@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>বন্ধু - Settings</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #fafafa;
+      padding: 20px;
+      max-width: 500px;
+      margin: 0 auto;
+    }
+    h1 { color: #e1306c; }
+    .box {
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      margin-bottom: 20px;
+    }
+    input {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      box-sizing: border-box;
+      font-size: 14px;
+    }
+    button {
+      background: #e1306c;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+      margin-right: 8px;
+    }
+    .danger { background: #dc3545; }
+    #status {
+      margin-top: 10px;
+      padding: 10px;
+      border-radius: 8px;
+      font-size: 14px;
+    }
+    .ok { background: #d4edda; color: #155724; }
+    .err { background: #f8d7da; color: #721c24; }
+    .info { background: #d1ecf1; color: #0c5460; }
+    small { color: #666; }
+  </style>
+</head>
+<body>
+  <h1>বন্ধু ⚙️</h1>
+
+  <div class="box">
+    <h3>GitHub Token Setup</h3>
+    <p><small>Upload korar jonno ekbar token paste koro. Browser e save thakbe.</small></p>
+    <input type="password" id="tokenInput" placeholder="github_pat_...">
+    <button id="saveBtn">Save</button>
+    <button id="clearBtn" class="danger">Clear</button>
+    <div id="status"></div>
+  </div>
+
+  <div class="box">
+    <h3>Status</h3>
+    <div id="currentStatus"></div>
+  </div>
+
+  <script type="module">
+    import { setToken, clearToken, hasToken } from "./js/upload.js";
+
+    const tokenInput = document.getElementById("tokenInput");
+    const saveBtn = document.getElementById("saveBtn");
+    const clearBtn = document.getElementById("clearBtn");
+    const status = document.getElementById("status");
+    const currentStatus = document.getElementById("currentStatus");
+
+    function updateCurrentStatus() {
+      if (hasToken()) {
+        currentStatus.innerHTML = "✅ Token set ache";
+        currentStatus.className = "ok";
+      } else {
+        currentStatus.innerHTML = "❌ Token set nei";
+        currentStatus.className = "err";
+      }
+    }
+
+    saveBtn.addEventListener("click", () => {
+      const t = tokenInput.value.trim();
+      if (!t || !t.startsWith("github_pat_")) {
+        status.className = "err";
+        status.textContent = "Token 'github_pat_' diye shuru hote hobe";
+        return;
+      }
+      setToken(t);
+      status.className = "ok";
+      status.textContent = "✅ Token save hoyeche!";
+      tokenInput.value = "";
+      updateCurrentStatus();
+    });
+
+    clearBtn.addEventListener("click", () => {
+      clearToken();
+      status.className = "info";
+      status.textContent = "Token clear hoyeche";
+      updateCurrentStatus();
+    });
+
+    updateCurrentStatus();
+  </script>
+</body>
+</html>
