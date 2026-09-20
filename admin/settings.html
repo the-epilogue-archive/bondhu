@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="bn" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#f5f0e2">
+<title>বন্ধু — অ্যাডমিন সেটিংস</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,500;0,600;0,700;0,800;1,500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/app.css">
+<link rel="stylesheet" href="css/admin.css">
+<script src="../js/theme.js"></script>
+<script src="js/admin-config.js"></script>
+<style>
+  .settings-item{
+    background:var(--paper-elev);
+    border:1px solid var(--rule);
+    border-radius:14px;
+    padding:18px;
+    margin-bottom:14px;
+    transition:all .3s cubic-bezier(.34,1.56,.64,1);
+  }
+  .settings-item:hover{
+    transform:translateY(-2px);
+    border-color:var(--rule-dark);
+    box-shadow:var(--shadow-md);
+  }
+  .settings-item-head{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    margin-bottom:14px;
+  }
+  .settings-item-icon{
+    width:42px;height:42px;
+    border-radius:10px;
+    background:var(--accent-soft);
+    color:var(--accent);
+    display:flex;align-items:center;justify-content:center;
+    flex-shrink:0;
+  }
+  .settings-item-icon svg{
+    width:20px;height:20px;
+    stroke:currentColor;fill:none;stroke-width:1.8;
+    stroke-linecap:round;stroke-linejoin:round;
+  }
+  .settings-item-title{
+    font-family:'Playfair Display',serif;
+    font-size:15px;font-weight:700;
+    color:var(--ink);
+  }
+  .settings-item-sub{
+    font-size:11.5px;color:var(--ink-mute);
+    font-style:italic;font-family:'Playfair Display',serif;
+    margin-top:2px;
+  }
+  .info-row{
+    display:flex;
+    justify-content:space-between;
+    gap:12px;
+    padding:8px 0;
+    border-bottom:1px solid var(--rule);
+    font-size:13px;
+  }
+  .info-row:last-child{border-bottom:none}
+  .info-row .key{
+    font-size:11px;
+    letter-spacing:1px;
+    text-transform:uppercase;
+    font-weight:600;
+    color:var(--ink-mute);
+  }
+  .info-row .val{
+    color:var(--ink);
+    font-weight:500;
+    text-align:right;
+    word-break:break-all;
+  }
+  .danger-zone{
+    border-color:rgba(198,40,40,.3);
+    background:rgba(198,40,40,.03);
+  }
+</style>
+</head>
+<body class="admin">
+
+<div class="admin-shell">
+  <aside id="adminSidebar"></aside>
+
+  <div class="admin-main">
+    <header class="admin-topbar" id="adminTopbar">
+      <div class="admin-topbar-brand">
+        সেটিংস
+        <span class="admin-badge">Admin</span>
+      </div>
+      <div class="admin-topbar-actions">
+        <button class="theme-toggle" onclick="toggleBondhuTheme()" aria-label="Theme">
+          <svg class="icon-moon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+          <svg class="icon-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <div class="admin-page">
+      <div class="admin-page-head">
+        <div>
+          <div class="admin-page-title">অ্যাডমিন সেটিংস</div>
+          <div class="admin-page-sub">ব্যবস্থাপনা তথ্য, নিরাপত্তা এবং নিয়ন্ত্রণ</div>
+        </div>
+      </div>
+
+      <!-- Session Info -->
+      <div class="settings-item">
+        <div class="settings-item-head">
+          <div class="settings-item-icon">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21v-2a4 4 0 0 1 4-4h8a4 4 0 0 1 4 4v2"/></svg>
+          </div>
+          <div style="flex:1;min-width:0">
+            <div class="settings-item-title">অ্যাডমিন তথ্য</div>
+            <div class="settings-item-sub">আপনার সেশন বিবরণ</div>
+          </div>
+        </div>
+        <div class="info-row">
+          <span class="key">নাম</span>
+          <span class="val" id="infoName">—</span>
+        </div>
+        <div class="info-row">
+          <span class="key">ইমেইল</span>
+          <span class="val" id="infoEmail">—</span>
+        </div>
+        <div class="info-row">
+          <span class="key">সেশন শুরু</span>
+          <span class="val" id="infoSession">—</span>
+        </div>
+        <div class="info-row">
+          <span class="key">সেশন শেষ</span>
+          <span class="val" id="infoExpires">—</span>
+        </div>
+      </div>
+
+      <!-- App Info -->
+      <div class="settings-item">
+        <div class="settings-item-head">
+          <div class="settings-item-icon">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+          </div>
+          <div style="flex:1">
+            <div class="settings-item-title">অ্যাপ্লিকেশন তথ্য</div>
+            <div class="settings-item-sub">বন্ধু প্ল্যাটফর্ম</div>
+          </div>
+        </div>
+        <div class="info-row">
+          <span class="key">নাম</span>
+          <span class="val">বন্ধু</span>
+        </div>
+        <div class="info-row">
+          <span class="key">সংস্করণ</span>
+          <span class="val">v1.0</span>
+        </div>
+        <div class="info-row">
+          <span class="key">প্ল্যাটফর্ম</span>
+          <span class="val">Web + PWA</span>
+        </div>
+        <div class="info-row">
+          <span class="key">ব্যাকএন্ড</span>
+          <span class="val">Firebase + Cloudinary + GitHub CDN</span>
+        </div>
+      </div>
+
+      <!-- Export Data -->
+      <div class="settings-item">
+        <div class="settings-item-head">
+          <div class="settings-item-icon">
+            <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          </div>
+          <div style="flex:1">
+            <div class="settings-item-title">ডেটা এক্সপোর্ট</div>
+            <div class="settings-item-sub">ব্যবহারকারীদের তালিকা ডাউনলোড</div>
+          </div>
+        </div>
+        <p style="font-size:12.5px;color:var(--ink-soft);margin-bottom:14px;line-height:1.5">
+          সব ব্যবহারকারীর তথ্য CSV ফাইল হিসেবে ডাউনলোড করুন।
+        </p>
+        <button class="admin-btn admin-btn-primary" id="exportUsersBtn">
+          <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          ব্যবহারকারী CSV ডাউনলোড
+        </button>
+      </div>
+
+      <!-- Danger Zone -->
+      <div class="settings-item danger-zone">
+        <div class="settings-item-head">
+          <div class="settings-item-icon" style="background:rgba(198,40,40,.12);color:#c62828">
+            <svg viewBox="0 0 24 24"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          </div>
+          <div style="flex:1">
+            <div class="settings-item-title" style="color:#c62828">বিপদ অঞ্চল</div>
+            <div class="settings-item-sub" style="color:#c62828;opacity:.7">সতর্কতার সাথে ব্যবহার করুন</div>
+          </div>
+        </div>
+        <button class="admin-btn admin-btn-danger" id="logoutAdminBtn" style="width:100%;justify-content:center;padding:12px">
+          <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          অ্যাডমিন সেশন বন্ধ করুন
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script type="module">
+  import { requireAdmin, signOutAdmin } from "./js/admin-auth.js";
+  import { db } from "../../js/firebase-config.js";
+  import { collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+  import { showToast, showConfirm } from "../js/toast.js";
+  import "./js/admin-sidebar.js";
+
+  requireAdmin((user) => {
+    renderInfo(user);
+    document.getElementById("exportUsersBtn").addEventListener("click", exportUsers);
+    document.getElementById("logoutAdminBtn").addEventListener("click", async () => {
+      const ok = await showConfirm("অ্যাডমিন সেশন বন্ধ করবেন?", {
+        title: "সেশন বন্ধ", okText: "বন্ধ করুন", cancelText: "বাতিল"
+      });
+      if (!ok) return;
+      await signOutAdmin();
+      window.location.href = "index.html";
+    });
+  });
+
+  function renderInfo(user) {
+    document.getElementById("infoName").textContent = user.displayName || "—";
+    document.getElementById("infoEmail").textContent = user.email || "—";
+    if (user.session?.verifiedAt) {
+      document.getElementById("infoSession").textContent = new Date(user.session.verifiedAt).toLocaleString("bn-BD");
+    }
+    if (user.session?.expires) {
+      document.getElementById("infoExpires").textContent = new Date(user.session.expires).toLocaleString("bn-BD");
+    }
+  }
+
+  async function exportUsers() {
+    const btn = document.getElementById("exportUsersBtn");
+    btn.disabled = true;
+    btn.textContent = "এক্সপোর্ট হচ্ছে...";
+    try {
+      const snap = await getDocs(collection(db, "users"));
+      const users = [];
+      snap.forEach(d => users.push(d.data()));
+
+      if (users.length === 0) {
+        showToast("কোনো ব্যবহারকারী নেই", "warn");
+        btn.disabled = false;
+        btn.textContent = "ব্যবহারকারী CSV ডাউনলোড";
+        return;
+      }
+
+      // Build CSV
+      const headers = ["uid", "email", "name", "username", "bio", "provider", "followers", "following", "createdAt", "banned"];
+      const rows = [headers.join(",")];
+      users.forEach(u => {
+        const row = [
+          u.uid || "",
+          u.email || "",
+          u.name || "",
+          u.username || "",
+          (u.bio || "").replace(/"/g, '""'),
+          u.provider || "password",
+          (u.followers || []).length,
+          (u.following || []).length,
+          u.createdAt?.seconds ? new Date(u.createdAt.seconds * 1000).toISOString() : "",
+          u.banned ? "yes" : "no"
+        ];
+        rows.push(row.map(c => `"${c}"`).join(","));
+      });
+
+      const csv = rows.join("\n");
+      const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `bondhu-users-${Date.now()}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+
+      showToast(`✅ ${users.length} জন ব্যবহারকারী এক্সপোর্ট হয়েছে`, "ok");
+    } catch (e) {
+      showToast("❌ ব্যর্থ: " + e.message, "err");
+    }
+    btn.disabled = false;
+    btn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> ব্যবহারকারী CSV ডাউনলোড`;
+  }
+</script>
+
+</body>
+</html>
