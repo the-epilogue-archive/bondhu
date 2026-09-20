@@ -11,6 +11,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,500;0,600;0,700;0,800;1,500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/app.css">
 <script src="js/theme.js"></script>
+<script src="admin/js/admin-config.js"></script>
 <style>
   .settings-card{
     background:var(--paper-elev);
@@ -85,7 +86,6 @@
   .field-row{margin-bottom:14px}
   .field-row:last-child{margin-bottom:0}
 
-  /* Username change UI */
   .username-display{
     display:flex;align-items:center;gap:10px;
     padding:12px 16px;
@@ -103,15 +103,117 @@
     font-weight:500;
     white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
   }
-  .username-edit-row{
-    display:none;
-    gap:8px;margin-top:10px;
-  }
+  .username-edit-row{display:none;gap:8px;margin-top:10px}
   .username-edit-row.show{display:flex}
   .username-edit-row .input{flex:1}
   .username-edit-row .btn{width:auto}
 
   .btn-row{display:flex;gap:8px}
+
+  /* ===== ADMIN PANEL CARD ===== */
+  .admin-card{
+    background:linear-gradient(135deg,var(--accent) 0%,var(--accent-2) 100%);
+    border:none;
+    color:var(--accent-text);
+    position:relative;
+    overflow:hidden;
+    box-shadow:0 8px 24px var(--accent-glow);
+  }
+  .admin-card::before{
+    content:'';
+    position:absolute;
+    top:-50%;right:-20%;
+    width:200px;height:200px;
+    border-radius:50%;
+    background:rgba(255,255,255,.08);
+  }
+  .admin-card::after{
+    content:'';
+    position:absolute;
+    bottom:-30%;left:-10%;
+    width:150px;height:150px;
+    border-radius:50%;
+    background:rgba(255,255,255,.06);
+  }
+  .admin-card .settings-title{
+    color:var(--accent-text);
+    border-bottom-color:rgba(255,255,255,.2);
+    position:relative;
+    z-index:2;
+  }
+  .admin-card .settings-title svg{
+    stroke:var(--accent-text);
+  }
+  .admin-card p{
+    color:rgba(255,255,255,.85);
+    position:relative;
+    z-index:2;
+  }
+  .admin-card .admin-btn{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+    width:100%;
+    padding:14px;
+    background:rgba(255,255,255,.15);
+    border:1px solid rgba(255,255,255,.3);
+    border-radius:12px;
+    color:var(--accent-text);
+    font-family:'Hind Siliguri',sans-serif;
+    font-size:14px;
+    font-weight:700;
+    letter-spacing:.3px;
+    text-decoration:none;
+    cursor:pointer;
+    position:relative;
+    z-index:2;
+    transition:all .3s cubic-bezier(.34,1.56,.64,1);
+    backdrop-filter:blur(10px);
+    -webkit-backdrop-filter:blur(10px);
+  }
+  .admin-btn:hover{
+    background:rgba(255,255,255,.25);
+    border-color:rgba(255,255,255,.5);
+    transform:translateY(-2px);
+    box-shadow:0 8px 20px rgba(0,0,0,.15);
+  }
+  .admin-btn:active{
+    transform:translateY(0) scale(.98);
+  }
+  .admin-btn svg{
+    width:20px;height:20px;
+    stroke:currentColor;
+    fill:none;
+    stroke-width:1.8;
+    stroke-linecap:round;
+    stroke-linejoin:round;
+  }
+  .admin-badge{
+    display:inline-flex;
+    align-items:center;
+    gap:5px;
+    padding:3px 9px;
+    background:rgba(255,255,255,.2);
+    border-radius:20px;
+    font-size:9.5px;
+    font-weight:700;
+    letter-spacing:1.5px;
+    text-transform:uppercase;
+    margin-left:auto;
+  }
+  .admin-badge::before{
+    content:'';
+    width:5px;height:5px;
+    border-radius:50%;
+    background:#7CFC00;
+    box-shadow:0 0 6px #7CFC00;
+    animation:adminBlink 2s ease-in-out infinite;
+  }
+  @keyframes adminBlink{
+    0%,100%{opacity:1}
+    50%{opacity:.3}
+  }
 
   @media (max-width:480px){
     .settings-card{padding:16px}
@@ -123,7 +225,35 @@
 
 <div class="page">
 
-<nav data-component="topbar" data-title="সেটিংস"></nav>
+  <nav class="topbar">
+    <div class="topbar-brand" style="font-size:18px">সেটিংস</div>
+    <div class="topbar-actions">
+      <button class="theme-toggle" onclick="toggleBondhuTheme()" aria-label="Theme">
+        <svg class="icon-moon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        <svg class="icon-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+      </button>
+      <a href="index.html" class="icon-btn" aria-label="Home">
+        <svg viewBox="0 0 24 24"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+      </a>
+    </div>
+  </nav>
+
+  <!-- ===== ADMIN PANEL CARD (hidden, only for admin email) ===== -->
+  <div class="settings-card admin-card" id="adminPanelCard" style="display:none">
+    <div class="settings-title">
+      <svg viewBox="0 0 24 24"><path d="M12 2 4 6v6c0 5.5 3.8 10.7 8 12 4.2-1.3 8-6.5 8-12V6z"/><path d="M9 12l2 2 4-4"/></svg>
+      অ্যাডমিন প্যানেল
+      <span class="admin-badge">Admin</span>
+    </div>
+    <p style="font-size:12.5px;margin-bottom:16px;line-height:1.6;font-style:italic;font-family:'Playfair Display',serif">
+      সাইট পরিচালনা, ব্যবহারকারী ব্যবস্থাপনা ও নিরাপত্তা নিয়ন্ত্রণ
+    </p>
+    <a href="admin/" class="admin-btn">
+      <svg viewBox="0 0 24 24"><path d="M12 2 4 6v6c0 5.5 3.8 10.7 8 12 4.2-1.3 8-6.5 8-12V6z"/><path d="M9 12l2 2 4-4"/></svg>
+      অ্যাডমিন প্যানেল খুলুন
+      <svg viewBox="0 0 24 24" style="width:16px;height:16px;margin-left:auto"><polyline points="9 18 15 12 9 6"/></svg>
+    </a>
+  </div>
 
   <!-- PROFILE -->
   <div class="settings-card">
@@ -148,7 +278,6 @@
       <input class="input" type="text" id="nameInput" placeholder="আপনার নাম">
     </div>
 
-    <!-- USERNAME CHANGE -->
     <div class="field-row">
       <label class="field-label">ইউজারনেম</label>
       <div class="username-display">
@@ -248,13 +377,42 @@
   import { uploadToGitHub, hasToken, setToken, clearToken } from "./js/upload.js";
   import { showToast, showConfirm } from "./js/toast.js";
   import "./js/components.js";
+
   let currentUser = null;
 
   requireAuth(async (user) => {
     currentUser = user;
     renderProfile(user);
     renderToken();
+    checkAdminAccess(user);
   });
+
+  // ==========================================
+  // ADMIN ACCESS — only for whitelisted emails
+  // ==========================================
+  function checkAdminAccess(user) {
+    try {
+      const adminEmails = (window.ADMIN_CONFIG?.ADMIN_EMAILS || []).map(e => (e || "").toLowerCase().trim());
+      const myEmail = (user.email || "").toLowerCase().trim();
+
+      if (myEmail && adminEmails.includes(myEmail)) {
+        const card = document.getElementById("adminPanelCard");
+        if (card) {
+          card.style.display = "block";
+          // Slight animation
+          card.style.opacity = "0";
+          card.style.transform = "translateY(10px)";
+          requestAnimationFrame(() => {
+            card.style.transition = "opacity .5s, transform .5s cubic-bezier(.22,1,.36,1)";
+            card.style.opacity = "1";
+            card.style.transform = "translateY(0)";
+          });
+        }
+      }
+    } catch (e) {
+      console.warn("Admin check skipped:", e);
+    }
+  }
 
   function renderProfile(user) {
     const initial = (user.name || "?")[0].toUpperCase();
@@ -285,9 +443,6 @@
     }
   }
 
-  // ==========================================
-  // Profile pic
-  // ==========================================
   document.getElementById("picBtn").addEventListener("click", () => {
     document.getElementById("picInput").click();
   });
@@ -315,9 +470,6 @@
     }
   });
 
-  // ==========================================
-  // Username change UI
-  // ==========================================
   document.getElementById("editUsernameBtn").addEventListener("click", () => {
     document.getElementById("usernameEditRow").classList.add("show");
     const inp = document.getElementById("newUsernameInput");
@@ -363,9 +515,6 @@
     btn.textContent = "সংরক্ষণ";
   });
 
-  // ==========================================
-  // Profile save
-  // ==========================================
   document.getElementById("saveProfileBtn").addEventListener("click", async () => {
     const name = document.getElementById("nameInput").value.trim();
     const bio = document.getElementById("bioInput").value.trim();
@@ -389,9 +538,6 @@
     }
   });
 
-  // ==========================================
-  // Token
-  // ==========================================
   document.getElementById("saveTokenBtn").addEventListener("click", () => {
     const t = document.getElementById("tokenInput").value.trim();
     if (!t || !t.startsWith("github_pat_")) {
@@ -410,14 +556,9 @@
     showToast("টোকেন মুছে ফেলা হয়েছে", "info");
   });
 
-  // ==========================================
-  // Logout
-  // ==========================================
   document.getElementById("logoutBtn").addEventListener("click", async () => {
     const ok = await showConfirm("প্রস্থান করবেন?", {
-      title: "প্রস্থান",
-      okText: "প্রস্থান",
-      cancelText: "বাতিল"
+      title: "প্রস্থান", okText: "প্রস্থান", cancelText: "বাতিল"
     });
     if (!ok) return;
     await logout();
