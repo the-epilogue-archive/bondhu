@@ -7,6 +7,7 @@ import {
   collection, addDoc, getDocs, doc, getDoc, updateDoc, deleteDoc,
   query, orderBy, serverTimestamp, arrayUnion, arrayRemove
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { createNotification } from "./notifications.js";
 
 // Post create
 export async function createPost(imageUrl, caption) {
@@ -47,15 +48,28 @@ export async function loadUserPosts(uid) {
   return posts;
 }
 
-// Like toggle
+// Like toggle + notification
 export async function toggleLike(postId, currentLikes) {
   const user = auth.currentUser;
   if (!user) throw new Error("Login koro");
   const ref = doc(db, "posts", postId);
   const alreadyLiked = currentLikes.includes(user.uid);
+
   await updateDoc(ref, {
     likes: alreadyLiked ? arrayRemove(user.uid) : arrayUnion(user.uid)
   });
+
+  // Notify post owner (jodi notun like hoy)
+  if (!alreadyLiked) {
+    try {
+      const postSnap = await getDoc(ref);
+      const postData = postSnap.data();
+      if (postData && postData.userId && postData.userId !== user.uid) {
+        await createNotification(postData.userId, "like", postId);
+      }
+    } catch (e) { console.warn("Like notif fail:", e); }
+  }
+
   return !alreadyLiked;
 }
 
@@ -64,7 +78,7 @@ export async function deletePost(postId) {
   await deleteDoc(doc(db, "posts", postId));
 }
 
-// Comment add
+// Comment add + notification
 export async function addComment(postId, text) {
   const user = auth.currentUser;
   if (!user) throw new Error("Login koro");
@@ -84,6 +98,12 @@ export async function addComment(postId, text) {
   if (postSnap.exists()) {
     const cur = postSnap.data().commentCount || 0;
     await updateDoc(postRef, { commentCount: cur + 1 });
+
+    // Notify post owner
+    const postData = postSnap.data();
+    if (postData.userId && postData.userId !== user.uid) {
+      await createNotification(postData.userId, "comment", postId, text.slice(0, 60));
+    }
   }
 }
 
@@ -114,7 +134,7 @@ export async function searchUsers(term) {
   return arr.slice(0, 20);
 }
 
-// Follow toggle
+// Follow toggle + notification
 export async function toggleFollow(targetUid) {
   const user = auth.currentUser;
   if (!user) throw new Error("Login koro");
@@ -132,6 +152,8 @@ export async function toggleFollow(targetUid) {
   } else {
     await updateDoc(meRef, { following: arrayUnion(targetUid) });
     await updateDoc(targetRef, { followers: arrayUnion(user.uid) });
+    // Notify
+    await createNotification(targetUid, "follow");
     return true;
   }
 }
