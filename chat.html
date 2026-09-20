@@ -12,14 +12,13 @@
 <link rel="stylesheet" href="css/app.css">
 <script src="js/theme.js"></script>
 <style>
-  /* FIX: bottom-nav height = ~72px + safe area। layout e padding diye overlap bondho */
   html,body{height:100%;overflow:hidden}
   body{padding-bottom:0}
 
   .chat-layout{
     position:fixed;
     top:0;left:0;right:0;
-    bottom:calc(72px + env(safe-area-inset-bottom));   /* 👈 bottom nav er upore */
+    bottom:calc(72px + env(safe-area-inset-bottom));
     display:flex;
     flex-direction:column;
     max-width:560px;
@@ -29,14 +28,12 @@
     background:var(--paper);
   }
 
-  /* Chat list (left panel) */
   .chat-list{
     flex:1;
     overflow-y:auto;
     padding:8px 0 20px;
     -webkit-overflow-scrolling:touch;
     scrollbar-width:thin;
-    overscroll-behavior:contain;
   }
   .chat-list::-webkit-scrollbar{width:4px}
   .chat-list::-webkit-scrollbar-thumb{background:var(--rule);border-radius:2px}
@@ -48,7 +45,6 @@
     cursor:pointer;
     transition:all .3s cubic-bezier(.34,1.56,.64,1);
     border-bottom:1px solid var(--rule);
-    will-change:transform;
   }
   .chat-item:hover{
     background:var(--accent-soft);
@@ -88,7 +84,6 @@
     flex-shrink:0;align-self:flex-start;margin-top:4px;
   }
 
-  /* Conversation view */
   .conversation{
     display:none;flex-direction:column;
     flex:1;overflow:hidden;min-height:0;
@@ -128,14 +123,12 @@
 
   .conv-actions{display:flex;gap:6px}
 
-  /* Messages */
   .messages{
     flex:1;overflow-y:auto;
     padding:16px 0;
     display:flex;flex-direction:column;gap:8px;
     -webkit-overflow-scrolling:touch;
     scrollbar-width:thin;
-    overscroll-behavior:contain;
   }
   .messages::-webkit-scrollbar{width:4px}
   .messages::-webkit-scrollbar-thumb{background:var(--rule);border-radius:2px}
@@ -169,13 +162,13 @@
   }
   .msg.voice audio{height:32px;max-width:220px}
 
-  /* Input bar */
   .input-bar{
     padding:12px 0 14px;
     border-top:1px solid var(--rule);
     display:flex;gap:6px;align-items:center;
     flex-shrink:0;
     background:var(--paper);
+    position:relative;
   }
 
   .icon-action{
@@ -183,7 +176,6 @@
     border-radius:50%;
     display:flex;align-items:center;justify-content:center;
     transition:all .3s cubic-bezier(.34,1.56,.64,1);
-    will-change:transform;
     color:var(--ink-mute);
   }
   .icon-action:hover{background:var(--accent-soft);color:var(--accent);transform:translateY(-2px)}
@@ -215,14 +207,12 @@
     display:flex;align-items:center;justify-content:center;
     flex-shrink:0;
     transition:all .3s cubic-bezier(.34,1.56,.64,1);
-    will-change:transform;
   }
   .send-btn:hover{transform:translateY(-3px) scale(1.05);box-shadow:0 8px 20px var(--accent-glow)}
   .send-btn:active{transform:translateY(-1px) scale(.95);transition-duration:.1s}
   .send-btn:disabled{opacity:.4;cursor:not-allowed;transform:none;box-shadow:none}
   .send-btn svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 
-  /* Emoji picker */
   .emoji-picker{
     position:absolute;
     bottom:calc(100% + 8px);left:0;
@@ -247,27 +237,6 @@
   }
   .emoji-picker button:hover{background:var(--accent-soft);transform:scale(1.2)}
 
-  /* Voice recording state */
-  .recording-bar{
-    display:none;
-    align-items:center;gap:12px;
-    flex:1;
-    padding:11px 16px;
-    border:1px solid #c62828;
-    border-radius:24px;
-    background:rgba(198,40,40,.08);
-    color:#c62828;
-    font-size:13px;
-    font-weight:600;
-  }
-  .recording-bar.show{display:flex}
-  .recording-dot{
-    width:8px;height:8px;border-radius:50%;
-    background:#c62828;
-    animation:pulse .8s infinite;
-  }
-
-  /* Empty state */
   .chat-empty{
     display:flex;flex-direction:column;align-items:center;justify-content:center;
     padding:60px 20px;gap:16px;
@@ -275,15 +244,6 @@
   }
   .chat-empty svg{width:56px;height:56px;stroke:var(--rule-dark);fill:none;stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round}
   .chat-empty a{color:var(--accent);font-weight:600;padding:10px 20px;border-radius:24px;background:var(--accent-soft)}
-
-  /* Unread dot on chat item */
-  .unread-dot{
-    width:8px;height:8px;border-radius:50%;
-    background:var(--accent);
-    box-shadow:0 0 6px var(--accent-glow);
-    flex-shrink:0;
-    margin-left:4px;
-  }
 </style>
 </head>
 <body>
@@ -303,7 +263,6 @@
     </div>
   </nav>
 
-  <!-- Chat list view -->
   <div class="chat-list" id="chatList">
     <div style="text-align:center;padding:50px 20px;color:var(--ink-mute);font-size:13px">
       <div class="spinner" style="margin-bottom:12px"></div>
@@ -311,7 +270,6 @@
     </div>
   </div>
 
-  <!-- Conversation view -->
   <div class="conversation" id="conversation">
     <div class="conv-header">
       <button class="back-btn" id="backBtn">
@@ -330,7 +288,7 @@
 
     <div class="messages" id="messages"></div>
 
-    <div class="input-bar" style="position:relative">
+    <div class="input-bar">
       <button class="icon-action" id="emojiBtn" title="ইমোজি">
         <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
       </button>
@@ -340,7 +298,7 @@
       <input class="msg-input" type="text" id="msgInput" placeholder="বার্তা লিখুন..." autocomplete="off">
 
       <button class="icon-action" id="voiceBtn" title="ভয়েস বার্তা">
-        <svg viewBox="0 0 24 24" id="voiceIcon"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+        <svg viewBox="0 0 24 24"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
       </button>
 
       <button class="send-btn" id="sendBtn" aria-label="Send">
@@ -369,6 +327,7 @@
   let currentUser = null;
   let activeChatId = null;
   let unsubMessages = null;
+  let currentChats = [];
 
   const chatList = document.getElementById("chatList");
   const conversation = document.getElementById("conversation");
@@ -381,10 +340,8 @@
   const emojiPicker = document.getElementById("emojiPicker");
   const voiceBtn = document.getElementById("voiceBtn");
 
-  // Emoji list
   const EMOJIS = ["😀","😁","😂","🤣","😊","😍","😘","😎","🤔","😅","😢","😭","😡","🥰","😴","🤗","🙃","😉","😋","🤤","😇","🥳","🤩","😱","🤯","😳","🥺","😤","😈","💀","👻","🤖","👍","👎","👏","🙏","💪","✌️","🤝","❤️","🧡","💛","💚","💙","💜","🖤","🤍","💔","💯","🔥","⭐","✨","🎉","🎊","🎁","🌸","🌹","🌈","☀️","🌙","⚡"];
 
-  // Emoji picker render
   emojiPicker.innerHTML = EMOJIS.map(e => `<button type="button" data-emoji="${e}">${e}</button>`).join("");
   emojiBtn.addEventListener("click", (e) => {
     e.stopPropagation();
@@ -404,9 +361,9 @@
     const params = new URLSearchParams(window.location.search);
     const toUsername = params.get("to");
 
-    // 🔧 FIX: chat list load
-    listenMyChats((chats) => {
-      console.log("Chats loaded:", chats.length, chats);
+    // 🔥 FIX: currentUser.uid pass koro
+    listenMyChats(user.uid, (chats) => {
+      currentChats = chats;
       renderChatList(chats);
     });
 
@@ -414,7 +371,6 @@
   });
 
   function renderChatList(chats) {
-    // Chat na thakle empty state
     if (!chats || chats.length === 0) {
       chatList.innerHTML = `
         <div class="chat-empty">
@@ -428,9 +384,10 @@
     chatList.innerHTML = chats.map(chat => {
       const other = getOtherMember(chat, currentUser.uid);
       const initial = (other.name || "?")[0].toUpperCase();
-      const time = chat.updatedAt?.seconds ? timeAgo(chat.updatedAt.seconds * 1000) : "";
+      const time = chat.updatedAt?.seconds ? timeAgo(chat.updatedAt.seconds * 1000)
+                 : (chat.createdAt?.seconds ? timeAgo(chat.createdAt.seconds * 1000) : "");
       const isActive = chat.id === activeChatId;
-      const preview = chat.lastMessage || (chat.lastMessageType === "voice" ? "🎤 ভয়েস বার্তা" : "কথা শুরু করুন");
+      const preview = chat.lastMessage || "কথা শুরু করুন";
       return `
         <div class="chat-item ${isActive ? "active-chat" : ""}" data-chat-id="${chat.id}">
           <div class="chat-avatar">${other.photoURL ? `<img src="${other.photoURL}">` : initial}</div>
@@ -444,7 +401,7 @@
 
     chatList.querySelectorAll(".chat-item").forEach(item => {
       item.addEventListener("click", () => {
-        const chat = chats.find(c => c.id === item.dataset.chatId);
+        const chat = currentChats.find(c => c.id === item.dataset.chatId);
         if (chat) openChatById(chat.id, getOtherMember(chat, currentUser.uid));
       });
     });
@@ -533,21 +490,13 @@
     chatList.style.display = "block";
   });
 
-  // ==========================================
-  // Voice message recording
-  // ==========================================
   let mediaRecorder = null;
   let audioChunks = [];
   let isRecording = false;
 
   voiceBtn.addEventListener("click", async () => {
     if (!activeChatId) { alert("প্রথমে একটি চ্যাট খুলুন"); return; }
-
-    if (isRecording) {
-      // Stop
-      mediaRecorder.stop();
-      return;
-    }
+    if (isRecording) { mediaRecorder.stop(); return; }
 
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -562,11 +511,9 @@
 
         if (audioChunks.length === 0) return;
         const blob = new Blob(audioChunks, { type: "audio/webm" });
-        if (blob.size < 1000) return; // too short
+        if (blob.size < 1000) return;
 
-        // Show temp message
         const tempId = "temp_" + Date.now();
-        const tempUrl = URL.createObjectURL(blob);
         const tempDiv = document.createElement("div");
         tempDiv.className = "msg voice me";
         tempDiv.id = tempId;
