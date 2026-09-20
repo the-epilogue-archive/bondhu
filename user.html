@@ -20,7 +20,8 @@
       width: 90px; height: 90px; border-radius: 50%;
       background: linear-gradient(135deg, #feda75, #d62976);
       display: flex; align-items: center; justify-content: center;
-      color: white; font-size: 36px; font-weight: bold; overflow: hidden; flex-shrink: 0;
+      color: white; font-size: 36px; font-weight: bold;
+      overflow: hidden; flex-shrink: 0;
     }
     .avatar-big img { width: 100%; height: 100%; object-fit: cover; }
     .stats { display: flex; gap: 20px; margin-top: 6px; }
@@ -30,15 +31,19 @@
     .name { font-size: 18px; font-weight: bold; }
     .username { color: #666; font-size: 14px; }
     .bio { font-size: 14px; color: #333; margin: 12px 0; }
-    .follow-btn {
-      width: 100%; background: #e1306c; color: white; border: none;
-      padding: 10px; border-radius: 8px; font-size: 14px;
-      font-weight: bold; cursor: pointer;
+    .btn-row { display: flex; gap: 8px; margin-top: 4px; }
+    .action-btn {
+      flex: 1; padding: 10px; border-radius: 8px;
+      font-size: 14px; font-weight: bold; cursor: pointer;
+      border: none;
     }
+    .follow-btn { background: #e1306c; color: white; }
     .follow-btn.following { background: #efefef; color: #333; }
+    .msg-btn { background: #efefef; color: #333; }
     .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3px; margin-top: 20px; }
     .grid img { width: 100%; aspect-ratio: 1/1; object-fit: cover; background: #eee; }
     .empty { text-align: center; color: #999; padding: 40px; grid-column: 1 / -1; }
+    #loading { text-align: center; padding: 40px; color: #999; }
   </style>
 </head>
 <body>
@@ -48,7 +53,7 @@
   </div>
 
   <div class="profile" id="profile">
-    <div style="text-align:center;padding:40px;color:#999;">Loading...</div>
+    <div id="loading">Loading...</div>
   </div>
 
   <script type="module">
@@ -63,20 +68,29 @@
 
     requireAuth(async (user) => {
       currentUser = user;
+
       if (!targetUsername) {
-        document.getElementById("profile").innerHTML = `<div class="empty">User nei</div>`;
+        document.getElementById("profile").innerHTML =
+          `<div class="empty">User nei</div>`;
         return;
       }
+
       try {
         const all = await getAllUsersList();
-        targetUser = all.find(u => (u.username || "").toLowerCase() === targetUsername.toLowerCase());
+        targetUser = all.find(u =>
+          (u.username || "").toLowerCase() === targetUsername.toLowerCase()
+        );
+
         if (!targetUser) {
-          document.getElementById("profile").innerHTML = `<div class="empty">User pawa jay ni</div>`;
+          document.getElementById("profile").innerHTML =
+            `<div class="empty">User pawa jay ni</div>`;
           return;
         }
+
         await render();
       } catch (e) {
-        document.getElementById("profile").innerHTML = `<div class="empty">❌ ${e.message}</div>`;
+        document.getElementById("profile").innerHTML =
+          `<div class="empty">❌ ${e.message}</div>`;
       }
     });
 
@@ -89,24 +103,34 @@
       const container = document.getElementById("profile");
       container.innerHTML = `
         <div class="profile-head">
-          <div class="avatar-big">${u.photoURL ? `<img src="${u.photoURL}">` : initial}</div>
+          <div class="avatar-big">
+            ${u.photoURL ? `<img src="${u.photoURL}">` : initial}
+          </div>
           <div style="flex:1;">
             <div class="name">${escapeHtml(u.name)}</div>
             <div class="username">@${escapeHtml(u.username)}</div>
             <div class="stats">
               <div class="stat"><b id="postCount">0</b><span>Post</span></div>
-              <div class="stat"><b>${(u.followers||[]).length}</b><span>Follower</span></div>
-              <div class="stat"><b>${(u.following||[]).length}</b><span>Following</span></div>
+              <div class="stat"><b>${(u.followers || []).length}</b><span>Follower</span></div>
+              <div class="stat"><b>${(u.following || []).length}</b><span>Following</span></div>
             </div>
           </div>
         </div>
         <div class="bio">${escapeHtml(u.bio || "Kono bio nei")}</div>
-        ${isMe ? "" : `<button class="follow-btn ${isFollowing ? "following" : ""}" id="followBtn">
-          ${isFollowing ? "Following ✓" : "Follow koro"}
-        </button>`}
+        ${isMe ? "" : `
+          <div class="btn-row">
+            <button class="action-btn follow-btn ${isFollowing ? "following" : ""}" id="followBtn">
+              ${isFollowing ? "Following ✓" : "Follow koro"}
+            </button>
+            <button class="action-btn msg-btn" id="msgBtn">
+              💬 Message
+            </button>
+          </div>
+        `}
         <div class="grid" id="grid"></div>
       `;
 
+      // Follow + Message button handler
       if (!isMe) {
         document.getElementById("followBtn").addEventListener("click", async (e) => {
           e.target.disabled = true;
@@ -114,18 +138,31 @@
             const nowFollowing = await toggleFollow(u.uid);
             e.target.textContent = nowFollowing ? "Following ✓" : "Follow koro";
             e.target.classList.toggle("following", nowFollowing);
-          } catch (err) { alert("Follow fail: " + err.message); }
+          } catch (err) {
+            alert("Follow fail: " + err.message);
+          }
           e.target.disabled = false;
+        });
+
+        document.getElementById("msgBtn").addEventListener("click", () => {
+          window.location.href = `chat.html?to=${encodeURIComponent(u.username)}`;
         });
       }
 
-      const posts = await loadUserPosts(u.uid);
-      document.getElementById("postCount").textContent = posts.length;
-      const grid = document.getElementById("grid");
-      if (posts.length === 0) {
-        grid.innerHTML = `<div class="empty">Kono post nei</div>`;
-      } else {
-        grid.innerHTML = posts.map(p => `<img src="${p.imageUrl}" alt="post">`).join("");
+      // Posts grid
+      try {
+        const posts = await loadUserPosts(u.uid);
+        document.getElementById("postCount").textContent = posts.length;
+        const grid = document.getElementById("grid");
+        if (posts.length === 0) {
+          grid.innerHTML = `<div class="empty">Kono post nei</div>`;
+        } else {
+          grid.innerHTML = posts.map(p =>
+            `<img src="${p.imageUrl}" alt="post">`
+          ).join("");
+        }
+      } catch (e) {
+        console.error(e);
       }
     }
 
