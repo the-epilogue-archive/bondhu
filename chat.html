@@ -12,30 +12,37 @@
 <link rel="stylesheet" href="css/app.css">
 <script src="js/theme.js"></script>
 <style>
-  body{padding-bottom:0;height:100vh;overflow:hidden;display:flex;flex-direction:column}
+  /* FIX: bottom-nav height = ~72px + safe area। layout e padding diye overlap bondho */
+  html,body{height:100%;overflow:hidden}
+  body{padding-bottom:0}
 
   .chat-layout{
-    flex:1;
+    position:fixed;
+    top:0;left:0;right:0;
+    bottom:calc(72px + env(safe-area-inset-bottom));   /* 👈 bottom nav er upore */
     display:flex;
     flex-direction:column;
     max-width:560px;
     margin:0 auto;
-    width:100%;
-    overflow:hidden;
     padding:0 16px;
+    overflow:hidden;
+    background:var(--paper);
   }
 
+  /* Chat list (left panel) */
   .chat-list{
     flex:1;
     overflow-y:auto;
-    padding:8px 0 90px;
+    padding:8px 0 20px;
+    -webkit-overflow-scrolling:touch;
     scrollbar-width:thin;
+    overscroll-behavior:contain;
   }
+  .chat-list::-webkit-scrollbar{width:4px}
+  .chat-list::-webkit-scrollbar-thumb{background:var(--rule);border-radius:2px}
 
   .chat-item{
-    display:flex;
-    align-items:center;
-    gap:14px;
+    display:flex;align-items:center;gap:14px;
     padding:14px 12px;
     border-radius:12px;
     cursor:pointer;
@@ -49,16 +56,14 @@
     border-color:var(--accent-border);
   }
   .chat-item:last-child{border-bottom:none}
+  .chat-item.active-chat{background:var(--accent-soft)}
 
   .chat-avatar{
-    width:48px;height:48px;
-    border-radius:50%;
+    width:48px;height:48px;border-radius:50%;
     background:var(--ink);color:var(--paper);
     display:flex;align-items:center;justify-content:center;
     font-weight:600;font-size:17px;
-    flex-shrink:0;
-    position:relative;
-    overflow:hidden;
+    flex-shrink:0;position:relative;overflow:hidden;
     background-image:linear-gradient(135deg,rgba(255,255,255,.08),transparent 60%);
     transition:background-color .3s;
   }
@@ -68,8 +73,7 @@
   .chat-info{flex:1;min-width:0}
   .chat-name{
     font-family:'Playfair Display',serif;
-    font-size:15px;font-weight:700;
-    color:var(--ink);
+    font-size:15px;font-weight:700;color:var(--ink);
     white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
     margin-bottom:3px;
   }
@@ -81,27 +85,20 @@
     font-size:10px;color:var(--ink-mute);
     font-style:italic;
     font-family:'Playfair Display',serif;
-    flex-shrink:0;
-    align-self:flex-start;
-    margin-top:4px;
+    flex-shrink:0;align-self:flex-start;margin-top:4px;
   }
 
   /* Conversation view */
   .conversation{
-    display:none;
-    flex-direction:column;
-    flex:1;
-    overflow:hidden;
+    display:none;flex-direction:column;
+    flex:1;overflow:hidden;min-height:0;
   }
   .conversation.active{display:flex}
 
   .conv-header{
-    display:flex;
-    align-items:center;
-    gap:12px;
+    display:flex;align-items:center;gap:12px;
     padding:12px 0;
     border-bottom:1px solid var(--rule);
-    background:var(--paper);
     flex-shrink:0;
   }
   .back-btn{
@@ -109,47 +106,45 @@
     display:flex;align-items:center;justify-content:center;
     border-radius:50%;
     transition:all .3s cubic-bezier(.34,1.56,.64,1);
+    flex-shrink:0;
   }
   .back-btn:hover{
     background:var(--accent-soft);
     transform:translateX(-3px);
   }
-  .back-btn svg{
-    width:22px;height:22px;
-    stroke:var(--accent);fill:none;stroke-width:2;
-    stroke-linecap:round;stroke-linejoin:round;
-  }
-  .conv-user{display:flex;align-items:center;gap:10px}
+  .back-btn svg{width:22px;height:22px;stroke:var(--accent);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+  .conv-user{display:flex;align-items:center;gap:10px;flex:1;min-width:0;cursor:pointer;padding:4px;border-radius:8px;transition:background .2s}
+  .conv-user:hover{background:var(--accent-soft)}
   .conv-avatar{
     width:38px;height:38px;border-radius:50%;
     background:var(--ink);color:var(--paper);
     display:flex;align-items:center;justify-content:center;
-    font-weight:600;font-size:14px;
-    overflow:hidden;
+    font-weight:600;font-size:14px;overflow:hidden;flex-shrink:0;
     background-image:linear-gradient(135deg,rgba(255,255,255,.08),transparent 60%);
   }
   .conv-avatar img{width:100%;height:100%;object-fit:cover}
-  .conv-name{
-    font-family:'Playfair Display',serif;
-    font-size:15px;font-weight:700;color:var(--ink);
-  }
+  .conv-name{font-family:'Playfair Display',serif;font-size:15px;font-weight:700;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
+  .conv-actions{display:flex;gap:6px}
+
+  /* Messages */
   .messages{
-    flex:1;
-    overflow-y:auto;
+    flex:1;overflow-y:auto;
     padding:16px 0;
-    display:flex;
-    flex-direction:column;
-    gap:8px;
+    display:flex;flex-direction:column;gap:8px;
+    -webkit-overflow-scrolling:touch;
     scrollbar-width:thin;
+    overscroll-behavior:contain;
   }
+  .messages::-webkit-scrollbar{width:4px}
+  .messages::-webkit-scrollbar-thumb{background:var(--rule);border-radius:2px}
 
   .msg{
-    max-width:75%;
+    max-width:78%;
     padding:10px 14px;
     border-radius:16px;
-    font-size:14px;
-    line-height:1.5;
+    font-size:14px;line-height:1.5;
     word-break:break-word;
     animation:msgIn .3s cubic-bezier(.34,1.56,.64,1) forwards;
     opacity:0;
@@ -157,28 +152,45 @@
   @keyframes msgIn{to{opacity:1;transform:translateY(0)}}
   .msg.me{
     align-self:flex-end;
-    background:var(--accent);
-    color:var(--accent-text);
+    background:var(--accent);color:var(--accent-text);
     border-bottom-right-radius:4px;
     transform:translateY(6px);
   }
   .msg.them{
     align-self:flex-start;
-    background:var(--paper-2);
-    color:var(--ink);
+    background:var(--paper-2);color:var(--ink);
     border:1px solid var(--rule);
     border-bottom-left-radius:4px;
     transform:translateY(6px);
   }
+  .msg.voice{
+    display:flex;align-items:center;gap:10px;
+    min-width:180px;
+  }
+  .msg.voice audio{height:32px;max-width:220px}
 
+  /* Input bar */
   .input-bar{
     padding:12px 0 14px;
     border-top:1px solid var(--rule);
-    display:flex;
-    gap:8px;
-    background:var(--paper);
+    display:flex;gap:6px;align-items:center;
     flex-shrink:0;
+    background:var(--paper);
   }
+
+  .icon-action{
+    width:40px;height:40px;flex-shrink:0;
+    border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    transition:all .3s cubic-bezier(.34,1.56,.64,1);
+    will-change:transform;
+    color:var(--ink-mute);
+  }
+  .icon-action:hover{background:var(--accent-soft);color:var(--accent);transform:translateY(-2px)}
+  .icon-action svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+  .icon-action.recording{background:#c62828;color:#fff;animation:pulse .8s infinite}
+  @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.1)}}
+
   .msg-input{
     flex:1;
     padding:11px 16px;
@@ -190,31 +202,87 @@
     font-family:inherit;
     outline:none;
     transition:border-color .25s,box-shadow .25s;
+    min-width:0;
   }
   .msg-input:focus{
     border-color:var(--accent);
     box-shadow:0 0 0 3px var(--accent-soft);
   }
+
   .send-btn{
-    width:42px;height:42px;
-    border-radius:50%;
-    background:var(--accent);
-    color:var(--accent-text);
+    width:42px;height:42px;border-radius:50%;
+    background:var(--accent);color:var(--accent-text);
     display:flex;align-items:center;justify-content:center;
     flex-shrink:0;
     transition:all .3s cubic-bezier(.34,1.56,.64,1);
     will-change:transform;
   }
-  .send-btn:hover{
-    transform:translateY(-3px) scale(1.05);
-    box-shadow:0 8px 20px var(--accent-glow);
-  }
+  .send-btn:hover{transform:translateY(-3px) scale(1.05);box-shadow:0 8px 20px var(--accent-glow)}
   .send-btn:active{transform:translateY(-1px) scale(.95);transition-duration:.1s}
-  .send-btn:disabled{opacity:.5;cursor:not-allowed;transform:none;box-shadow:none}
-  .send-btn svg{
-    width:20px;height:20px;
-    stroke:currentColor;fill:none;stroke-width:2;
-    stroke-linecap:round;stroke-linejoin:round;
+  .send-btn:disabled{opacity:.4;cursor:not-allowed;transform:none;box-shadow:none}
+  .send-btn svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+  /* Emoji picker */
+  .emoji-picker{
+    position:absolute;
+    bottom:calc(100% + 8px);left:0;
+    background:var(--paper-elev);
+    border:1px solid var(--rule);
+    border-radius:14px;
+    box-shadow:var(--shadow-lg);
+    padding:12px;
+    width:280px;max-height:240px;
+    overflow-y:auto;
+    display:none;
+    grid-template-columns:repeat(7,1fr);
+    gap:6px;
+    z-index:60;
+  }
+  .emoji-picker.show{display:grid}
+  .emoji-picker button{
+    font-size:20px;padding:6px;
+    border-radius:6px;
+    transition:transform .2s,background .2s;
+    line-height:1;
+  }
+  .emoji-picker button:hover{background:var(--accent-soft);transform:scale(1.2)}
+
+  /* Voice recording state */
+  .recording-bar{
+    display:none;
+    align-items:center;gap:12px;
+    flex:1;
+    padding:11px 16px;
+    border:1px solid #c62828;
+    border-radius:24px;
+    background:rgba(198,40,40,.08);
+    color:#c62828;
+    font-size:13px;
+    font-weight:600;
+  }
+  .recording-bar.show{display:flex}
+  .recording-dot{
+    width:8px;height:8px;border-radius:50%;
+    background:#c62828;
+    animation:pulse .8s infinite;
+  }
+
+  /* Empty state */
+  .chat-empty{
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    padding:60px 20px;gap:16px;
+    color:var(--ink-mute);text-align:center;
+  }
+  .chat-empty svg{width:56px;height:56px;stroke:var(--rule-dark);fill:none;stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round}
+  .chat-empty a{color:var(--accent);font-weight:600;padding:10px 20px;border-radius:24px;background:var(--accent-soft)}
+
+  /* Unread dot on chat item */
+  .unread-dot{
+    width:8px;height:8px;border-radius:50%;
+    background:var(--accent);
+    box-shadow:0 0 6px var(--accent-glow);
+    flex-shrink:0;
+    margin-left:4px;
   }
 </style>
 </head>
@@ -235,28 +303,46 @@
     </div>
   </nav>
 
-  <!-- Chat list -->
+  <!-- Chat list view -->
   <div class="chat-list" id="chatList">
-    <div class="loading-wrap">
-      <div class="spinner"></div>
-      <div>লোড হচ্ছে...</div>
+    <div style="text-align:center;padding:50px 20px;color:var(--ink-mute);font-size:13px">
+      <div class="spinner" style="margin-bottom:12px"></div>
+      বার্তা লোড হচ্ছে...
     </div>
   </div>
 
-  <!-- Conversation -->
+  <!-- Conversation view -->
   <div class="conversation" id="conversation">
     <div class="conv-header">
       <button class="back-btn" id="backBtn">
         <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
       </button>
-      <div class="conv-user">
+      <div class="conv-user" id="convUserBtn">
         <div class="conv-avatar" id="convAvatar">?</div>
         <div class="conv-name" id="convName">...</div>
       </div>
+      <div class="conv-actions">
+        <button class="icon-action" id="voiceCallBtn" title="ভয়েস কল (শীঘ্রই আসছে)">
+          <svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+        </button>
+      </div>
     </div>
+
     <div class="messages" id="messages"></div>
-    <div class="input-bar">
+
+    <div class="input-bar" style="position:relative">
+      <button class="icon-action" id="emojiBtn" title="ইমোজি">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
+      </button>
+
+      <div class="emoji-picker" id="emojiPicker"></div>
+
       <input class="msg-input" type="text" id="msgInput" placeholder="বার্তা লিখুন..." autocomplete="off">
+
+      <button class="icon-action" id="voiceBtn" title="ভয়েস বার্তা">
+        <svg viewBox="0 0 24 24" id="voiceIcon"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+      </button>
+
       <button class="send-btn" id="sendBtn" aria-label="Send">
         <svg viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
       </button>
@@ -275,7 +361,10 @@
 
 <script type="module">
   import { requireAuth } from "./js/auth.js";
-  import { getOrCreateChat, sendMessage, listenMessages, listenMyChats, getOtherMember } from "./js/chat.js";
+  import {
+    getOrCreateChat, sendMessage, listenMessages,
+    listenMyChats, getOtherMember, sendVoiceMessage
+  } from "./js/chat.js";
 
   let currentUser = null;
   let activeChatId = null;
@@ -288,24 +377,50 @@
   const sendBtn = document.getElementById("sendBtn");
   const convAvatar = document.getElementById("convAvatar");
   const convName = document.getElementById("convName");
+  const emojiBtn = document.getElementById("emojiBtn");
+  const emojiPicker = document.getElementById("emojiPicker");
+  const voiceBtn = document.getElementById("voiceBtn");
+
+  // Emoji list
+  const EMOJIS = ["😀","😁","😂","🤣","😊","😍","😘","😎","🤔","😅","😢","😭","😡","🥰","😴","🤗","🙃","😉","😋","🤤","😇","🥳","🤩","😱","🤯","😳","🥺","😤","😈","💀","👻","🤖","👍","👎","👏","🙏","💪","✌️","🤝","❤️","🧡","💛","💚","💙","💜","🖤","🤍","💔","💯","🔥","⭐","✨","🎉","🎊","🎁","🌸","🌹","🌈","☀️","🌙","⚡"];
+
+  // Emoji picker render
+  emojiPicker.innerHTML = EMOJIS.map(e => `<button type="button" data-emoji="${e}">${e}</button>`).join("");
+  emojiBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    emojiPicker.classList.toggle("show");
+  });
+  emojiPicker.addEventListener("click", (e) => {
+    const emoji = e.target.dataset.emoji;
+    if (!emoji) return;
+    msgInput.value += emoji;
+    msgInput.focus();
+    emojiPicker.classList.remove("show");
+  });
+  document.addEventListener("click", () => emojiPicker.classList.remove("show"));
 
   requireAuth(async (user) => {
     currentUser = user;
     const params = new URLSearchParams(window.location.search);
     const toUsername = params.get("to");
 
-    listenMyChats(renderChatList);
+    // 🔧 FIX: chat list load
+    listenMyChats((chats) => {
+      console.log("Chats loaded:", chats.length, chats);
+      renderChatList(chats);
+    });
 
     if (toUsername) await openChatWithUsername(toUsername);
   });
 
   function renderChatList(chats) {
-    if (chats.length === 0) {
+    // Chat na thakle empty state
+    if (!chats || chats.length === 0) {
       chatList.innerHTML = `
-        <div class="empty">
+        <div class="chat-empty">
           <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-          এখনো কোনো বার্তা নেই<br>
-          <a href="search.html" style="color:var(--accent);font-weight:600;display:inline-block;margin-top:12px">ব্যবহারকারী খুঁজুন</a>
+          <div style="line-height:1.6">এখনো কোনো বার্তা নেই<br>কথা শুরু করুন</div>
+          <a href="search.html">ব্যবহারকারী খুঁজুন</a>
         </div>`;
       return;
     }
@@ -314,12 +429,14 @@
       const other = getOtherMember(chat, currentUser.uid);
       const initial = (other.name || "?")[0].toUpperCase();
       const time = chat.updatedAt?.seconds ? timeAgo(chat.updatedAt.seconds * 1000) : "";
+      const isActive = chat.id === activeChatId;
+      const preview = chat.lastMessage || (chat.lastMessageType === "voice" ? "🎤 ভয়েস বার্তা" : "কথা শুরু করুন");
       return `
-        <div class="chat-item" data-chat-id="${chat.id}">
+        <div class="chat-item ${isActive ? "active-chat" : ""}" data-chat-id="${chat.id}">
           <div class="chat-avatar">${other.photoURL ? `<img src="${other.photoURL}">` : initial}</div>
           <div class="chat-info">
             <div class="chat-name">${escapeHtml(other.name)}</div>
-            <div class="chat-preview">${escapeHtml(chat.lastMessage || "কথা শুরু করুন")}</div>
+            <div class="chat-preview">${escapeHtml(preview)}</div>
           </div>
           <div class="chat-time">${time}</div>
         </div>`;
@@ -341,12 +458,22 @@
     const initial = (otherUser.name || "?")[0].toUpperCase();
     convAvatar.innerHTML = otherUser.photoURL ? `<img src="${otherUser.photoURL}">` : initial;
     convName.textContent = otherUser.name;
+    conversation.dataset.otherUsername = otherUser.username || "";
 
     if (unsubMessages) unsubMessages();
     unsubMessages = listenMessages(chatId, renderMessages);
 
-    msgInput.focus();
+    setTimeout(() => msgInput.focus(), 150);
   }
+
+  document.getElementById("convUserBtn").addEventListener("click", () => {
+    const u = conversation.dataset.otherUsername;
+    if (u) window.location.href = `user.html?u=${encodeURIComponent(u)}`;
+  });
+
+  document.getElementById("voiceCallBtn").addEventListener("click", () => {
+    alert("🎤 ভয়েস/ভিডিও কল শীঘ্রই আসছে!");
+  });
 
   async function openChatWithUsername(username) {
     try {
@@ -370,6 +497,12 @@
     }
     messages.innerHTML = msgs.map(m => {
       const isMe = m.from === currentUser.uid;
+      if (m.type === "voice" && m.audioUrl) {
+        return `<div class="msg voice ${isMe ? "me" : "them"}">
+          <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/></svg>
+          <audio controls src="${m.audioUrl}" preload="metadata"></audio>
+        </div>`;
+      }
       return `<div class="msg ${isMe ? "me" : "them"}">${escapeHtml(m.text)}</div>`;
     }).join("");
     messages.scrollTop = messages.scrollHeight;
@@ -398,6 +531,70 @@
     if (unsubMessages) { unsubMessages(); unsubMessages = null; }
     conversation.classList.remove("active");
     chatList.style.display = "block";
+  });
+
+  // ==========================================
+  // Voice message recording
+  // ==========================================
+  let mediaRecorder = null;
+  let audioChunks = [];
+  let isRecording = false;
+
+  voiceBtn.addEventListener("click", async () => {
+    if (!activeChatId) { alert("প্রথমে একটি চ্যাট খুলুন"); return; }
+
+    if (isRecording) {
+      // Stop
+      mediaRecorder.stop();
+      return;
+    }
+
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      mediaRecorder = new MediaRecorder(stream);
+      audioChunks = [];
+
+      mediaRecorder.addEventListener("dataavailable", e => audioChunks.push(e.data));
+      mediaRecorder.addEventListener("stop", async () => {
+        voiceBtn.classList.remove("recording");
+        stream.getTracks().forEach(t => t.stop());
+        isRecording = false;
+
+        if (audioChunks.length === 0) return;
+        const blob = new Blob(audioChunks, { type: "audio/webm" });
+        if (blob.size < 1000) return; // too short
+
+        // Show temp message
+        const tempId = "temp_" + Date.now();
+        const tempUrl = URL.createObjectURL(blob);
+        const tempDiv = document.createElement("div");
+        tempDiv.className = "msg voice me";
+        tempDiv.id = tempId;
+        tempDiv.innerHTML = `
+          <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/></svg>
+          <span style="font-size:12px;opacity:.7">আপলোড হচ্ছে...</span>
+        `;
+        messages.appendChild(tempDiv);
+        messages.scrollTop = messages.scrollHeight;
+
+        try {
+          await sendVoiceMessage(activeChatId, blob, (pct) => {
+            const s = tempDiv.querySelector("span");
+            if (s) s.textContent = pct + "%";
+          });
+          tempDiv.remove();
+        } catch (err) {
+          tempDiv.remove();
+          alert("ভয়েস পাঠানো যায়নি: " + err.message);
+        }
+      });
+
+      mediaRecorder.start();
+      isRecording = true;
+      voiceBtn.classList.add("recording");
+    } catch (e) {
+      alert("মাইক্রোফোন অ্যাক্সেস পাওয়া যায়নি: " + e.message);
+    }
   });
 
   function timeAgo(t) {
