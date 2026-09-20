@@ -3,7 +3,7 @@
 // Google login + email whitelist + PIN
 // ==========================================
 
-import { auth } from "../js/firebase-config.js";
+import { auth } from "../../js/firebase-config.js";
 import {
   GoogleAuthProvider,
   signInWithPopup,
