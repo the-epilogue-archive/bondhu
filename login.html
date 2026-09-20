@@ -125,7 +125,7 @@
     const toggleText = document.getElementById("toggleText");
     const toggleLink = document.getElementById("toggleLink");
 
-    let mode = "login"; // "login" | "signup"
+    let mode = "login";
 
     function setMode(newMode) {
       mode = newMode;
@@ -182,7 +182,6 @@
           status.textContent = "✅ Login successful!";
         }
 
-        // 1 sec por index e pathao
         setTimeout(() => window.location.href = "index.html", 800);
       } catch (err) {
         status.className = "err";
