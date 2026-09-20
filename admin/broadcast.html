@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="bn" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#f5f0e2">
+<title>বন্ধু — ব্রডকাস্ট</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,500;0,600;0,700;0,800;1,500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/app.css">
+<link rel="stylesheet" href="css/admin.css">
+<script src="../js/theme.js"></script>
+<script src="js/admin-config.js"></script>
+<style>
+  .broadcast-form{
+    background:var(--paper-elev);
+    border:1px solid var(--rule);
+    border-radius:14px;
+    padding:22px;
+    max-width:640px;
+  }
+  .broadcast-preview{
+    background:var(--paper-2);
+    border:1px solid var(--rule);
+    border-left:4px solid var(--accent);
+    border-radius:12px;
+    padding:14px 16px;
+    margin-top:14px;
+    display:flex;
+    gap:12px;
+    align-items:flex-start;
+  }
+  .broadcast-preview-icon{
+    width:38px;height:38px;
+    border-radius:50%;
+    background:var(--accent);
+    color:var(--accent-text);
+    display:flex;align-items:center;justify-content:center;
+    flex-shrink:0;
+  }
+  .broadcast-preview-icon svg{
+    width:18px;height:18px;
+    stroke:currentColor;fill:none;stroke-width:1.8;
+  }
+  .broadcast-preview-body{flex:1;min-width:0}
+  .broadcast-preview-title{
+    font-family:'Playfair Display',serif;
+    font-size:14px;font-weight:700;
+    color:var(--ink);margin-bottom:4px;
+  }
+  .broadcast-preview-text{
+    font-size:13px;color:var(--ink-soft);
+    line-height:1.5;word-break:break-word;
+  }
+  .broadcast-preview-time{
+    font-size:11px;color:var(--ink-mute);
+    font-style:italic;font-family:'Playfair Display',serif;
+    margin-top:6px;
+  }
+</style>
+</head>
+<body class="admin">
+
+<div class="admin-shell">
+  <aside id="adminSidebar"></aside>
+
+  <div class="admin-main">
+    <header class="admin-topbar" id="adminTopbar">
+      <div class="admin-topbar-brand">
+        ব্রডকাস্ট
+        <span class="admin-badge">সব ব্যবহারকারী</span>
+      </div>
+      <div class="admin-topbar-actions">
+        <button class="theme-toggle" onclick="toggleBondhuTheme()" aria-label="Theme">
+          <svg class="icon-moon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+          <svg class="icon-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <div class="admin-page">
+      <div class="admin-page-head">
+        <div>
+          <div class="admin-page-title">ব্রডকাস্ট নোটিফিকেশন</div>
+          <div class="admin-page-sub">সব ব্যবহারকারীকে একসাথে একটি বার্তা পাঠান</div>
+        </div>
+      </div>
+
+      <div class="broadcast-form">
+        <div class="field-row" style="margin-bottom:14px">
+          <label class="field-label">শিরোনাম</label>
+          <input class="input" type="text" id="titleInput" placeholder="যেমন: নতুন আপডেট এসেছে!" maxlength="60">
+        </div>
+
+        <div class="field-row" style="margin-bottom:14px">
+          <label class="field-label">বার্তা</label>
+          <textarea class="textarea" id="msgInput" placeholder="আপনার বার্তা লিখুন..." maxlength="300" style="min-height:100px"></textarea>
+          <div style="text-align:right;font-size:11px;color:var(--ink-mute);margin-top:6px;font-family:'Playfair Display',serif;font-style:italic"><span id="charCount">0</span> / 300</div>
+        </div>
+
+        <div class="field-row" style="margin-bottom:16px">
+          <label class="field-label">প্রকার</label>
+          <select class="input" id="typeSelect">
+            <option value="info">তথ্য (সাধারণ বার্তা)</option>
+            <option value="update">আপডেট (নতুন ফিচার)</option>
+            <option value="warning">সতর্কতা (গুরুত্বপূর্ণ)</option>
+            <option value="maintenance">রক্ষণাবেক্ষণ (ডাউনটাইম)</option>
+          </select>
+        </div>
+
+        <div style="display:flex;gap:10px;align-items:center">
+          <button class="admin-btn admin-btn-primary" id="sendBtn" style="padding:12px 24px;font-size:13.5px">
+            <svg viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+            সবাইকে পাঠান
+          </button>
+          <button class="admin-btn admin-btn-ghost" id="clearBtn">মুছুন</button>
+        </div>
+
+        <div class="alert" id="status" style="margin-top:16px"></div>
+
+        <div class="broadcast-preview" id="preview" style="display:none">
+          <div class="broadcast-preview-icon">
+            <svg viewBox="0 0 24 24"><path d="M4 4l16 8-16 8v-6l10-2-10-2z"/></svg>
+          </div>
+          <div class="broadcast-preview-body">
+            <div class="broadcast-preview-title" id="pvTitle">শিরোনাম</div>
+            <div class="broadcast-preview-text" id="pvText">বার্তা</div>
+            <div class="broadcast-preview-time">এইমাত্র</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+  import { requireAdmin } from "./js/admin-auth.js";
+  import { db } from "../../js/firebase-config.js";
+  import {
+    collection, getDocs, addDoc, serverTimestamp, writeBatch, doc
+  } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+  import { showToast } from "../js/toast.js";
+  import "./js/admin-sidebar.js";
+
+  let currentAdmin = null;
+
+  requireAdmin((user) => {
+    currentAdmin = user;
+    setupPreview();
+  });
+
+  function setupPreview() {
+    const titleInput = document.getElementById("titleInput");
+    const msgInput = document.getElementById("msgInput");
+    const charCount = document.getElementById("charCount");
+    const preview = document.getElementById("preview");
+    const pvTitle = document.getElementById("pvTitle");
+    const pvText = document.getElementById("pvText");
+
+    function updatePreview() {
+      const t = titleInput.value.trim();
+      const m = msgInput.value.trim();
+      charCount.textContent = msgInput.value.length;
+      if (t || m) {
+        preview.style.display = "flex";
+        pvTitle.textContent = t || "(শিরোনাম নেই)";
+        pvText.textContent = m || "(বার্তা নেই)";
+      } else {
+        preview.style.display = "none";
+      }
+    }
+
+    titleInput.addEventListener("input", updatePreview);
+    msgInput.addEventListener("input", updatePreview);
+
+    document.getElementById("clearBtn").addEventListener("click", () => {
+      titleInput.value = "";
+      msgInput.value = "";
+      updatePreview();
+      document.getElementById("status").className = "alert";
+      document.getElementById("status").style.display = "none";
+    });
+
+    document.getElementById("sendBtn").addEventListener("click", sendBroadcast);
+  }
+
+  async function sendBroadcast() {
+    const title = document.getElementById("titleInput").value.trim();
+    const msg = document.getElementById("msgInput").value.trim();
+    const type = document.getElementById("typeSelect").value;
+    const status = document.getElementById("status");
+    const btn = document.getElementById("sendBtn");
+
+    if (!title && !msg) {
+      status.className = "alert err show";
+      status.textContent = "শিরোনাম বা বার্তা দিন";
+      return;
+    }
+
+    const ok = confirm(`সব ব্যবহারকারীকে এই ব্রডকাস্ট পাঠানো হবে।\n\nশিরোনাম: ${title}\nবার্তা: ${msg}\n\nনিশ্চিত?`);
+    if (!ok) return;
+
+    btn.disabled = true;
+    status.className = "alert info show";
+    status.style.display = "block";
+    status.textContent = "ব্যবহারকারীদের তালিকা লোড হচ্ছে...";
+
+    try {
+      // Get all users
+      const usersSnap = await getDocs(collection(db, "users"));
+      const userIds = [];
+      usersSnap.forEach(d => userIds.push(d.id));
+
+      if (userIds.length === 0) {
+        status.className = "alert err show";
+        status.textContent = "কোনো ব্যবহারকারী নেই";
+        btn.disabled = false;
+        return;
+      }
+
+      status.textContent = `${userIds.length} জনকে পাঠানো হচ্ছে...`;
+
+      // Create the broadcast doc
+      const broadcastRef = await addDoc(collection(db, "broadcasts"), {
+        title,
+        message: msg,
+        type,
+        sentBy: currentAdmin.email,
+        sentAt: serverTimestamp(),
+        recipientCount: userIds.length
+      });
+
+      // Create notification for each user (batch in chunks of 400)
+      const chunkSize = 400;
+      let processed = 0;
+      for (let i = 0; i < userIds.length; i += chunkSize) {
+        const chunk = userIds.slice(i, i + chunkSize);
+        const batch = writeBatch(db);
+
+        chunk.forEach(uid => {
+          const notifRef = doc(collection(db, "notifications"));
+          batch.set(notifRef, {
+            toUid: uid,
+            fromUid: "system",
+            fromName: "বন্ধু টিম",
+            type: "broadcast",
+            title,
+            text: msg,
+            broadcastType: type,
+            broadcastId: broadcastRef.id,
+            read: false,
+            createdAt: serverTimestamp()
+          });
+        });
+
+        await batch.commit();
+        processed += chunk.length;
+        status.textContent = `${bnNum(processed)} / ${bnNum(userIds.length)} পাঠানো হয়েছে...`;
+      }
+
+      status.className = "alert ok show";
+      status.textContent = `✅ সফলভাবে ${bnNum(userIds.length)} জনকে পাঠানো হয়েছে!`;
+      showToast(`✅ ব্রডকাস্ট পাঠানো হয়েছে (${bnNum(userIds.length)} জন)`, "ok", 4000);
+
+      document.getElementById("titleInput").value = "";
+      document.getElementById("msgInput").value = "";
+      document.getElementById("preview").style.display = "none";
+      document.getElementById("charCount").textContent = "0";
+    } catch (e) {
+      console.error(e);
+      status.className = "alert err show";
+      status.textContent = "❌ ব্যর্থ: " + e.message;
+    }
+    btn.disabled = false;
+  }
+
+  function bnNum(n) {
+    const en = "0123456789", bn = "০১২৩৪৫৬৭৮৯";
+    return String(n).replace(/[0-9]/g, d => bn[en.indexOf(d)]);
+  }
+</script>
+
+</body>
+</html>
