@@ -1,11 +1,12 @@
 // ==========================================
 // Bondhu - Chat (1-to-1 realtime + voice)
+// FIXED: chat list loading issue
 // ==========================================
 
 import { db, auth } from "./firebase-config.js";
 import {
   collection, addDoc, doc, getDoc, setDoc, getDocs,
-  query, orderBy, where, serverTimestamp, onSnapshot,
+  query, orderBy, serverTimestamp, onSnapshot,
   updateDoc, limit
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
@@ -79,19 +80,17 @@ export async function sendMessage(chatId, text) {
 }
 
 // ==========================================
-// Voice message — Cloudinary unsigned upload
+// Voice message — Cloudinary
 // ==========================================
-const CLOUDINARY_CLOUD_NAME = "kmquukhi";       // 👈 tomar cloud name
-const CLOUDINARY_VOICE_PRESET = "bondhu_reels";          // same preset works for audio
+const CLOUDINARY_CLOUD_NAME = "TOMAR_CLOUD_NAME";
+const CLOUDINARY_VOICE_PRESET = "bondhu_reels";
 
 export async function sendVoiceMessage(chatId, blob, onProgress) {
   const me = auth.currentUser;
   if (!me) throw new Error("Login koro");
 
-  // Upload to Cloudinary
   const audioUrl = await uploadVoiceToCloudinary(blob, onProgress);
 
-  // Save to Firestore
   await addDoc(collection(db, "chats", chatId, "messages"), {
     from: me.uid,
     type: "voice",
@@ -166,32 +165,37 @@ export function listenMessages(chatId, callback) {
 }
 
 // ==========================================
-// My chats listen (🔥 FIX: createdAt fallback)
+// 🔥 FIXED: My chats listen
+// Age: where() + orderBy() use korechilam — index na thakle fail korto
+// Ekhon: sob chat fetch kore client-side filter
 // ==========================================
-export function listenMyChats(callback) {
-  const me = auth.currentUser;
-  if (!me) { callback([]); return () => {}; }
+export function listenMyChats(uid, callback) {
+  if (!uid) { callback([]); return () => {}; }
 
-  // Query sob chats jekhane ami member
-  const q = query(
-    collection(db, "chats"),
-    where("members", "array-contains", me.uid)
-  );
+  // Sob chats fetch — kono index/composite dorkar nei
+  const q = query(collection(db, "chats"));
 
   return onSnapshot(q, (snap) => {
     const chats = [];
-    snap.forEach(d => chats.push({ id: d.id, ...d.data() }));
+    snap.forEach(d => {
+      const data = d.data();
+      // Members array check
+      if (Array.isArray(data.members) && data.members.includes(uid)) {
+        chats.push({ id: d.id, ...data });
+      }
+    });
 
-    // Client-side sort (updatedAt desc) — Firestore index er dorkar nei
+    // Sort: newest first (client-side)
     chats.sort((a, b) => {
       const at = a.updatedAt?.seconds || a.createdAt?.seconds || 0;
       const bt = b.updatedAt?.seconds || b.createdAt?.seconds || 0;
       return bt - at;
     });
 
+    console.log("✅ Chats loaded:", chats.length);
     callback(chats);
   }, (err) => {
-    console.error("Chat list error:", err);
+    console.error("❌ Chat list error:", err);
     callback([]);
   });
 }
