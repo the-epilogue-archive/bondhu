@@ -14,6 +14,61 @@
     }
     .topbar h1 { color: #e1306c; margin: 0; font-size: 22px; }
     .topbar a { color: #e1306c; text-decoration: none; font-weight: bold; font-size: 14px; margin-left: 12px; }
+
+    /* Story bar */
+    .story-bar {
+      background: white; padding: 10px 0;
+      border-bottom: 1px solid #eee;
+      overflow-x: auto; white-space: nowrap;
+      display: flex; gap: 12px; padding-left: 12px; padding-right: 12px;
+    }
+    .story-bar::-webkit-scrollbar { display: none; }
+    .story-item {
+      display: inline-flex; flex-direction: column; align-items: center;
+      gap: 6px; cursor: pointer; flex-shrink: 0;
+      text-decoration: none; color: inherit;
+    }
+    .story-ring {
+      width: 66px; height: 66px; border-radius: 50%;
+      padding: 3px;
+      background: linear-gradient(135deg, #feda75, #fa7e1e, #d62976, #962fbf);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .story-ring.mine {
+      background: #ddd;
+    }
+    .story-ring-inner {
+      width: 100%; height: 100%; border-radius: 50%;
+      background: white; padding: 2px;
+      display: flex; align-items: center; justify-content: center;
+      overflow: hidden;
+    }
+    .story-avatar {
+      width: 100%; height: 100%; border-radius: 50%;
+      background: linear-gradient(135deg, #feda75, #d62976);
+      display: flex; align-items: center; justify-content: center;
+      color: white; font-weight: bold; font-size: 24px;
+      overflow: hidden;
+    }
+    .story-avatar img { width: 100%; height: 100%; object-fit: cover; }
+    .story-name {
+      font-size: 11px; color: #333; max-width: 70px;
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+      text-align: center;
+    }
+    .add-story-plus {
+      position: relative;
+    }
+    .add-story-plus::after {
+      content: "+";
+      position: absolute; bottom: 14px; right: 0;
+      width: 22px; height: 22px; border-radius: 50%;
+      background: #e1306c; color: white;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px; font-weight: bold;
+      border: 2px solid white;
+    }
+
     .feed { max-width: 500px; margin: 0 auto; padding: 12px; }
     .post {
       background: white; border-radius: 12px; margin-bottom: 16px;
@@ -72,6 +127,8 @@
     </div>
   </div>
 
+  <div class="story-bar" id="storyBar"></div>
+
   <div class="feed" id="feed">
     <div id="empty">Loading...</div>
   </div>
@@ -81,11 +138,13 @@
   <script type="module">
     import { requireAuth, logout } from "./js/auth.js";
     import { loadFeed, toggleLike, deletePost, addComment, loadComments } from "./js/feed.js";
+    import { loadActiveStories } from "./js/stories.js";
 
     let currentUser = null;
 
     requireAuth(async (user) => {
       currentUser = user;
+      loadStories();
       loadPosts();
     });
 
@@ -95,6 +154,72 @@
       window.location.href = "login.html";
     });
 
+    // ==========================================
+    // Story bar
+    // ==========================================
+    async function loadStories() {
+      const bar = document.getElementById("storyBar");
+      try {
+        const groups = await loadActiveStories();
+
+        // Amar nijer story ache kina
+        const myGroup = groups.find(g => g.userId === currentUser.uid);
+
+        let html = "";
+
+        // Amar story tile
+        if (myGroup) {
+          const initial = (currentUser.name || "?")[0].toUpperCase();
+          html += `
+            <a class="story-item" href="story.html?u=${encodeURIComponent(currentUser.username)}">
+              <div class="story-ring">
+                <div class="story-ring-inner">
+                  <div class="story-avatar">${currentUser.photoURL ? `<img src="${currentUser.photoURL}">` : initial}</div>
+                </div>
+              </div>
+              <div class="story-name">Tomar story</div>
+            </a>
+          `;
+        } else {
+          const initial = (currentUser.name || "?")[0].toUpperCase();
+          html += `
+            <a class="story-item add-story-plus" href="story-upload.html">
+              <div class="story-ring mine">
+                <div class="story-ring-inner">
+                  <div class="story-avatar">${currentUser.photoURL ? `<img src="${currentUser.photoURL}">` : initial}</div>
+                </div>
+              </div>
+              <div class="story-name">Story add</div>
+            </a>
+          `;
+        }
+
+        // Baki user der story
+        groups.forEach(g => {
+          if (g.userId === currentUser.uid) return;
+          const initial = (g.userName || "?")[0].toUpperCase();
+          html += `
+            <a class="story-item" href="story.html?u=${encodeURIComponent(g.username)}">
+              <div class="story-ring">
+                <div class="story-ring-inner">
+                  <div class="story-avatar">${g.userPhoto ? `<img src="${g.userPhoto}">` : initial}</div>
+                </div>
+              </div>
+              <div class="story-name">${escapeHtml(g.userName)}</div>
+            </a>
+          `;
+        });
+
+        bar.innerHTML = html;
+      } catch (e) {
+        console.error("Stories load fail:", e);
+        bar.innerHTML = "";
+      }
+    }
+
+    // ==========================================
+    // Feed
+    // ==========================================
     async function loadPosts() {
       const feed = document.getElementById("feed");
       try {
@@ -145,7 +270,6 @@
           feed.appendChild(div);
         });
 
-        // Like
         feed.querySelectorAll(".like-btn").forEach(btn => {
           btn.addEventListener("click", async () => {
             const postId = btn.dataset.id;
@@ -163,7 +287,6 @@
           });
         });
 
-        // Comment toggle
         feed.querySelectorAll(".comment-toggle-btn").forEach(btn => {
           btn.addEventListener("click", async () => {
             const postId = btn.dataset.id;
@@ -173,7 +296,6 @@
           });
         });
 
-        // Comment send
         feed.querySelectorAll(".comment-send").forEach(btn => {
           btn.addEventListener("click", async () => {
             const postId = btn.dataset.id;
@@ -193,7 +315,6 @@
           });
         });
 
-        // Delete
         feed.querySelectorAll(".delete-btn").forEach(btn => {
           btn.addEventListener("click", async () => {
             if (!confirm("Ei post delete korbe?")) return;
