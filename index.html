@@ -6,126 +6,57 @@
   <title>বন্ধু - Feed</title>
   <style>
     * { box-sizing: border-box; }
-    body {
-      font-family: sans-serif;
-      background: #fafafa;
-      margin: 0;
-      padding-bottom: 70px;
-    }
+    body { font-family: sans-serif; background: #fafafa; margin: 0; padding-bottom: 70px; }
     .topbar {
-      background: white;
-      padding: 12px 16px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      border-bottom: 1px solid #eee;
-      position: sticky;
-      top: 0;
-      z-index: 10;
+      background: white; padding: 12px 16px; display: flex;
+      justify-content: space-between; align-items: center;
+      border-bottom: 1px solid #eee; position: sticky; top: 0; z-index: 10;
     }
-    .topbar h1 {
-      color: #e1306c;
-      margin: 0;
-      font-size: 22px;
-    }
-    .topbar a {
-      color: #e1306c;
-      text-decoration: none;
-      font-weight: bold;
-      font-size: 14px;
-      margin-left: 12px;
-    }
-    .feed {
-      max-width: 500px;
-      margin: 0 auto;
-      padding: 12px;
-    }
+    .topbar h1 { color: #e1306c; margin: 0; font-size: 22px; }
+    .topbar a { color: #e1306c; text-decoration: none; font-weight: bold; font-size: 14px; margin-left: 12px; }
+    .feed { max-width: 500px; margin: 0 auto; padding: 12px; }
     .post {
-      background: white;
-      border-radius: 12px;
-      margin-bottom: 16px;
-      overflow: hidden;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      background: white; border-radius: 12px; margin-bottom: 16px;
+      overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.06);
     }
-    .post-head {
-      display: flex;
-      align-items: center;
-      padding: 12px;
-      gap: 10px;
-    }
+    .post-head { display: flex; align-items: center; padding: 12px; gap: 10px; }
     .avatar {
-      width: 38px; height: 38px;
-      border-radius: 50%;
+      width: 38px; height: 38px; border-radius: 50%;
       background: linear-gradient(135deg, #feda75, #d62976);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: white;
-      font-weight: bold;
-      font-size: 16px;
-      overflow: hidden;
+      display: flex; align-items: center; justify-content: center;
+      color: white; font-weight: bold; font-size: 16px; overflow: hidden;
     }
     .avatar img { width: 100%; height: 100%; object-fit: cover; }
     .post-head .name { font-weight: bold; font-size: 14px; }
     .post-head .user { color: #888; font-size: 12px; }
-    .post img.post-img {
-      width: 100%;
-      display: block;
-      background: #eee;
-      min-height: 200px;
-    }
-    .actions {
-      padding: 10px 14px;
-      display: flex;
-      gap: 14px;
-      align-items: center;
-    }
-    .like-btn {
-      background: none;
-      border: none;
-      cursor: pointer;
-      font-size: 22px;
-      padding: 0;
-      color: #333;
-    }
+    .post img.post-img { width: 100%; display: block; background: #eee; min-height: 200px; }
+    .actions { padding: 10px 14px; display: flex; gap: 14px; align-items: center; }
+    .like-btn { background: none; border: none; cursor: pointer; font-size: 22px; padding: 0; }
     .like-btn.liked { color: #e1306c; }
-    .caption {
-      padding: 0 14px 10px;
-      font-size: 14px;
-      color: #333;
-      word-break: break-word;
-    }
+    .comment-toggle-btn { background: none; border: none; cursor: pointer; font-size: 18px; padding: 0; }
+    .caption { padding: 0 14px 8px; font-size: 14px; color: #333; word-break: break-word; }
     .caption b { margin-right: 6px; }
-    .delete-btn {
-      background: none;
-      border: none;
-      color: #999;
-      font-size: 12px;
-      cursor: pointer;
-      margin-left: auto;
-    }
-    #empty {
-      text-align: center;
-      color: #999;
-      padding: 40px;
-    }
+    .delete-btn { background: none; border: none; color: #999; font-size: 12px; cursor: pointer; margin-left: auto; }
+    #empty { text-align: center; color: #999; padding: 40px; }
     .fab {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      background: #e1306c;
-      color: white;
-      border: none;
-      width: 56px;
-      height: 56px;
-      border-radius: 50%;
-      font-size: 28px;
-      cursor: pointer;
-      box-shadow: 0 4px 14px rgba(225,48,108,0.4);
-      text-decoration: none;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      position: fixed; bottom: 20px; right: 20px; background: #e1306c;
+      color: white; border: none; width: 56px; height: 56px;
+      border-radius: 50%; font-size: 28px; cursor: pointer;
+      box-shadow: 0 4px 14px rgba(225,48,108,0.4); text-decoration: none;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .comments-section { border-top: 1px solid #eee; padding: 10px 14px; display: none; }
+    .comments-section.open { display: block; }
+    .comment { font-size: 13px; margin-bottom: 6px; word-break: break-word; }
+    .comment b { margin-right: 6px; }
+    .comment-input-wrap { display: flex; gap: 8px; margin-top: 8px; }
+    .comment-input {
+      flex: 1; padding: 8px 10px; border: 1px solid #ddd;
+      border-radius: 8px; font-size: 13px; box-sizing: border-box;
+    }
+    .comment-send {
+      background: #e1306c; color: white; border: none;
+      padding: 8px 14px; border-radius: 8px; font-size: 13px; cursor: pointer;
     }
   </style>
 </head>
@@ -133,6 +64,7 @@
   <div class="topbar">
     <h1>বন্ধু</h1>
     <div>
+      <a href="search.html">🔍</a>
       <a href="profile.html">Profile</a>
       <a href="settings.html">⚙️</a>
       <a href="#" id="logoutLink">Logout</a>
@@ -146,10 +78,13 @@
   <a href="upload.html" class="fab">+</a>
 
   <script type="module">
-    import { requireAuth, logout, getCurrentUser } from "./js/auth.js";
-    import { loadFeed, toggleLike, deletePost } from "./js/feed.js";
+    import { requireAuth, logout } from "./js/auth.js";
+    import { loadFeed, toggleLike, deletePost, addComment, loadComments } from "./js/feed.js";
+
+    let currentUser = null;
 
     requireAuth(async (user) => {
+      currentUser = user;
       loadPosts();
     });
 
@@ -163,7 +98,7 @@
       const feed = document.getElementById("feed");
       try {
         const posts = await loadFeed();
-        const me = getCurrentUser();
+        const me = currentUser;
 
         if (posts.length === 0) {
           feed.innerHTML = `<div id="empty">Kono post nei. <br><br>+ button diye first post banao!</div>`;
@@ -175,6 +110,7 @@
           const isLiked = p.likes?.includes(me.uid);
           const isMine = p.userId === me.uid;
           const initial = (p.userName || "?")[0].toUpperCase();
+          const commentCount = p.commentCount || 0;
 
           const div = document.createElement("div");
           div.className = "post";
@@ -192,14 +128,23 @@
               <button class="like-btn ${isLiked ? "liked" : ""}" data-id="${p.id}">
                 ${isLiked ? "❤️" : "🤍"}
               </button>
-              <span style="font-size:13px;color:#666;">${p.likes?.length || 0} like</span>
+              <span style="font-size:13px;color:#666;">${p.likes?.length || 0}</span>
+              <button class="comment-toggle-btn" data-id="${p.id}">💬</button>
+              <span style="font-size:13px;color:#666;">${commentCount}</span>
             </div>
             <div class="caption"><b>${escapeHtml(p.username || "?")}</b>${escapeHtml(p.caption || "")}</div>
+            <div class="comments-section" id="cs-${p.id}">
+              <div class="comments-list" id="cl-${p.id}">Loading...</div>
+              <div class="comment-input-wrap">
+                <input class="comment-input" placeholder="Comment likho..." data-id="${p.id}">
+                <button class="comment-send" data-id="${p.id}">Send</button>
+              </div>
+            </div>
           `;
           feed.appendChild(div);
         });
 
-        // Like handler
+        // Like
         feed.querySelectorAll(".like-btn").forEach(btn => {
           btn.addEventListener("click", async () => {
             const postId = btn.dataset.id;
@@ -209,32 +154,73 @@
               const nowLiked = await toggleLike(postId, post.likes || []);
               btn.classList.toggle("liked", nowLiked);
               btn.textContent = nowLiked ? "❤️" : "🤍";
-              // count update
               const countSpan = btn.nextElementSibling;
               const prev = post.likes?.length || 0;
-              countSpan.textContent = `${prev + (nowLiked ? 1 : -1)} like`;
-            } catch (e) {
-              alert("Like fail: " + e.message);
-            }
+              countSpan.textContent = prev + (nowLiked ? 1 : -1);
+            } catch (e) { alert("Like fail: " + e.message); }
             btn.disabled = false;
           });
         });
 
-        // Delete handler
+        // Comment toggle
+        feed.querySelectorAll(".comment-toggle-btn").forEach(btn => {
+          btn.addEventListener("click", async () => {
+            const postId = btn.dataset.id;
+            const section = document.getElementById("cs-" + postId);
+            const isOpen = section.classList.toggle("open");
+            if (isOpen) await renderComments(postId);
+          });
+        });
+
+        // Comment send
+        feed.querySelectorAll(".comment-send").forEach(btn => {
+          btn.addEventListener("click", async () => {
+            const postId = btn.dataset.id;
+            const input = document.querySelector(`.comment-input[data-id="${postId}"]`);
+            const text = input.value.trim();
+            if (!text) return;
+            btn.disabled = true;
+            try {
+              await addComment(postId, text);
+              input.value = "";
+              await renderComments(postId);
+              const commentBtn = document.querySelector(`.comment-toggle-btn[data-id="${postId}"]`);
+              commentBtn.nextElementSibling.textContent =
+                parseInt(commentBtn.nextElementSibling.textContent) + 1;
+            } catch (e) { alert("Comment fail: " + e.message); }
+            btn.disabled = false;
+          });
+        });
+
+        // Delete
         feed.querySelectorAll(".delete-btn").forEach(btn => {
           btn.addEventListener("click", async () => {
             if (!confirm("Ei post delete korbe?")) return;
             try {
               await deletePost(btn.dataset.id);
               btn.closest(".post").remove();
-            } catch (e) {
-              alert("Delete fail: " + e.message);
-            }
+            } catch (e) { alert("Delete fail: " + e.message); }
           });
         });
       } catch (e) {
         feed.innerHTML = `<div id="empty">❌ Load fail: ${e.message}</div>`;
         console.error(e);
+      }
+    }
+
+    async function renderComments(postId) {
+      const list = document.getElementById("cl-" + postId);
+      try {
+        const comments = await loadComments(postId);
+        if (comments.length === 0) {
+          list.innerHTML = `<div style="color:#999;font-size:13px;">Kono comment nei</div>`;
+        } else {
+          list.innerHTML = comments.map(c =>
+            `<div class="comment"><b>@${escapeHtml(c.username)}</b>${escapeHtml(c.text)}</div>`
+          ).join("");
+        }
+      } catch (e) {
+        list.innerHTML = `<div style="color:#c00;font-size:13px;">Load fail</div>`;
       }
     }
 
