@@ -1,109 +1,233 @@
 <!DOCTYPE html>
-<html lang="bn">
+<html lang="bn" data-theme="light">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>বন্ধু - Search</title>
-  <style>
-    * { box-sizing: border-box; }
-    body { font-family: sans-serif; background: #fafafa; margin: 0; }
-    .topbar {
-      background: white; padding: 12px 16px;
-      display: flex; justify-content: space-between; align-items: center;
-      border-bottom: 1px solid #eee;
-    }
-    .topbar h1 { color: #e1306c; margin: 0; font-size: 22px; }
-    .topbar a { color: #e1306c; text-decoration: none; font-weight: bold; font-size: 14px; }
-    .container { max-width: 500px; margin: 0 auto; padding: 16px; }
-    .search-bar { display: flex; gap: 8px; margin-bottom: 16px; }
-    .search-bar input {
-      flex: 1; padding: 12px 14px; border: 1px solid #ddd;
-      border-radius: 24px; font-size: 15px;
-    }
-    .user-item {
-      display: flex; align-items: center; gap: 12px;
-      background: white; padding: 12px 14px;
-      border-radius: 12px; margin-bottom: 10px;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.05);
-      text-decoration: none; color: inherit;
-    }
-    .avatar {
-      width: 46px; height: 46px; border-radius: 50%;
-      background: linear-gradient(135deg, #feda75, #d62976);
-      display: flex; align-items: center; justify-content: center;
-      color: white; font-weight: bold; font-size: 20px;
-      overflow: hidden; flex-shrink: 0;
-    }
-    .avatar img { width: 100%; height: 100%; object-fit: cover; }
-    .info { flex: 1; }
-    .info .name { font-weight: bold; font-size: 15px; }
-    .info .username { color: #888; font-size: 13px; }
-    .empty { text-align: center; color: #999; padding: 40px; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#f5f0e2">
+<title>বন্ধু — খুঁজুন</title>
+<link rel="manifest" href="manifest.json">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,500;0,600;0,700;0,800;1,500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/app.css">
+<script src="js/theme.js"></script>
+<style>
+  .search-bar{
+    padding:16px 0 8px;
+    position:relative;
+  }
+  .search-bar .input{
+    padding:14px 16px 14px 46px;
+    border-radius:30px;
+    font-size:15px;
+  }
+  .search-icon{
+    position:absolute;
+    left:16px;top:50%;
+    transform:translateY(-30%);
+    width:20px;height:20px;
+    stroke:var(--ink-mute);
+    fill:none;stroke-width:1.8;
+    stroke-linecap:round;stroke-linejoin:round;
+    pointer-events:none;
+    transition:stroke .25s;
+  }
+  .search-bar .input:focus ~ .search-icon{stroke:var(--accent)}
+
+  .user-list{padding-top:8px}
+
+  .user-item{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    padding:14px 12px;
+    border-radius:12px;
+    cursor:pointer;
+    transition:all .3s cubic-bezier(.34,1.56,.64,1);
+    border-bottom:1px solid var(--rule);
+    will-change:transform;
+  }
+  .user-item:hover{
+    background:var(--accent-soft);
+    transform:translateX(4px);
+    border-color:var(--accent-border);
+  }
+  .user-item:last-child{border-bottom:none}
+
+  .user-avatar{
+    width:48px;height:48px;
+    border-radius:50%;
+    background:var(--ink);color:var(--paper);
+    display:flex;align-items:center;justify-content:center;
+    font-weight:600;font-size:17px;
+    flex-shrink:0;
+    overflow:hidden;
+    background-image:linear-gradient(135deg,rgba(255,255,255,.08),transparent 60%);
+    transition:background-color .3s;
+  }
+  .user-item:hover .user-avatar{background-color:var(--accent)}
+  .user-avatar img{width:100%;height:100%;object-fit:cover}
+
+  .user-info{flex:1;min-width:0}
+  .user-name{
+    font-family:'Playfair Display',serif;
+    font-size:15px;font-weight:700;
+    color:var(--ink);margin-bottom:3px;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  }
+  .user-handle{
+    font-size:12.5px;color:var(--ink-mute);
+    font-style:italic;
+    font-family:'Playfair Display',serif;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  }
+</style>
 </head>
 <body>
-  <div class="topbar">
-    <h1>Search</h1>
-    <a href="index.html">← Feed</a>
-  </div>
 
-  <div class="container">
-    <div class="search-bar">
-      <input type="text" id="searchInput" placeholder="Username ba naam likho..." autofocus>
+<div class="page">
+
+  <nav class="topbar">
+    <div class="topbar-brand" style="font-size:18px">খুঁজুন</div>
+    <div class="topbar-actions">
+      <button class="theme-toggle" onclick="toggleBondhuTheme()" aria-label="Theme">
+        <svg class="icon-moon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        <svg class="icon-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+      </button>
+      <a href="index.html" class="icon-btn" aria-label="Home">
+        <svg viewBox="0 0 24 24"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+      </a>
     </div>
-    <div id="results"><div class="empty">Naam likho khুঁjte...</div></div>
+  </nav>
+
+  <div class="search-bar">
+    <input class="input" type="text" id="searchInput" placeholder="নাম বা ইউজারনেম লিখুন..." autocomplete="off" autofocus>
+    <svg class="search-icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.35-4.35"/></svg>
   </div>
 
-  <script type="module">
-    import { requireAuth } from "./js/auth.js";
-    import { searchUsers } from "./js/feed.js";
+  <div class="section-head">ব্যবহারকারী</div>
 
-    requireAuth(() => {});
+  <div class="user-list" id="userList">
+    <div class="empty">
+      <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.35-4.35"/></svg>
+      নাম লিখে খুঁজুন
+    </div>
+  </div>
 
-    const input = document.getElementById("searchInput");
-    const results = document.getElementById("results");
-    let timer = null;
+</div>
 
-    input.addEventListener("input", () => {
-      clearTimeout(timer);
-      timer = setTimeout(doSearch, 350);
-    });
+<nav class="bottom-nav">
+  <a href="index.html"><svg viewBox="0 0 24 24"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg></a>
+  <a href="search.html" class="active"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.35-4.35"/></svg></a>
+  <a href="upload.html"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="5"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg></a>
+  <a href="reels.html"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="5"/><path d="M9 8v8l6-4z"/></svg></a>
+  <a href="profile.html"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21v-2a4 4 0 0 1 4-4h8a4 4 0 0 1 4 4v2"/></svg></a>
+</nav>
 
-    async function doSearch() {
-      const term = input.value.trim();
-      if (!term) {
-        results.innerHTML = `<div class="empty">Naam likho khুঁjte...</div>`;
+<script type="module">
+  import { requireAuth } from "./js/auth.js";
+  import { searchUsers } from "./js/feed.js";
+
+  requireAuth(() => {});
+
+  const input = document.getElementById("searchInput");
+  const list = document.getElementById("userList");
+  let timer = null;
+
+  // Recent searches save
+  const RECENT_KEY = "bondhu_recent_search";
+  function getRecent() {
+    try { return JSON.parse(localStorage.getItem(RECENT_KEY) || "[]"); }
+    catch { return []; }
+  }
+  function addRecent(user) {
+    const list = getRecent().filter(u => u.uid !== user.uid);
+    list.unshift({ uid: user.uid, name: user.name, username: user.username, photoURL: user.photoURL });
+    localStorage.setItem(RECENT_KEY, JSON.stringify(list.slice(0, 8)));
+  }
+
+  input.addEventListener("input", () => {
+    clearTimeout(timer);
+    timer = setTimeout(doSearch, 300);
+  });
+
+  async function doSearch() {
+    const term = input.value.trim();
+    if (!term) {
+      renderRecent();
+      return;
+    }
+
+    list.innerHTML = `<div class="loading-wrap"><div class="spinner"></div></div>`;
+
+    try {
+      const users = await searchUsers(term);
+      if (users.length === 0) {
+        list.innerHTML = `<div class="empty">কোনো ব্যবহারকারী পাওয়া যায়নি</div>`;
         return;
       }
-      results.innerHTML = `<div class="empty">Khুঁjchi...</div>`;
-      try {
-        const users = await searchUsers(term);
-        if (users.length === 0) {
-          results.innerHTML = `<div class="empty">Kono user nei</div>`;
-          return;
-        }
-        results.innerHTML = users.map(u => {
-          const initial = (u.name || "?")[0].toUpperCase();
-          return `
-            <a class="user-item" href="user.html?u=${encodeURIComponent(u.username)}">
-              <div class="avatar">${u.photoURL ? `<img src="${u.photoURL}">` : initial}</div>
-              <div class="info">
-                <div class="name">${escapeHtml(u.name)}</div>
-                <div class="username">@${escapeHtml(u.username)}</div>
-              </div>
-            </a>
-          `;
-        }).join("");
-      } catch (e) {
-        results.innerHTML = `<div class="empty">❌ ${e.message}</div>`;
-      }
+      renderUsers(users);
+    } catch (e) {
+      list.innerHTML = `<div class="empty">❌ ${e.message}</div>`;
     }
+  }
 
-    function escapeHtml(str) {
-      return String(str || "").replace(/[&<>"']/g, m => ({
-        "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
-      }[m]));
+  function renderUsers(users) {
+    list.innerHTML = users.map(u => {
+      const initial = (u.name || "?")[0].toUpperCase();
+      return `
+        <a class="user-item" href="user.html?u=${encodeURIComponent(u.username)}" data-uid="${u.uid}" data-name="${escapeHtml(u.name)}" data-username="${escapeHtml(u.username)}" data-photo="${u.photoURL || ''}">
+          <div class="user-avatar">${u.photoURL ? `<img src="${u.photoURL}">` : initial}</div>
+          <div class="user-info">
+            <div class="user-name">${escapeHtml(u.name)}</div>
+            <div class="user-handle">@${escapeHtml(u.username)}</div>
+          </div>
+        </a>`;
+    }).join("");
+
+    list.querySelectorAll(".user-item").forEach(el => {
+      el.addEventListener("click", () => {
+        addRecent({
+          uid: el.dataset.uid,
+          name: el.dataset.name,
+          username: el.dataset.username,
+          photoURL: el.dataset.photo
+        });
+      });
+    });
+  }
+
+  function renderRecent() {
+    const recent = getRecent();
+    if (recent.length === 0) {
+      list.innerHTML = `<div class="empty">
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.35-4.35"/></svg>
+        নাম লিখে খুঁজুন
+      </div>`;
+      return;
     }
-  </script>
+    list.innerHTML = `<div style="font-size:11px;color:var(--ink-mute);letter-spacing:1.2px;text-transform:uppercase;font-weight:600;padding:8px 4px">সাম্প্রতিক</div>` +
+      recent.map(u => {
+        const initial = (u.name || "?")[0].toUpperCase();
+        return `
+          <a class="user-item" href="user.html?u=${encodeURIComponent(u.username)}">
+            <div class="user-avatar">${u.photoURL ? `<img src="${u.photoURL}">` : initial}</div>
+            <div class="user-info">
+              <div class="user-name">${escapeHtml(u.name)}</div>
+              <div class="user-handle">@${escapeHtml(u.username)}</div>
+            </div>
+          </a>`;
+      }).join("");
+  }
+
+  renderRecent();
+
+  function escapeHtml(str) {
+    return String(str || "").replace(/[&<>"']/g, m => ({
+      "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+    }[m]));
+  }
+</script>
+
 </body>
 </html>
