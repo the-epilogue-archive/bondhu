@@ -1,253 +1,321 @@
 <!DOCTYPE html>
-<html lang="bn">
+<html lang="bn" data-theme="light">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>বন্ধু - Reels</title>
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: sans-serif;
-      background: #000;
-      color: white;
-      overflow: hidden;
-      height: 100vh;
-    }
-    .reels-container {
-      height: 100vh;
-      overflow-y: scroll;
-      scroll-snap-type: y mandatory;
-      scrollbar-width: none;
-    }
-    .reels-container::-webkit-scrollbar { display: none; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0f1712">
+<title>বন্ধু — রিল</title>
+<link rel="manifest" href="manifest.json">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,500;0,600;0,700;0,800;1,500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/app.css">
+<script src="js/theme.js"></script>
+<style>
+  body{padding-bottom:0;overflow:hidden;height:100vh}
 
-    .reel {
-      height: 100vh;
-      scroll-snap-align: start;
-      position: relative;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: #000;
-    }
-    .reel video {
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
-      background: #000;
-    }
+  .reels-container{
+    position:fixed;
+    inset:0;
+    bottom:72px;
+    overflow-y:scroll;
+    scroll-snap-type:y mandatory;
+    scrollbar-width:none;
+    background:#000;
+  }
+  .reels-container::-webkit-scrollbar{display:none}
 
-    .reel-overlay {
-      position: absolute;
-      bottom: 0; left: 0; right: 0;
-      padding: 20px;
-      background: linear-gradient(transparent, rgba(0,0,0,0.7));
-      display: flex;
-      align-items: flex-end;
-      justify-content: space-between;
-      gap: 12px;
-    }
-    .reel-info { flex: 1; }
-    .reel-user {
-      display: flex; align-items: center; gap: 10px; margin-bottom: 8px;
-    }
-    .reel-avatar {
-      width: 36px; height: 36px; border-radius: 50%;
-      background: linear-gradient(135deg, #feda75, #d62976);
-      display: flex; align-items: center; justify-content: center;
-      color: white; font-weight: bold; font-size: 14px;
-      overflow: hidden;
-    }
-    .reel-avatar img { width: 100%; height: 100%; object-fit: cover; }
-    .reel-username { font-weight: bold; font-size: 14px; }
-    .reel-caption {
-      font-size: 14px; line-height: 1.4;
-      margin-left: 46px; word-break: break-word;
-    }
+  .reel{
+    height:100%;
+    scroll-snap-align:start;
+    position:relative;
+    display:flex;align-items:center;justify-content:center;
+    background:#000;
+    color:#fff;
+  }
+  .reel video{
+    width:100%;height:100%;
+    object-fit:contain;
+    background:#000;
+  }
+  .reel-overlay{
+    position:absolute;inset:0;
+    pointer-events:none;
+    background:linear-gradient(180deg,rgba(0,0,0,.4) 0%,transparent 25%,transparent 60%,rgba(0,0,0,.75) 100%);
+  }
+  .reel-info{
+    position:absolute;
+    bottom:24px;left:16px;right:80px;
+    pointer-events:auto;
+    z-index:3;
+  }
+  .reel-user{
+    display:flex;align-items:center;gap:10px;
+    margin-bottom:10px;
+  }
+  .reel-av{
+    width:40px;height:40px;border-radius:50%;
+    background:var(--accent);
+    display:flex;align-items:center;justify-content:center;
+    font-weight:700;font-size:15px;
+    color:var(--accent-text);
+    overflow:hidden;
+    border:2px solid rgba(255,255,255,.3);
+  }
+  .reel-av img{width:100%;height:100%;object-fit:cover}
+  .reel-username{
+    font-family:'Playfair Display',serif;
+    font-weight:700;font-size:14px;
+    color:#fff;
+    text-shadow:0 1px 3px rgba(0,0,0,.6);
+  }
+  .reel-caption{
+    font-size:13.5px;line-height:1.5;
+    color:#f5f5f5;
+    text-shadow:0 1px 3px rgba(0,0,0,.7);
+    word-break:break-word;
+  }
 
-    .reel-actions {
-      display: flex; flex-direction: column; gap: 16px;
-      align-items: center;
-    }
-    .reel-action-btn {
-      background: none; border: none; color: white;
-      cursor: pointer; display: flex; flex-direction: column;
-      align-items: center; gap: 4px;
-      font-size: 12px;
-    }
-    .reel-action-btn .icon { font-size: 28px; }
-    .reel-action-btn.liked .icon { color: #e1306c; }
+  .reel-actions{
+    position:absolute;
+    right:12px;bottom:24px;
+    display:flex;flex-direction:column;
+    gap:18px;align-items:center;
+    pointer-events:auto;
+    z-index:3;
+  }
+  .reel-btn{
+    background:none;border:none;
+    color:#fff;cursor:pointer;
+    display:flex;flex-direction:column;
+    align-items:center;gap:4px;
+    font-size:11px;font-weight:600;
+    transition:transform .3s cubic-bezier(.34,1.56,.64,1);
+    will-change:transform;
+    text-shadow:0 1px 3px rgba(0,0,0,.6);
+  }
+  .reel-btn:hover{transform:scale(1.15)}
+  .reel-btn:active{transform:scale(.9);transition-duration:.1s}
+  .reel-btn svg{
+    width:30px;height:30px;
+    stroke:#fff;fill:none;stroke-width:1.9;
+    stroke-linecap:round;stroke-linejoin:round;
+    filter:drop-shadow(0 2px 6px rgba(0,0,0,.5));
+  }
+  .reel-btn.liked svg{fill:#e1306c;stroke:#e1306c}
+  .reel-btn.liked{color:#ffb3d1}
 
-    .topbar-overlay {
-      position: absolute; top: 0; left: 0; right: 0;
-      padding: 12px 16px; z-index: 10;
-      display: flex; justify-content: space-between; align-items: center;
-      background: linear-gradient(rgba(0,0,0,0.6), transparent);
-    }
-    .topbar-overlay h1 {
-      font-size: 22px; color: #e1306c; margin: 0;
-    }
-    .topbar-overlay a {
-      color: white; text-decoration: none; font-weight: bold;
-      font-size: 14px; margin-left: 12px;
-      text-shadow: 0 2px 4px rgba(0,0,0,0.6);
-    }
+  .reels-topbar{
+    position:fixed;top:0;left:0;right:0;
+    display:flex;justify-content:space-between;align-items:center;
+    padding:14px 16px;
+    z-index:20;
+    background:linear-gradient(180deg,rgba(0,0,0,.6) 0%,transparent 100%);
+    pointer-events:auto;
+  }
+  .reels-topbar .title{
+    font-family:'Playfair Display',serif;
+    font-size:22px;font-weight:800;
+    color:#fff;letter-spacing:-.5px;
+    text-shadow:0 2px 6px rgba(0,0,0,.5);
+  }
+  .reels-topbar .title em{color:var(--accent-2);font-style:italic;font-weight:500}
+  .reels-topbar .actions{display:flex;gap:8px}
+  .reels-topbar .icon-btn{
+    background:rgba(0,0,0,.35);
+    backdrop-filter:blur(10px);
+    -webkit-backdrop-filter:blur(10px);
+  }
+  .reels-topbar .icon-btn svg{stroke:#fff}
+  .reels-topbar .icon-btn:hover{background:rgba(255,255,255,.2)}
 
-    .empty {
-      display: flex; align-items: center; justify-content: center;
-      height: 100vh; color: #999; font-size: 15px;
-      text-align: center; padding: 40px;
-    }
-    .empty a { color: #e1306c; text-decoration: none; font-weight: bold; margin-left: 6px; }
-  </style>
+  .reels-topbar .theme-toggle{
+    background:rgba(0,0,0,.35);
+    border-color:transparent;
+    backdrop-filter:blur(10px);
+    -webkit-backdrop-filter:blur(10px);
+  }
+  .reels-topbar .theme-toggle svg{stroke:#fff}
+
+  .reels-empty{
+    display:flex;flex-direction:column;
+    align-items:center;justify-content:center;
+    height:100%;gap:16px;
+    color:#999;text-align:center;padding:40px 20px;
+  }
+  .reels-empty svg{
+    width:64px;height:64px;
+    stroke:#666;fill:none;stroke-width:1.3;
+    stroke-linecap:round;stroke-linejoin:round;
+  }
+  .reels-empty a{
+    color:var(--accent-2);
+    font-weight:600;
+    padding:10px 20px;
+    border-radius:24px;
+    background:rgba(124,179,66,.15);
+    border:1px solid rgba(124,179,66,.3);
+    transition:transform .3s cubic-bezier(.34,1.56,.64,1);
+  }
+  .reels-empty a:hover{transform:translateY(-2px)}
+</style>
 </head>
 <body>
-  <div class="topbar-overlay">
-    <h1>Reels</h1>
-    <div>
-      <a href="reel-upload.html">+ Upload</a>
-      <a href="index.html">← Feed</a>
-    </div>
+
+<div class="reels-topbar">
+  <div class="title">রিল<em>.</em></div>
+  <div class="actions">
+    <button class="theme-toggle" onclick="toggleBondhuTheme()" aria-label="Theme">
+      <svg class="icon-moon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      <svg class="icon-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+    </button>
+    <a href="reel-upload.html" class="icon-btn" aria-label="Upload">
+      <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    </a>
+    <a href="index.html" class="icon-btn" aria-label="Home">
+      <svg viewBox="0 0 24 24"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+    </a>
   </div>
+</div>
 
-  <div class="reels-container" id="container">
-    <div class="empty">Loading...</div>
+<div class="reels-container" id="container">
+  <div class="reels-empty">
+    <div class="spinner" style="border-color:rgba(255,255,255,.2);border-top-color:#7cb342"></div>
+    <div>লোড হচ্ছে...</div>
   </div>
+</div>
 
-  <script type="module">
-    import { requireAuth } from "./js/auth.js";
-    import { loadReels, toggleReelLike, deleteReel } from "./js/reels.js";
+<nav class="bottom-nav">
+  <a href="index.html"><svg viewBox="0 0 24 24"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg></a>
+  <a href="search.html"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.35-4.35"/></svg></a>
+  <a href="upload.html"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="5"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg></a>
+  <a href="reels.html" class="active"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="5"/><path d="M9 8v8l6-4z"/></svg></a>
+  <a href="profile.html"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21v-2a4 4 0 0 1 4-4h8a4 4 0 0 1 4 4v2"/></svg></a>
+</nav>
 
-    let currentUser = null;
-    const container = document.getElementById("container");
+<script type="module">
+  import { requireAuth } from "./js/auth.js";
+  import { loadReels, toggleReelLike, deleteReel } from "./js/reels.js";
 
-    requireAuth(async (user) => {
-      currentUser = user;
-      await render();
-      setupIntersectionObserver();
-    });
+  let currentUser = null;
+  const container = document.getElementById("container");
 
-    async function render() {
-      try {
-        const reels = await loadReels();
+  requireAuth(async (user) => {
+    currentUser = user;
+    await render();
+    setupIntersectionObserver();
+  });
 
-        if (reels.length === 0) {
-          container.innerHTML = `
-            <div class="empty">
-              Kono reel nei.
-              <a href="reel-upload.html">First reel banao →</a>
-            </div>`;
-          return;
-        }
-
-        container.innerHTML = reels.map(r => {
-          const isLiked = r.likes?.includes(currentUser.uid);
-          const isMine = r.userId === currentUser.uid;
-          const initial = (r.userName || "?")[0].toUpperCase();
-
-          return `
-            <div class="reel" data-id="${r.id}">
-              <video src="${r.videoUrl}" loop playsinline preload="metadata" muted></video>
-
-              <div class="reel-overlay">
-                <div class="reel-info">
-                  <div class="reel-user">
-                    <div class="reel-avatar">
-                      ${r.userPhoto ? `<img src="${r.userPhoto}">` : initial}
-                    </div>
-                    <div class="reel-username">@${escapeHtml(r.username || "?")}</div>
-                  </div>
-                  ${r.caption ? `<div class="reel-caption">${escapeHtml(r.caption)}</div>` : ""}
-                </div>
-
-                <div class="reel-actions">
-                  <button class="reel-action-btn like-btn ${isLiked ? "liked" : ""}" data-id="${r.id}">
-                    <span class="icon">${isLiked ? "❤️" : "🤍"}</span>
-                    <span class="like-count">${r.likes?.length || 0}</span>
-                  </button>
-                  ${isMine ? `
-                    <button class="reel-action-btn delete-btn" data-id="${r.id}">
-                      <span class="icon">🗑️</span>
-                      <span>Delete</span>
-                    </button>
-                  ` : ""}
-                </div>
-              </div>
-            </div>
-          `;
-        }).join("");
-
-        // Like handler
-        container.querySelectorAll(".like-btn").forEach(btn => {
-          btn.addEventListener("click", async (e) => {
-            e.stopPropagation();
-            const reelId = btn.dataset.id;
-            const reel = reels.find(r => r.id === reelId);
-            btn.disabled = true;
-            try {
-              const nowLiked = await toggleReelLike(reelId, reel.likes || []);
-              btn.classList.toggle("liked", nowLiked);
-              btn.querySelector(".icon").textContent = nowLiked ? "❤️" : "🤍";
-              const prev = reel.likes?.length || 0;
-              btn.querySelector(".like-count").textContent = prev + (nowLiked ? 1 : -1);
-            } catch (e) { alert("Like fail: " + e.message); }
-            btn.disabled = false;
-          });
-        });
-
-        // Delete handler
-        container.querySelectorAll(".delete-btn").forEach(btn => {
-          btn.addEventListener("click", async (e) => {
-            e.stopPropagation();
-            if (!confirm("Ei reel delete korbe?")) return;
-            try {
-              await deleteReel(btn.dataset.id);
-              btn.closest(".reel").remove();
-            } catch (e) { alert("Delete fail: " + e.message); }
-          });
-        });
-
-        // Video click → play/pause toggle
-        container.querySelectorAll("video").forEach(v => {
-          v.addEventListener("click", () => {
-            if (v.paused) v.play();
-            else v.pause();
-          });
-        });
-      } catch (e) {
-        container.innerHTML = `<div class="empty">❌ ${e.message}</div>`;
+  async function render() {
+    try {
+      const reels = await loadReels();
+      if (reels.length === 0) {
+        container.innerHTML = `
+          <div class="reels-empty">
+            <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="5"/><path d="M9 8v8l6-4z"/></svg>
+            <div>এখনো কোনো রিল নেই</div>
+            <a href="reel-upload.html">প্রথম রিল তৈরি করুন</a>
+          </div>`;
+        return;
       }
-    }
 
-    // ==========================================
-    // Auto play/pause with scroll
-    // ==========================================
-    function setupIntersectionObserver() {
-      const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-          const video = entry.target.querySelector("video");
-          if (!video) return;
-          if (entry.isIntersecting) {
-            video.muted = false;
-            video.play().catch(() => {
-              video.muted = true;
-              video.play().catch(() => {});
-            });
-          } else {
-            video.pause();
-            video.currentTime = 0;
-          }
+      container.innerHTML = reels.map(r => {
+        const isLiked = r.likes?.includes(currentUser.uid);
+        const isMine = r.userId === currentUser.uid;
+        const initial = (r.userName || "?")[0].toUpperCase();
+        return `
+          <div class="reel" data-id="${r.id}">
+            <video src="${r.videoUrl}" loop playsinline preload="metadata" muted></video>
+            <div class="reel-overlay"></div>
+
+            <div class="reel-info">
+              <div class="reel-user">
+                <div class="reel-av">${r.userPhoto ? `<img src="${r.userPhoto}">` : initial}</div>
+                <div class="reel-username">@${escapeHtml(r.username || "?")}</div>
+              </div>
+              ${r.caption ? `<div class="reel-caption">${escapeHtml(r.caption)}</div>` : ""}
+            </div>
+
+            <div class="reel-actions">
+              <button class="reel-btn like-btn ${isLiked ? "liked" : ""}" data-id="${r.id}">
+                <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+                <span class="like-count">${r.likes?.length || 0}</span>
+              </button>
+              ${isMine ? `
+                <button class="reel-btn delete-btn" data-id="${r.id}">
+                  <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-2 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg>
+                  <span>মুছুন</span>
+                </button>
+              ` : ""}
+            </div>
+          </div>`;
+      }).join("");
+
+      container.querySelectorAll(".like-btn").forEach(btn => {
+        btn.addEventListener("click", async (e) => {
+          e.stopPropagation();
+          const reelId = btn.dataset.id;
+          const reel = reels.find(r => r.id === reelId);
+          btn.disabled = true;
+          try {
+            const nowLiked = await toggleReelLike(reelId, reel.likes || []);
+            btn.classList.toggle("liked", nowLiked);
+            const prev = reel.likes?.length || 0;
+            btn.querySelector(".like-count").textContent = prev + (nowLiked ? 1 : -1);
+          } catch (err) { console.error(err); }
+          btn.disabled = false;
         });
-      }, { threshold: 0.6 });
+      });
 
-      container.querySelectorAll(".reel").forEach(r => observer.observe(r));
-    }
+      container.querySelectorAll(".delete-btn").forEach(btn => {
+        btn.addEventListener("click", async (e) => {
+          e.stopPropagation();
+          if (!confirm("এই রিলটি মুছে ফেলবেন?")) return;
+          try {
+            await deleteReel(btn.dataset.id);
+            btn.closest(".reel").remove();
+          } catch (err) { alert("Delete fail: " + err.message); }
+        });
+      });
 
-    function escapeHtml(str) {
-      return String(str || "").replace(/[&<>"']/g, m => ({
-        "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
-      }[m]));
+      container.querySelectorAll("video").forEach(v => {
+        v.addEventListener("click", () => {
+          if (v.paused) v.play();
+          else v.pause();
+        });
+      });
+    } catch (e) {
+      container.innerHTML = `<div class="reels-empty">❌ ${e.message}</div>`;
     }
-  </script>
+  }
+
+  function setupIntersectionObserver() {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        const video = entry.target.querySelector("video");
+        if (!video) return;
+        if (entry.isIntersecting) {
+          video.muted = false;
+          video.play().catch(() => {
+            video.muted = true;
+            video.play().catch(() => {});
+          });
+        } else {
+          video.pause();
+          video.currentTime = 0;
+        }
+      });
+    }, { threshold: 0.6 });
+
+    container.querySelectorAll(".reel").forEach(r => observer.observe(r));
+  }
+
+  function escapeHtml(str) {
+    return String(str || "").replace(/[&<>"']/g, m => ({
+      "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+    }[m]));
+  }
+</script>
+
 </body>
 </html>
