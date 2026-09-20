@@ -295,7 +295,12 @@
 
       feed.querySelectorAll(".delete-btn").forEach(btn => {
         btn.addEventListener("click", async () => {
-          if (!confirm("এই পোস্টটি মুছে ফেলবেন?")) return;
+const ok = await showConfirm("এই পোস্টটি মুছে ফেলবেন?", {
+  title: "পোস্ট মুছুন",
+  okText: "মুছুন",
+  cancelText: "বাতিল"
+});
+if (!ok) return;
           try {
             await deletePost(btn.dataset.id);
             btn.closest(".post").remove();
