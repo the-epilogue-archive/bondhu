@@ -1,46 +1,56 @@
 // ==========================================
-// Bondhu - Firebase Authentication
+// Bondhu - Simple Auth (localStorage based)
+// Pore Firebase Auth e upgrade kora jabe
 // ==========================================
 
-import { auth, db } from "./firebase-config.js";
-import {
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
-  signOut,
-  onAuthStateChanged,
-  updateProfile
-} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-import {
-  doc,
-  setDoc,
-  getDoc,
-  serverTimestamp
-} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+const USERS_KEY = "bondhu_users";       // sob user list
+const CURRENT_KEY = "bondhu_current";   // current logged in user
 
 // ==========================================
-// Signup — notun user
+// Helper — sob user list
+// ==========================================
+function getAllUsers() {
+  return JSON.parse(localStorage.getItem(USERS_KEY) || "[]");
+}
+
+function saveAllUsers(users) {
+  localStorage.setItem(USERS_KEY, JSON.stringify(users));
+}
+
+// ==========================================
+// Signup
 // ==========================================
 export async function signup(email, password, displayName, username) {
-  // 1. Auth e user create
-  const cred = await createUserWithEmailAndPassword(auth, email, password);
-  const user = cred.user;
+  const users = getAllUsers();
 
-  // 2. Display name set
-  await updateProfile(user, { displayName });
+  // Email already ache?
+  if (users.find(u => u.email.toLowerCase() === email.toLowerCase())) {
+    throw new Error("Ei email diye account already ache");
+  }
 
-  // 3. Firestore e user doc create
-  await setDoc(doc(db, "users", user.uid), {
-    uid: user.uid,
-    email: email,
+  // Username already ache?
+  if (users.find(u => u.username.toLowerCase() === username.toLowerCase())) {
+    throw new Error("Ei username already neowa");
+  }
+
+  const user = {
+    uid: "local_" + Date.now() + "_" + Math.random().toString(36).slice(2, 8),
+    email: email.toLowerCase(),
+    password: password, // ⚠️ plaintext — only for local testing
     name: displayName,
     username: username.toLowerCase(),
     bio: "",
     photoURL: "",
     followers: [],
     following: [],
-    createdAt: serverTimestamp()
-  });
+    createdAt: Date.now()
+  };
 
+  users.push(user);
+  saveAllUsers(users);
+
+  // Auto login
+  localStorage.setItem(CURRENT_KEY, JSON.stringify(user));
   return user;
 }
 
@@ -48,48 +58,72 @@ export async function signup(email, password, displayName, username) {
 // Login
 // ==========================================
 export async function login(email, password) {
-  const cred = await signInWithEmailAndPassword(auth, email, password);
-  return cred.user;
+  const users = getAllUsers();
+  const user = users.find(u => u.email.toLowerCase() === email.toLowerCase());
+
+  if (!user) throw new Error("Ei email diye account nei");
+  if (user.password !== password) throw new Error("Password bhul");
+
+  localStorage.setItem(CURRENT_KEY, JSON.stringify(user));
+  return user;
 }
 
 // ==========================================
 // Logout
 // ==========================================
 export async function logout() {
-  await signOut(auth);
+  localStorage.removeItem(CURRENT_KEY);
 }
 
 // ==========================================
-// Current user er Firestore data
+// Current user
 // ==========================================
+export function getCurrentUser() {
+  const data = localStorage.getItem(CURRENT_KEY);
+  return data ? JSON.parse(data) : null;
+}
+
 export async function getUserData(uid) {
-  const snap = await getDoc(doc(db, "users", uid));
-  return snap.exists() ? snap.data() : null;
+  const users = getAllUsers();
+  return users.find(u => u.uid === uid) || null;
 }
 
 // ==========================================
-// Auth state change — page protect korar jonno
+// User data update koro (bio, photo etc.)
+// ==========================================
+export function updateUserData(uid, updates) {
+  const users = getAllUsers();
+  const idx = users.findIndex(u => u.uid === uid);
+  if (idx === -1) return null;
+  users[idx] = { ...users[idx], ...updates };
+  saveAllUsers(users);
+  localStorage.setItem(CURRENT_KEY, JSON.stringify(users[idx]));
+  return users[idx];
+}
+
+// ==========================================
+// Page protect — login na korle login.html e
 // ==========================================
 export function requireAuth(callback) {
-  onAuthStateChanged(auth, (user) => {
-    if (!user) {
-      // Login nei — login page e pathao
-      window.location.href = "login.html";
-    } else {
-      callback(user);
-    }
-  });
+  const user = getCurrentUser();
+  if (!user) {
+    window.location.href = "login.html";
+  } else {
+    callback(user);
+  }
 }
 
 // ==========================================
-// Jodi already logged in thake — feed e pathao
+// Already logged in hole index e
 // ==========================================
 export function redirectIfLoggedIn(to = "index.html") {
-  onAuthStateChanged(auth, (user) => {
-    if (user) {
-      window.location.href = to;
-    }
-  });
+  const user = getCurrentUser();
+  if (user) window.location.href = to;
 }
 
-export { auth };
+// ==========================================
+// Sob user (search er jonno)
+// ==========================================
+export function getAllUsersList() {
+  return getAllUsers();
+}
