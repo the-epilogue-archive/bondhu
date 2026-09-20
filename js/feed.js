@@ -128,7 +128,9 @@ export async function searchUsers(term) {
     const u = d.data();
     if ((u.username || "").toLowerCase().includes(t) ||
         (u.name || "").toLowerCase().includes(t)) {
-      arr.push(u);
+      // 🔒 Email strip
+      const { email, ...publicData } = u;
+      arr.push(publicData);
     }
   });
   return arr.slice(0, 20);
