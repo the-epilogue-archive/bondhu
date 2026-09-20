@@ -1,219 +1,243 @@
 <!DOCTYPE html>
-<html lang="bn">
+<html lang="bn" data-theme="light">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>বন্ধু - Story</title>
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: sans-serif;
-      background: #000;
-      color: white;
-      height: 100vh;
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-    }
-    .progress-bar {
-      display: flex; gap: 4px; padding: 10px 12px;
-      position: absolute; top: 0; left: 0; right: 0; z-index: 10;
-    }
-    .progress-segment {
-      flex: 1; height: 3px; background: rgba(255,255,255,0.3);
-      border-radius: 2px; overflow: hidden;
-    }
-    .progress-fill {
-      height: 100%; background: white; width: 0%;
-    }
-    .progress-fill.done { width: 100%; }
-    .progress-fill.active { animation: fill 5s linear forwards; }
-    @keyframes fill { from { width: 0%; } to { width: 100%; } }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#000000">
+<title>বন্ধু — স্টোরি</title>
+<link rel="manifest" href="manifest.json">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,500;0,600;0,700;0,800;1,500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/app.css">
+<script src="js/theme.js"></script>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    background:#000;color:#fff;
+    overflow:hidden;
+    height:100vh;
+    padding-bottom:0;
+    font-family:'Hind Siliguri',system-ui,sans-serif;
+  }
 
-    .header {
-      position: absolute; top: 20px; left: 0; right: 0;
-      padding: 8px 16px; display: flex;
-      align-items: center; gap: 12px; z-index: 10;
-      background: linear-gradient(180deg, rgba(0,0,0,0.6) 0%, transparent 100%);
-    }
-    .avatar {
-      width: 36px; height: 36px; border-radius: 50%;
-      background: linear-gradient(135deg, #feda75, #d62976);
-      display: flex; align-items: center; justify-content: center;
-      color: white; font-weight: bold; font-size: 15px;
-      overflow: hidden; flex-shrink: 0;
-    }
-    .avatar img { width: 100%; height: 100%; object-fit: cover; }
-    .header-info { flex: 1; }
-    .header-info .name { font-weight: bold; font-size: 14px; }
-    .header-info .time { font-size: 11px; opacity: 0.7; }
-    .close-btn {
-      background: none; border: none; color: white;
-      font-size: 28px; cursor: pointer; padding: 0; line-height: 1;
-    }
+  .story-wrap{
+    position:fixed;inset:0;
+    display:flex;align-items:center;justify-content:center;
+  }
 
-    .story-image {
-      flex: 1; display: flex; align-items: center; justify-content: center;
-      position: relative;
-    }
-    .story-image img {
-      max-width: 100%; max-height: 100%;
-      object-fit: contain;
-    }
-    .caption {
-      position: absolute; bottom: 40px; left: 20px; right: 20px;
-      text-align: center; font-size: 16px;
-      text-shadow: 0 2px 8px rgba(0,0,0,0.8);
-      background: rgba(0,0,0,0.4); padding: 10px 16px;
-      border-radius: 20px; word-break: break-word;
-    }
+  .story-stage{
+    position:relative;
+    width:100%;height:100%;
+    max-width:520px;
+    margin:0 auto;
+    background:#000;
+    overflow:hidden;
+  }
 
-    /* Tap zones */
-    .tap-left, .tap-right {
-      position: absolute; top: 0; bottom: 0; width: 30%;
-      z-index: 5; cursor: pointer;
-    }
-    .tap-left { left: 0; }
-    .tap-right { right: 0; }
+  .story-img{
+    position:absolute;inset:0;
+    width:100%;height:100%;
+    object-fit:contain;
+  }
 
-    .loading-screen {
-      display: flex; align-items: center; justify-content: center;
-      height: 100vh; font-size: 16px;
-    }
-  </style>
+  .story-gradient{
+    position:absolute;inset:0;
+    pointer-events:none;
+    background:linear-gradient(180deg,rgba(0,0,0,.65) 0%,transparent 22%,transparent 65%,rgba(0,0,0,.75) 100%);
+  }
+
+  .progress-row{
+    position:absolute;top:12px;left:12px;right:12px;
+    display:flex;gap:4px;z-index:5;
+  }
+  .progress-seg{
+    flex:1;height:3px;
+    background:rgba(255,255,255,.3);
+    border-radius:2px;overflow:hidden;
+  }
+  .progress-fill{
+    height:100%;background:#fff;width:0%;
+  }
+  .progress-fill.done{width:100%}
+  .progress-fill.active{animation:fill 5s linear forwards}
+  @keyframes fill{from{width:0%}to{width:100%}}
+
+  .story-header{
+    position:absolute;top:26px;left:0;right:0;
+    padding:8px 16px;
+    display:flex;align-items:center;gap:12px;
+    z-index:5;
+  }
+  .story-av{
+    width:40px;height:40px;border-radius:50%;
+    background:var(--accent);
+    display:flex;align-items:center;justify-content:center;
+    font-weight:700;font-size:15px;
+    overflow:hidden;
+    border:2px solid rgba(255,255,255,.4);
+    flex-shrink:0;
+  }
+  .story-av img{width:100%;height:100%;object-fit:cover}
+  .story-user{flex:1;min-width:0}
+  .story-name{
+    font-family:'Playfair Display',serif;
+    font-size:14px;font-weight:700;
+    text-shadow:0 1px 3px rgba(0,0,0,.5);
+  }
+  .story-time{
+    font-size:11px;opacity:.75;
+    font-style:italic;
+    font-family:'Playfair Display',serif;
+  }
+  .close-btn{
+    background:rgba(0,0,0,.35);
+    border:none;
+    width:36px;height:36px;
+    border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    cursor:pointer;
+    transition:transform .3s cubic-bezier(.34,1.56,.64,1),background .3s;
+    color:#fff;
+    backdrop-filter:blur(8px);
+    -webkit-backdrop-filter:blur(8px);
+  }
+  .close-btn:hover{background:rgba(255,255,255,.2);transform:scale(1.1) rotate(90deg)}
+  .close-btn svg{
+    width:18px;height:18px;
+    stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;
+  }
+
+  .story-caption{
+    position:absolute;
+    bottom:40px;left:20px;right:20px;
+    text-align:center;
+    font-size:15px;
+    line-height:1.5;
+    text-shadow:0 2px 8px rgba(0,0,0,.8);
+    padding:10px 16px;
+    background:rgba(0,0,0,.4);
+    backdrop-filter:blur(6px);
+    -webkit-backdrop-filter:blur(6px);
+    border-radius:20px;
+    word-break:break-word;
+    z-index:4;
+  }
+
+  .tap-zone{
+    position:absolute;top:0;bottom:0;
+    width:32%;z-index:3;cursor:pointer;
+  }
+  .tap-zone.left{left:0}
+  .tap-zone.right{right:0}
+
+  .story-empty{
+    position:absolute;inset:0;
+    display:flex;flex-direction:column;
+    align-items:center;justify-content:center;
+    color:#999;gap:14px;text-align:center;padding:30px;
+  }
+  .story-empty svg{
+    width:56px;height:56px;
+    stroke:#666;fill:none;stroke-width:1.4;
+    stroke-linecap:round;stroke-linejoin:round;
+  }
+  .story-empty a{
+    color:var(--accent-2);
+    padding:10px 20px;border-radius:24px;
+    background:rgba(124,179,66,.15);
+    border:1px solid rgba(124,179,66,.3);
+    text-decoration:none;font-weight:600;
+  }
+</style>
 </head>
 <body>
-  <div class="progress-bar" id="progressBar"></div>
 
-  <div class="header">
-    <div class="avatar" id="avatar">?</div>
-    <div class="header-info">
-      <div class="name" id="userName">...</div>
-      <div class="time" id="timeAgo"></div>
+<div class="story-wrap">
+  <div class="story-stage" id="stage">
+    <div class="story-empty">
+      <div class="spinner" style="border-color:rgba(255,255,255,.2);border-top-color:#7cb342"></div>
+      <div>লোড হচ্ছে...</div>
     </div>
-    <button class="close-btn" id="closeBtn">✕</button>
   </div>
+</div>
 
-  <div class="story-image" id="storyImage">
-    <div class="loading-screen" id="loading">Loading...</div>
-  </div>
+<script type="module">
+  import { requireAuth } from "./js/auth.js";
+  import { loadActiveStories, markStoryViewed } from "./js/stories.js";
 
-  <div class="tap-left" id="tapLeft"></div>
-  <div class="tap-right" id="tapRight"></div>
+  let allGroups = [];
+  let groupIdx = 0;
+  let storyIdx = 0;
+  let timer = null;
 
-  <script type="module">
-    import { requireAuth } from "./js/auth.js";
-    import { loadActiveStories, markStoryViewed } from "./js/stories.js";
+  const params = new URLSearchParams(window.location.search);
+  const startUsername = params.get("u");
+  const stage = document.getElementById("stage");
 
-    let allGroups = [];       // sob user er story group
-    let currentGroupIdx = 0;  // kon user
-    let currentStoryIdx = 0;  // kon story
-    let timer = null;
-
-    const params = new URLSearchParams(window.location.search);
-    const startUsername = params.get("u");
-
-    const progressBar = document.getElementById("progressBar");
-    const storyImage = document.getElementById("storyImage");
-    const avatar = document.getElementById("avatar");
-    const userName = document.getElementById("userName");
-    const timeAgo = document.getElementById("timeAgo");
-    const loading = document.getElementById("loading");
-
-    requireAuth(async () => {
-      try {
-        allGroups = await loadActiveStories();
-
-        if (allGroups.length === 0) {
-          storyImage.innerHTML = `<div class="loading-screen">Kono story nei</div>`;
-          return;
-        }
-
-        // Jodi ?u=username thake, oi user diye start
-        if (startUsername) {
-          const idx = allGroups.findIndex(g =>
-            (g.username || "").toLowerCase() === startUsername.toLowerCase()
-          );
-          if (idx >= 0) currentGroupIdx = idx;
-        }
-
-        currentStoryIdx = 0;
-        renderStory();
-      } catch (e) {
-        storyImage.innerHTML = `<div class="loading-screen">❌ ${e.message}</div>`;
+  requireAuth(async () => {
+    try {
+      allGroups = await loadActiveStories();
+      if (allGroups.length === 0) {
+        stage.innerHTML = `
+          <div class="story-empty">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+            <div>কোনো স্টোরি নেই</div>
+            <a href="story-upload.html">প্রথম স্টোরি তৈরি করুন</a>
+          </div>`;
+        return;
       }
-    });
 
-    function renderStory() {
-      if (timer) clearTimeout(timer);
-
-      const group = allGroups[currentGroupIdx];
-      const story = group.stories[currentStoryIdx];
-
-      // Progress bar setup
-      progressBar.innerHTML = group.stories.map((_, i) => {
-        if (i < currentStoryIdx) {
-          return `<div class="progress-segment"><div class="progress-fill done"></div></div>`;
-        } else if (i === currentStoryIdx) {
-          return `<div class="progress-segment"><div class="progress-fill active"></div></div>`;
-        } else {
-          return `<div class="progress-segment"><div class="progress-fill"></div></div>`;
-        }
-      }).join("");
-
-      // Header
-      const initial = (group.userName || "?")[0].toUpperCase();
-      avatar.innerHTML = group.userPhoto ? `<img src="${group.userPhoto}">` : initial;
-      userName.textContent = group.userName;
-
-      // Time ago
-      const created = story.createdAt?.seconds ? story.createdAt.seconds * 1000 : Date.now();
-      timeAgo.textContent = timeAgoCalc(created);
-
-      // Story image
-      storyImage.innerHTML = `
-        <img src="${story.imageUrl}" alt="story">
-        ${story.caption ? `<div class="caption">${escapeHtml(story.caption)}</div>` : ""}
-      `;
-
-      // View mark
-      markStoryViewed(story.id).catch(() => {});
-
-      // Auto advance — 5 sec
-      timer = setTimeout(nextStory, 5000);
-    }
-
-    function nextStory() {
-      const group = allGroups[currentGroupIdx];
-      if (currentStoryIdx < group.stories.length - 1) {
-        currentStoryIdx++;
-        renderStory();
-      } else {
-        // Next user
-        if (currentGroupIdx < allGroups.length - 1) {
-          currentGroupIdx++;
-          currentStoryIdx = 0;
-          renderStory();
-        } else {
-          // Sesh — feed e ফিরে jao
-          window.location.href = "index.html";
-        }
+      if (startUsername) {
+        const idx = allGroups.findIndex(g =>
+          (g.username || "").toLowerCase() === startUsername.toLowerCase()
+        );
+        if (idx >= 0) groupIdx = idx;
       }
-    }
 
-    function prevStory() {
-      if (currentStoryIdx > 0) {
-        currentStoryIdx--;
-        renderStory();
-      } else {
-        // Previous user
-        if (currentGroupIdx > 0) {
-          currentGroupIdx--;
-          currentStoryIdx = 0;
-          renderStory();
-        }
-      }
+      storyIdx = 0;
+      render();
+    } catch (e) {
+      stage.innerHTML = `<div class="story-empty">❌ ${e.message}</div>`;
     }
+  });
+
+  function render() {
+    if (timer) clearTimeout(timer);
+
+    const group = allGroups[groupIdx];
+    const story = group.stories[storyIdx];
+
+    stage.innerHTML = `
+      <img class="story-img" src="${story.imageUrl}" alt="story">
+      <div class="story-gradient"></div>
+
+      <div class="progress-row">
+        ${group.stories.map((_, i) => {
+          if (i < storyIdx) return `<div class="progress-seg"><div class="progress-fill done"></div></div>`;
+          if (i === storyIdx) return `<div class="progress-seg"><div class="progress-fill active"></div></div>`;
+          return `<div class="progress-seg"><div class="progress-fill"></div></div>`;
+        }).join("")}
+      </div>
+
+      <div class="story-header">
+        <div class="story-av">${group.userPhoto ? `<img src="${group.userPhoto}">` : (group.userName || "?")[0].toUpperCase()}</div>
+        <div class="story-user">
+          <div class="story-name">${escapeHtml(group.userName)}</div>
+          <div class="story-time">${timeAgo(story.createdAt?.seconds ? story.createdAt.seconds * 1000 : Date.now())}</div>
+        </div>
+        <button class="close-btn" id="closeBtn">
+          <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+
+      ${story.caption ? `<div class="story-caption">${escapeHtml(story.caption)}</div>` : ""}
+
+      <div class="tap-zone left" id="tapLeft"></div>
+      <div class="tap-zone right" id="tapRight"></div>
+    `;
+
+    markStoryViewed(story.id).catch(() => {});
 
     document.getElementById("tapRight").addEventListener("click", nextStory);
     document.getElementById("tapLeft").addEventListener("click", prevStory);
@@ -221,19 +245,42 @@
       window.location.href = "index.html";
     });
 
-    function timeAgoCalc(t) {
-      const diff = Math.floor((Date.now() - t) / 1000);
-      if (diff < 60) return `${diff}s`;
-      if (diff < 3600) return `${Math.floor(diff / 60)}m`;
-      if (diff < 86400) return `${Math.floor(diff / 3600)}h`;
-      return `${Math.floor(diff / 86400)}d`;
-    }
+    timer = setTimeout(nextStory, 5000);
+  }
 
-    function escapeHtml(str) {
-      return String(str || "").replace(/[&<>"']/g, m => ({
-        "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
-      }[m]));
+  function nextStory() {
+    const group = allGroups[groupIdx];
+    if (storyIdx < group.stories.length - 1) {
+      storyIdx++;
+      render();
+    } else if (groupIdx < allGroups.length - 1) {
+      groupIdx++; storyIdx = 0; render();
+    } else {
+      window.location.href = "index.html";
     }
-  </script>
+  }
+
+  function prevStory() {
+    if (storyIdx > 0) { storyIdx--; render(); }
+    else if (groupIdx > 0) {
+      groupIdx--; storyIdx = 0; render();
+    }
+  }
+
+  function timeAgo(t) {
+    const d = Math.floor((Date.now() - t) / 1000);
+    if (d < 60) return `${d} সেকেন্ড`;
+    if (d < 3600) return `${Math.floor(d / 60)} মিনিট`;
+    if (d < 86400) return `${Math.floor(d / 3600)} ঘণ্টা`;
+    return `${Math.floor(d / 86400)} দিন`;
+  }
+
+  function escapeHtml(str) {
+    return String(str || "").replace(/[&<>"']/g, m => ({
+      "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+    }[m]));
+  }
+</script>
+
 </body>
 </html>
