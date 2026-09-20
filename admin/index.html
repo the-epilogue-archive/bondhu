@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="bn" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#f5f0e2">
+<title>বন্ধু — অ্যাডমিন প্রবেশ</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,500;0,600;0,700;0,800;1,500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/app.css">
+<link rel="stylesheet" href="css/admin.css">
+<script src="../js/theme.js"></script>
+</head>
+<body class="admin">
+
+<div class="admin-login-page">
+  <div class="admin-login-card">
+
+    <!-- Floating theme toggle -->
+    <button class="theme-toggle" onclick="toggleBondhuTheme()" aria-label="Theme"
+      style="position:absolute;top:14px;right:14px">
+      <svg class="icon-moon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      <svg class="icon-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+    </button>
+
+    <div class="admin-login-badge">Restricted Area</div>
+    <div class="admin-login-logo">বন্ধু<em>.</em></div>
+    <div class="admin-login-sub">— অ্যাডমিন প্যানেল —</div>
+
+    <!-- STEP 1: Google sign in -->
+    <div class="admin-step active" id="step1">
+      <button class="admin-google-btn" id="googleBtn" type="button">
+        <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+          <path fill="#FFC107" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24c0,11.045,8.955,20,20,20c11.045,0,20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z"/>
+          <path fill="#FF3D00" d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z"/>
+          <path fill="#4CAF50" d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36c-5.202,0-9.619-3.317-11.283-7.946l-6.522,5.025C9.505,39.556,16.227,44,24,44z"/>
+          <path fill="#1976D2" d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.571c0.001-0.001,0.002-0.001,0.003-0.002l6.19,5.238C36.971,39.205,44,34,44,24C44,22.659,43.862,21.35,43.611,20.083z"/>
+        </svg>
+        Google দিয়ে প্রবেশ করুন
+      </button>
+
+      <div class="admin-alert error" id="step1Error"></div>
+    </div>
+
+    <!-- STEP 2: PIN -->
+    <div class="admin-step" id="step2">
+      <div class="admin-user-info">
+        <div class="admin-user-av" id="userAv">?</div>
+        <div style="min-width:0;flex:1">
+          <div class="admin-user-name" id="userName">—</div>
+          <div class="admin-user-email" id="userEmail">—</div>
+        </div>
+        <button class="admin-user-change" id="changeUserBtn" type="button">পরিবর্তন</button>
+      </div>
+
+      <div style="text-align:center;font-size:12.5px;color:var(--ink-mute);margin-bottom:4px;font-style:italic;font-family:'Playfair Display',serif">
+        অ্যাডমিন PIN দিন
+      </div>
+
+      <div class="pin-inputs" id="pinInputs">
+        <input class="pin-input" type="password" inputmode="numeric" maxlength="1" data-idx="0" autocomplete="off">
+        <input class="pin-input" type="password" inputmode="numeric" maxlength="1" data-idx="1" autocomplete="off">
+        <input class="pin-input" type="password" inputmode="numeric" maxlength="1" data-idx="2" autocomplete="off">
+        <input class="pin-input" type="password" inputmode="numeric" maxlength="1" data-idx="3" autocomplete="off">
+      </div>
+
+      <div class="admin-alert error" id="step2Error"></div>
+    </div>
+
+  </div>
+</div>
+
+<script type="module">
+  import {
+    signInAdmin, handleAdminRedirect, signOutAdmin,
+    isAdminEmail, verifyPIN, createSession
+  } from "./js/admin-auth.js";
+
+  const step1 = document.getElementById("step1");
+  const step2 = document.getElementById("step2");
+  const googleBtn = document.getElementById("googleBtn");
+  const step1Error = document.getElementById("step1Error");
+  const step2Error = document.getElementById("step2Error");
+  const userAv = document.getElementById("userAv");
+  const userName = document.getElementById("userName");
+  const userEmail = document.getElementById("userEmail");
+  const changeUserBtn = document.getElementById("changeUserBtn");
+  const pinInputs = document.querySelectorAll(".pin-input");
+
+  let currentUser = null;
+
+  // ==========================================
+  // 1. Check redirect result
+  // ==========================================
+  (async () => {
+    const u = await handleAdminRedirect();
+    if (u) handleUser(u);
+  })();
+
+  // ==========================================
+  // 2. Google button
+  // ==========================================
+  googleBtn.addEventListener("click", async () => {
+    googleBtn.disabled = true;
+    const original = googleBtn.innerHTML;
+    googleBtn.innerHTML = `
+      <span style="width:16px;height:16px;border:2px solid currentColor;border-top-color:transparent;border-radius:50%;animation:spin .8s linear infinite"></span>
+      সংযুক্ত হচ্ছে...
+    `;
+    step1Error.classList.remove("show");
+
+    try {
+      const result = await signInAdmin();
+      if (result.redirect) return;
+      if (result.user) handleUser(result.user);
+    } catch (e) {
+      showError(step1Error, prettyError(e));
+      googleBtn.disabled = false;
+      googleBtn.innerHTML = original;
+    }
+  });
+
+  // ==========================================
+  // 3. Handle logged-in user
+  // ==========================================
+  function handleUser(user) {
+    if (!isAdminEmail(user.email)) {
+      showError(step1Error, "এই ইমেইল দিয়ে অ্যাডমিন প্রবেশ অনুমোদিত নয়।");
+      setTimeout(async () => {
+        await signOutAdmin();
+        googleBtn.disabled = false;
+      }, 2500);
+      return;
+    }
+
+    currentUser = user;
+    step1.classList.remove("active");
+    step2.classList.add("active");
+
+    const initial = (user.displayName || "A")[0].toUpperCase();
+    userAv.innerHTML = user.photoURL ? `<img src="${user.photoURL}">` : initial;
+    userName.textContent = user.displayName || "Admin";
+    userEmail.textContent = user.email;
+
+    setTimeout(() => pinInputs[0].focus(), 250);
+  }
+
+  // ==========================================
+  // 4. Change user
+  // ==========================================
+  changeUserBtn.addEventListener("click", async () => {
+    await signOutAdmin();
+    location.reload();
+  });
+
+  // ==========================================
+  // 5. PIN input handling
+  // ==========================================
+  pinInputs.forEach((inp, idx) => {
+    inp.addEventListener("input", (e) => {
+      const v = e.target.value.replace(/\D/g, "");
+      e.target.value = v.slice(-1);
+      e.target.classList.toggle("filled", !!e.target.value);
+
+      if (e.target.value && idx < pinInputs.length - 1) {
+        pinInputs[idx + 1].focus();
+      }
+      if (getPIN().length === 4) verify();
+    });
+
+    inp.addEventListener("keydown", (e) => {
+      if (e.key === "Backspace" && !e.target.value && idx > 0) {
+        pinInputs[idx - 1].focus();
+        pinInputs[idx - 1].value = "";
+        pinInputs[idx - 1].classList.remove("filled");
+      }
+    });
+
+    inp.addEventListener("paste", (e) => {
+      e.preventDefault();
+      const txt = (e.clipboardData || window.clipboardData).getData("text").replace(/\D/g, "").slice(0, 4);
+      [...txt].forEach((ch, i) => {
+        if (pinInputs[i]) {
+          pinInputs[i].value = ch;
+          pinInputs[i].classList.add("filled");
+        }
+      });
+      if (txt.length === 4) verify();
+      else if (pinInputs[txt.length]) pinInputs[txt.length].focus();
+    });
+  });
+
+  function getPIN() {
+    return [...pinInputs].map(i => i.value).join("");
+  }
+
+  function clearPIN() {
+    pinInputs.forEach(i => {
+      i.value = "";
+      i.classList.remove("filled", "error");
+    });
+    pinInputs[0].focus();
+  }
+
+  // ==========================================
+  // 6. Verify PIN
+  // ==========================================
+  function verify() {
+    const pin = getPIN();
+    step2Error.classList.remove("show");
+
+    if (verifyPIN(pin)) {
+      pinInputs.forEach(i => i.style.borderColor = "var(--accent)");
+      createSession(currentUser);
+      setTimeout(() => window.location.href = "dashboard.html", 350);
+    } else {
+      pinInputs.forEach(i => i.classList.add("error"));
+      showError(step2Error, "ভুল PIN — আবার চেষ্টা করুন");
+      setTimeout(() => clearPIN(), 600);
+    }
+  }
+
+  // ==========================================
+  // Helpers
+  // ==========================================
+  function showError(el, msg) {
+    el.textContent = msg;
+    el.classList.add("show");
+  }
+
+  function prettyError(e) {
+    const code = e.code || "";
+    const map = {
+      "auth/popup-closed-by-user": "প্রবেশ বাতিল",
+      "auth/popup-blocked": "পপআপ আটকে গেছে",
+      "auth/cancelled-popup-request": "আবার চেষ্টা করুন",
+      "auth/network-request-failed": "নেটওয়ার্ক সমস্যা",
+      "auth/unauthorized-domain": "ডোমেইন অনুমোদিত নয়"
+    };
+    return map[code] || (e.message || "প্রবেশ ব্যর্থ");
+  }
+</script>
+
+<style>
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+
+</body>
+</html>
