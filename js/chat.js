@@ -82,7 +82,7 @@ export async function sendMessage(chatId, text) {
 // ==========================================
 // Voice message — Cloudinary
 // ==========================================
-const CLOUDINARY_CLOUD_NAME = "TOMAR_CLOUD_NAME";
+const CLOUDINARY_CLOUD_NAME = "kmquukhi";
 const CLOUDINARY_VOICE_PRESET = "bondhu_reels";
 
 export async function sendVoiceMessage(chatId, blob, onProgress) {
