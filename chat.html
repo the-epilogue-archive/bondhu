@@ -1,1 +1,314 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>বন্ধু - Chat</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { font-family: sans-serif; background: #fafafa; margin: 0; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
 
+    .topbar {
+      background: white; padding: 12px 16px;
+      display: flex; justify-content: space-between; align-items: center;
+      border-bottom: 1px solid #eee; flex-shrink: 0;
+    }
+    .topbar h1 { color: #e1306c; margin: 0; font-size: 22px; }
+    .topbar a { color: #e1306c; text-decoration: none; font-weight: bold; font-size: 14px; margin-left: 12px; }
+
+    .layout { flex: 1; display: flex; overflow: hidden; max-width: 700px; margin: 0 auto; width: 100%; }
+
+    /* Chat list sidebar */
+    .sidebar {
+      width: 100%; overflow-y: auto; border-right: 1px solid #eee; background: white;
+    }
+    .sidebar.hidden { display: none; }
+
+    .chat-item {
+      display: flex; gap: 12px; padding: 14px 16px;
+      cursor: pointer; align-items: center;
+      border-bottom: 1px solid #f5f5f5;
+      transition: background 0.15s;
+    }
+    .chat-item:hover { background: #fafafa; }
+    .chat-item.active { background: #fff0f5; }
+
+    .avatar {
+      width: 48px; height: 48px; border-radius: 50%;
+      background: linear-gradient(135deg, #feda75, #d62976);
+      display: flex; align-items: center; justify-content: center;
+      color: white; font-weight: bold; font-size: 20px;
+      overflow: hidden; flex-shrink: 0;
+    }
+    .avatar img { width: 100%; height: 100%; object-fit: cover; }
+
+    .chat-info { flex: 1; min-width: 0; }
+    .chat-info .name { font-weight: bold; font-size: 15px; }
+    .chat-info .last-msg { color: #888; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px; }
+
+    /* Conversation */
+    .conversation {
+      flex: 1; display: flex; flex-direction: column;
+      background: #fafafa;
+    }
+    .conversation.hidden { display: none; }
+
+    .conv-header {
+      padding: 10px 16px; background: white; border-bottom: 1px solid #eee;
+      display: flex; align-items: center; gap: 12px; flex-shrink: 0;
+    }
+    .conv-header .back-btn {
+      background: none; border: none; font-size: 22px;
+      cursor: pointer; padding: 0; color: #e1306c;
+    }
+    .conv-header .avatar { width: 36px; height: 36px; font-size: 16px; }
+    .conv-header .name { font-weight: bold; font-size: 15px; }
+
+    .messages {
+      flex: 1; overflow-y: auto; padding: 16px;
+      display: flex; flex-direction: column; gap: 8px;
+    }
+
+    .msg {
+      max-width: 75%; padding: 10px 14px;
+      border-radius: 18px; font-size: 14px;
+      word-break: break-word; line-height: 1.4;
+    }
+    .msg.me {
+      align-self: flex-end;
+      background: #e1306c; color: white;
+      border-bottom-right-radius: 4px;
+    }
+    .msg.them {
+      align-self: flex-start;
+      background: white; color: #333;
+      border-bottom-left-radius: 4px;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.08);
+    }
+
+    .input-bar {
+      padding: 10px 12px; background: white; border-top: 1px solid #eee;
+      display: flex; gap: 8px; flex-shrink: 0;
+    }
+    .input-bar input {
+      flex: 1; padding: 12px 14px; border: 1px solid #ddd;
+      border-radius: 24px; font-size: 15px; outline: none;
+    }
+    .input-bar input:focus { border-color: #e1306c; }
+    .input-bar button {
+      background: #e1306c; color: white; border: none;
+      padding: 0 20px; border-radius: 24px; font-size: 15px;
+      font-weight: bold; cursor: pointer;
+    }
+    .input-bar button:disabled { background: #ccc; }
+
+    .empty {
+      text-align: center; color: #999; padding: 60px 20px;
+      font-size: 14px;
+    }
+    .empty a { color: #e1306c; text-decoration: none; font-weight: bold; }
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <h1>Chat</h1>
+    <a href="index.html">← Feed</a>
+  </div>
+
+  <div class="layout">
+    <!-- Chat list -->
+    <div class="sidebar" id="sidebar">
+      <div class="empty" id="listEmpty">Loading...</div>
+    </div>
+
+    <!-- Conversation -->
+    <div class="conversation hidden" id="conversation">
+      <div class="conv-header">
+        <button class="back-btn" id="backBtn">←</button>
+        <div class="avatar" id="convAvatar">?</div>
+        <div class="name" id="convName">...</div>
+      </div>
+      <div class="messages" id="messages"></div>
+      <div class="input-bar">
+        <input type="text" id="msgInput" placeholder="Message likho..." autocomplete="off">
+        <button id="sendBtn">Send</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { requireAuth } from "./js/auth.js";
+    import {
+      getOrCreateChat, sendMessage, listenMessages,
+      listenMyChats, getOtherMember
+    } from "./js/chat.js";
+
+    let currentUser = null;
+    let activeChatId = null;
+    let unsubMessages = null;
+    let unsubChats = null;
+
+    const sidebar = document.getElementById("sidebar");
+    const conversation = document.getElementById("conversation");
+    const listEmpty = document.getElementById("listEmpty");
+    const messages = document.getElementById("messages");
+    const msgInput = document.getElementById("msgInput");
+    const sendBtn = document.getElementById("sendBtn");
+    const convAvatar = document.getElementById("convAvatar");
+    const convName = document.getElementById("convName");
+
+    requireAuth(async (user) => {
+      currentUser = user;
+
+      // URL e ?to=username thakle direct chat kholo
+      const params = new URLSearchParams(window.location.search);
+      const toUsername = params.get("to");
+
+      // Chat list realtime
+      unsubChats = listenMyChats((chats) => {
+        renderChatList(chats);
+      });
+
+      if (toUsername) {
+        await openChatWithUsername(toUsername);
+      }
+    });
+
+    // ==========================================
+    // Chat list render
+    // ==========================================
+    function renderChatList(chats) {
+      if (chats.length === 0) {
+        listEmpty.innerHTML = `Kono chat nei. <br><br>Feed e giye <a href="search.html">🔍 search</a> kore karo shathe chat shuru koro.`;
+        listEmpty.style.display = "block";
+        // Purono chat item gulo clear koro
+        sidebar.querySelectorAll(".chat-item").forEach(el => el.remove());
+        return;
+      }
+
+      listEmpty.style.display = "none";
+      sidebar.querySelectorAll(".chat-item").forEach(el => el.remove());
+
+      chats.forEach(chat => {
+        const other = getOtherMember(chat, currentUser.uid);
+        const initial = (other.name || "?")[0].toUpperCase();
+        const isActive = chat.id === activeChatId;
+
+        const div = document.createElement("div");
+        div.className = "chat-item" + (isActive ? " active" : "");
+        div.dataset.chatId = chat.id;
+        div.innerHTML = `
+          <div class="avatar">${other.photoURL ? `<img src="${other.photoURL}">` : initial}</div>
+          <div class="chat-info">
+            <div class="name">${escapeHtml(other.name)}</div>
+            <div class="last-msg">${escapeHtml(chat.lastMessage || "Chat shuru koro")}</div>
+          </div>
+        `;
+        div.addEventListener("click", () => openChatById(chat.id, other));
+        sidebar.appendChild(div);
+      });
+    }
+
+    // ==========================================
+    // Chat open
+    // ==========================================
+    async function openChatById(chatId, otherUser) {
+      activeChatId = chatId;
+      sidebar.classList.add("hidden");
+      conversation.classList.remove("hidden");
+
+      const initial = (otherUser.name || "?")[0].toUpperCase();
+      convAvatar.innerHTML = otherUser.photoURL
+        ? `<img src="${otherUser.photoURL}">` : initial;
+      convName.textContent = otherUser.name;
+
+      // Purono listener bondho
+      if (unsubMessages) unsubMessages();
+
+      // Notun listener
+      unsubMessages = listenMessages(chatId, (msgs) => {
+        renderMessages(msgs);
+      });
+
+      msgInput.focus();
+    }
+
+    async function openChatWithUsername(username) {
+      try {
+        // Sob user list theke khুঁjo
+        const { getAllUsersList } = await import("./js/auth.js");
+        const all = await getAllUsersList();
+        const target = all.find(u =>
+          (u.username || "").toLowerCase() === username.toLowerCase()
+        );
+        if (!target) {
+          alert("User pawa jay ni");
+          return;
+        }
+        const chatId = await getOrCreateChat(target);
+        await openChatById(chatId, target);
+      } catch (e) {
+        alert("Chat open fail: " + e.message);
+      }
+    }
+
+    // ==========================================
+    // Messages render
+    // ==========================================
+    function renderMessages(msgs) {
+      if (msgs.length === 0) {
+        messages.innerHTML = `<div style="text-align:center;color:#999;font-size:13px;padding:20px;">
+          Chat shuru koro 👋
+        </div>`;
+        return;
+      }
+
+      messages.innerHTML = msgs.map(m => {
+        const isMe = m.from === currentUser.uid;
+        return `<div class="msg ${isMe ? "me" : "them"}">${escapeHtml(m.text)}</div>`;
+      }).join("");
+
+      // Auto scroll to bottom
+      messages.scrollTop = messages.scrollHeight;
+    }
+
+    // ==========================================
+    // Send message
+    // ==========================================
+    async function doSend() {
+      const text = msgInput.value.trim();
+      if (!text || !activeChatId) return;
+
+      sendBtn.disabled = true;
+      msgInput.value = "";
+      try {
+        await sendMessage(activeChatId, text);
+      } catch (e) {
+        alert("Send fail: " + e.message);
+        msgInput.value = text;
+      }
+      sendBtn.disabled = false;
+      msgInput.focus();
+    }
+
+    sendBtn.addEventListener("click", doSend);
+    msgInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") doSend();
+    });
+
+    // Back button
+    document.getElementById("backBtn").addEventListener("click", () => {
+      activeChatId = null;
+      if (unsubMessages) { unsubMessages(); unsubMessages = null; }
+      conversation.classList.add("hidden");
+      sidebar.classList.remove("hidden");
+    });
+
+    function escapeHtml(str) {
+      return String(str || "").replace(/[&<>"']/g, m => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+      }[m]));
+    }
+  </script>
+</body>
+</html>
