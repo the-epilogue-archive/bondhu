@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="bn" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#f5f0e2">
+<title>বন্ধু — অ্যাডমিন ড্যাশবোর্ড</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,500;0,600;0,700;0,800;1,500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/app.css">
+<link rel="stylesheet" href="css/admin.css">
+<script src="../js/theme.js"></script>
+<script src="js/admin-config.js"></script>
+</head>
+<body class="admin">
+
+<div class="admin-shell">
+  <aside id="adminSidebar"></aside>
+
+  <div class="admin-main">
+
+    <header class="admin-topbar" id="adminTopbar">
+      <div class="admin-topbar-brand">
+        ড্যাশবোর্ড
+        <span class="admin-badge">Live</span>
+      </div>
+      <div class="admin-topbar-actions">
+        <button class="theme-toggle" onclick="toggleBondhuTheme()" aria-label="Theme">
+          <svg class="icon-moon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+          <svg class="icon-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <div class="admin-page">
+
+      <div class="admin-page-head">
+        <div>
+          <div class="admin-page-title">সারসংক্ষেপ</div>
+          <div class="admin-page-sub" id="greeting">— লোড হচ্ছে —</div>
+        </div>
+      </div>
+
+      <!-- Stats Grid -->
+      <div class="admin-cards" id="statsGrid">
+        <div class="admin-card">
+          <div class="admin-card-label">মোট ব্যবহারকারী</div>
+          <div class="admin-card-value accent" id="statUsers">
+            <span class="spinner" style="width:18px;height:18px;border-width:2px;display:inline-block;vertical-align:middle"></span>
+          </div>
+        </div>
+        <div class="admin-card">
+          <div class="admin-card-label">মোট পোস্ট</div>
+          <div class="admin-card-value" id="statPosts">—</div>
+        </div>
+        <div class="admin-card">
+          <div class="admin-card-label">মোট রিল</div>
+          <div class="admin-card-value" id="statReels">—</div>
+        </div>
+        <div class="admin-card">
+          <div class="admin-card-label">সক্রিয় স্টোরি</div>
+          <div class="admin-card-value" id="statStories">—</div>
+        </div>
+      </div>
+
+      <!-- Recent Users -->
+      <div style="margin-top:24px">
+        <div class="admin-page-head" style="margin-bottom:14px">
+          <div>
+            <div style="font-family:'Playfair Display',serif;font-size:18px;font-weight:700;color:var(--ink);letter-spacing:-.3px">সাম্প্রতিক ব্যবহারকারী</div>
+          </div>
+          <a href="users.html" class="admin-btn admin-btn-ghost admin-btn-sm">
+            সব দেখুন
+            <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+          </a>
+        </div>
+        <div class="admin-table-wrap" id="recentUsersWrap">
+          <div class="admin-empty">
+            <div class="spinner" style="margin:0 auto 12px;border-color:var(--rule);border-top-color:var(--accent)"></div>
+            লোড হচ্ছে...
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent Posts -->
+      <div style="margin-top:24px">
+        <div class="admin-page-head" style="margin-bottom:14px">
+          <div>
+            <div style="font-family:'Playfair Display',serif;font-size:18px;font-weight:700;color:var(--ink);letter-spacing:-.3px">সাম্প্রতিক পোস্ট</div>
+          </div>
+          <a href="posts.html" class="admin-btn admin-btn-ghost admin-btn-sm">
+            সব দেখুন
+            <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+          </a>
+        </div>
+        <div class="admin-table-wrap" id="recentPostsWrap">
+          <div class="admin-empty">
+            <div class="spinner" style="margin:0 auto 12px;border-color:var(--rule);border-top-color:var(--accent)"></div>
+            লোড হচ্ছে...
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script type="module">
+  import { requireAdmin } from "./js/admin-auth.js";
+  import { getStats, getRecentUsers, getRecentPosts } from "./js/admin-data.js";
+  import "./js/admin-sidebar.js";
+
+  // ==========================================
+  // Auth check
+  // ==========================================
+  requireAdmin((user) => {
+    const h = new Date().getHours();
+    let greeting = "শুভ সন্ধ্যা";
+    if (h < 12) greeting = "শুভ সকাল";
+    else if (h < 17) greeting = "শুভ অপরাহ্ন";
+    else if (h < 21) greeting = "শুভ সন্ধ্যা";
+    else greeting = "শুভ রাত্রি";
+    document.getElementById("greeting").textContent = `${greeting}, ${user.displayName || user.email}`;
+
+    loadAll();
+  });
+
+  async function loadAll() {
+    loadStats();
+    loadRecentUsers();
+    loadRecentPosts();
+  }
+
+  // ==========================================
+  // Stats
+  // ==========================================
+  async function loadStats() {
+    try {
+      const s = await getStats();
+      setStat("statUsers", s.users);
+      setStat("statPosts", s.posts);
+      setStat("statReels", s.reels);
+      setStat("statStories", s.stories);
+    } catch (e) {
+      console.error("Stats fail:", e);
+    }
+  }
+
+  function setStat(id, n) {
+    const el = document.getElementById(id);
+    if (el) el.textContent = bnNum(n);
+  }
+
+  // ==========================================
+  // Recent Users
+  // ==========================================
+  async function loadRecentUsers() {
+    const wrap = document.getElementById("recentUsersWrap");
+    try {
+      const users = await getRecentUsers(5);
+      if (users.length === 0) {
+        wrap.innerHTML = emptyState("কোনো ব্যবহারকারী নেই");
+        return;
+      }
+      wrap.innerHTML = `
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>ব্যবহারকারী</th>
+              <th>ইউজারনেম</th>
+              <th>যোগদান</th>
+              <th style="text-align:right">কর্ম</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${users.map(u => `
+              <tr>
+                <td>
+                  <div class="user-cell">
+                    <div class="avatar-sm">${u.photoURL ? `<img src="${u.photoURL}">` : (u.name || "?")[0].toUpperCase()}</div>
+                    <div style="min-width:0">
+                      <div style="font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escapeHtml(u.name || "—")}</div>
+                    </div>
+                  </div>
+                </td>
+                <td><span style="font-family:'Playfair Display',serif;font-style:italic;color:var(--ink-mute)">@${escapeHtml(u.username || "—")}</span></td>
+                <td>${u.createdAt?.seconds ? timeAgo(u.createdAt.seconds * 1000) : "—"}</td>
+                <td style="text-align:right">
+                  <a href="user-view.html?uid=${u.uid}" class="admin-btn admin-btn-ghost admin-btn-sm">
+                    দেখুন
+                  </a>
+                </td>
+              </tr>
+            `).join("")}
+          </tbody>
+        </table>
+      `;
+    } catch (e) {
+      wrap.innerHTML = emptyState("লোড ব্যর্থ: " + e.message);
+    }
+  }
+
+  // ==========================================
+  // Recent Posts
+  // ==========================================
+  async function loadRecentPosts() {
+    const wrap = document.getElementById("recentPostsWrap");
+    try {
+      const posts = await getRecentPosts(5);
+      if (posts.length === 0) {
+        wrap.innerHTML = emptyState("কোনো পোস্ট নেই");
+        return;
+      }
+      wrap.innerHTML = `
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th style="width:60px">ছবি</th>
+              <th>লেখক</th>
+              <th>ক্যাপশন</th>
+              <th>লাইক</th>
+              <th>সময়</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${posts.map(p => `
+              <tr>
+                <td>
+                  <div style="width:44px;height:44px;border-radius:8px;overflow:hidden;background:var(--paper-2);border:1px solid var(--rule)">
+                    <img src="${p.imageUrl}" alt="" style="width:100%;height:100%;object-fit:cover" loading="lazy">
+                  </div>
+                </td>
+                <td><span style="font-family:'Playfair Display',serif;font-style:italic;color:var(--ink-mute)">@${escapeHtml(p.username || "—")}</span></td>
+                <td style="max-width:280px">
+                  <div style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--ink-soft)">${escapeHtml(p.caption || "—")}</div>
+                </td>
+                <td>${p.likes?.length || 0}</td>
+                <td>${p.createdAt?.seconds ? timeAgo(p.createdAt.seconds * 1000) : "—"}</td>
+              </tr>
+            `).join("")}
+          </tbody>
+        </table>
+      `;
+    } catch (e) {
+      wrap.innerHTML = emptyState("লোড ব্যর্থ: " + e.message);
+    }
+  }
+
+  // ==========================================
+  // Helpers
+  // ==========================================
+  function bnNum(n) {
+    const en = "0123456789";
+    const bn = "০১২৩৪৫৬৭৮৯";
+    return String(n).replace(/[0-9]/g, d => bn[en.indexOf(d)]);
+  }
+
+  function timeAgo(t) {
+    const diff = Math.floor((Date.now() - t) / 1000);
+    if (diff < 60) return `${diff} সেকেন্ড আগে`;
+    if (diff < 3600) return `${Math.floor(diff / 60)} মিনিট আগে`;
+    if (diff < 86400) return `${Math.floor(diff / 3600)} ঘণ্টা আগে`;
+    if (diff < 604800) return `${Math.floor(diff / 86400)} দিন আগে`;
+    return new Date(t).toLocaleDateString("bn-BD");
+  }
+
+  function emptyState(msg) {
+    return `<div class="admin-empty">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      ${msg}
+    </div>`;
+  }
+
+  function escapeHtml(str) {
+    return String(str || "").replace(/[&<>"']/g, m => ({
+      "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+    }[m]));
+  }
+</script>
+
+</body>
+</html>
