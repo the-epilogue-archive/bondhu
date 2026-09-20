@@ -4,6 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>বন্ধু - Login</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#e1306c">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="বন্ধু">
   <style>
     * { box-sizing: border-box; }
     body {
@@ -24,29 +28,77 @@
       width: 100%;
       max-width: 380px;
     }
-    h1 { color: #e1306c; text-align: center; margin: 0 0 8px; font-size: 32px; }
-    .subtitle { text-align: center; color: #666; margin-bottom: 24px; font-size: 14px; }
-    input {
-      width: 100%; padding: 12px 14px; margin-bottom: 12px;
-      border: 1px solid #ddd; border-radius: 8px; font-size: 15px;
+    h1 {
+      color: #e1306c;
+      text-align: center;
+      margin: 0 0 8px;
+      font-size: 32px;
     }
-    input:focus { outline: none; border-color: #e1306c; }
+    .subtitle {
+      text-align: center;
+      color: #666;
+      margin-bottom: 24px;
+      font-size: 14px;
+    }
+    input {
+      width: 100%;
+      padding: 12px 14px;
+      margin-bottom: 12px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-size: 16px;
+      transition: border 0.2s;
+      box-sizing: border-box;
+    }
+    input:focus {
+      outline: none;
+      border-color: #e1306c;
+    }
     button {
-      width: 100%; background: #e1306c; color: white; border: none;
-      padding: 14px; border-radius: 8px; font-size: 16px;
-      font-weight: bold; cursor: pointer; margin-top: 8px;
+      width: 100%;
+      background: #e1306c;
+      color: white;
+      border: none;
+      padding: 14px;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 8px;
     }
     button:disabled { background: #ccc; cursor: not-allowed; }
-    .toggle { text-align: center; margin-top: 20px; font-size: 14px; color: #666; }
-    .toggle a { color: #e1306c; cursor: pointer; font-weight: bold; text-decoration: none; }
+    .toggle {
+      text-align: center;
+      margin-top: 20px;
+      font-size: 14px;
+      color: #666;
+    }
+    .toggle a {
+      color: #e1306c;
+      cursor: pointer;
+      font-weight: bold;
+      text-decoration: none;
+    }
     #status {
-      margin-top: 12px; padding: 10px; border-radius: 8px;
-      font-size: 13px; display: none; white-space: pre-wrap; word-break: break-word;
+      margin-top: 12px;
+      padding: 10px;
+      border-radius: 8px;
+      font-size: 13px;
+      display: none;
+      white-space: pre-wrap;
+      word-break: break-word;
     }
     .ok { background: #d4edda; color: #155724; display: block; }
     .err { background: #f8d7da; color: #721c24; display: block; }
     .info { background: #d1ecf1; color: #0c5460; display: block; }
     .hidden { display: none; }
+
+    /* Mobile polish */
+    @media (max-width: 500px) {
+      .card { padding: 32px 22px; }
+      h1 { font-size: 28px; }
+    }
+    button, a { -webkit-tap-highlight-color: transparent; }
   </style>
 </head>
 <body>
@@ -167,6 +219,16 @@
       if (code === "auth/network-request-failed") return "Network problem — internet check koro";
       if (code === "permission-denied") return "Firestore rules block korche";
       return err.message || "Kichu bhul hoyeche";
+    }
+  </script>
+
+  <script>
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("/bondhu/sw.js").catch((e) => {
+          console.warn("SW fail:", e);
+        });
+      });
     }
   </script>
 </body>
