@@ -4,6 +4,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>বন্ধু - Feed</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#e1306c">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="বন্ধু">
   <style>
     * { box-sizing: border-box; }
     body { font-family: sans-serif; background: #fafafa; margin: 0; padding-bottom: 70px; }
@@ -81,6 +86,10 @@
       overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.06);
     }
     .post-head { display: flex; align-items: center; padding: 12px; gap: 10px; }
+    .post-head a {
+      display: flex; align-items: center; gap: 10px;
+      text-decoration: none; color: inherit; flex: 1;
+    }
     .avatar {
       width: 38px; height: 38px; border-radius: 50%;
       background: linear-gradient(135deg, #feda75, #d62976);
@@ -130,6 +139,40 @@
       padding: 8px 14px; border-radius: 8px; font-size: 13px; cursor: pointer;
     }
     .comment-send:disabled { background: #ccc; }
+
+    /* Loading spinner */
+    .spinner {
+      display: inline-block;
+      width: 30px; height: 30px;
+      border: 3px solid #f3f3f3;
+      border-top: 3px solid #e1306c;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    .loading-wrap {
+      text-align: center; padding: 60px 20px;
+      color: #999; font-size: 14px;
+    }
+    .loading-wrap .spinner { margin-bottom: 12px; }
+
+    /* Mobile polish */
+    @media (max-width: 500px) {
+      body { padding-bottom: calc(70px + env(safe-area-inset-bottom)); }
+      .topbar { padding: 10px 12px; }
+      .topbar h1 { font-size: 20px; }
+      .topbar a { margin-left: 8px; padding: 4px 2px; }
+      .post { border-radius: 8px; }
+      .fab { bottom: calc(20px + env(safe-area-inset-bottom)); }
+    }
+
+    /* Prevent zoom on input focus (iOS) */
+    input, textarea, select { font-size: 16px; }
+    html { scroll-behavior: smooth; }
+    button, a { -webkit-tap-highlight-color: transparent; }
   </style>
 </head>
 <body>
@@ -151,10 +194,24 @@
   <div class="story-bar" id="storyBar"></div>
 
   <div class="feed" id="feed">
-    <div id="empty">Loading...</div>
+    <div class="loading-wrap">
+      <div class="spinner"></div>
+      <div>Feed load hocche...</div>
+    </div>
   </div>
 
   <a href="upload.html" class="fab">+</a>
+
+  <!-- PWA install prompt -->
+  <div id="installPrompt" style="display:none;position:fixed;bottom:80px;left:12px;right:12px;background:white;padding:14px 16px;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,0.15);z-index:100;align-items:center;gap:12px;">
+    <div style="font-size:24px;">📱</div>
+    <div style="flex:1;">
+      <div style="font-weight:bold;font-size:14px;">বন্ধু install koro</div>
+      <div style="font-size:12px;color:#666;">Home screen e add kore rakho</div>
+    </div>
+    <button id="installBtn" style="background:#e1306c;color:white;border:none;padding:8px 16px;border-radius:8px;font-size:13px;font-weight:bold;cursor:pointer;">Install</button>
+    <button id="dismissBtn" style="background:none;border:none;color:#999;font-size:20px;cursor:pointer;padding:0 4px;">×</button>
+  </div>
 
   <script type="module">
     import { requireAuth, logout } from "./js/auth.js";
@@ -177,9 +234,6 @@
       window.location.href = "login.html";
     });
 
-    // ==========================================
-    // Notification badge
-    // ==========================================
     async function loadNotifBadge() {
       try {
         const count = await getUnreadCount();
@@ -193,9 +247,6 @@
       }
     }
 
-    // ==========================================
-    // Story bar
-    // ==========================================
     async function loadStories() {
       const bar = document.getElementById("storyBar");
       try {
@@ -204,7 +255,6 @@
 
         let html = "";
 
-        // Amar story tile
         if (myGroup) {
           const initial = (currentUser.name || "?")[0].toUpperCase();
           html += `
@@ -231,7 +281,6 @@
           `;
         }
 
-        // Baki user der story
         groups.forEach(g => {
           if (g.userId === currentUser.uid) return;
           const initial = (g.userName || "?")[0].toUpperCase();
@@ -254,9 +303,6 @@
       }
     }
 
-    // ==========================================
-    // Feed
-    // ==========================================
     async function loadPosts() {
       const feed = document.getElementById("feed");
       try {
@@ -279,11 +325,13 @@
           div.className = "post";
           div.innerHTML = `
             <div class="post-head">
-              <div class="avatar">${p.userPhoto ? `<img src="${p.userPhoto}">` : initial}</div>
-              <div>
-                <div class="name">${escapeHtml(p.userName || "?")}</div>
-                <div class="user">@${escapeHtml(p.username || "?")}</div>
-              </div>
+              <a href="user.html?u=${encodeURIComponent(p.username || "")}">
+                <div class="avatar">${p.userPhoto ? `<img src="${p.userPhoto}">` : initial}</div>
+                <div>
+                  <div class="name">${escapeHtml(p.userName || "?")}</div>
+                  <div class="user">@${escapeHtml(p.username || "?")}</div>
+                </div>
+              </a>
               ${isMine ? `<button class="delete-btn" data-id="${p.id}">Delete</button>` : ""}
             </div>
             <img class="post-img" src="${p.imageUrl}" alt="post">
@@ -307,7 +355,6 @@
           feed.appendChild(div);
         });
 
-        // Like
         feed.querySelectorAll(".like-btn").forEach(btn => {
           btn.addEventListener("click", async () => {
             const postId = btn.dataset.id;
@@ -325,7 +372,6 @@
           });
         });
 
-        // Comment toggle
         feed.querySelectorAll(".comment-toggle-btn").forEach(btn => {
           btn.addEventListener("click", async () => {
             const postId = btn.dataset.id;
@@ -335,7 +381,6 @@
           });
         });
 
-        // Comment send
         feed.querySelectorAll(".comment-send").forEach(btn => {
           btn.addEventListener("click", async () => {
             const postId = btn.dataset.id;
@@ -355,7 +400,6 @@
           });
         });
 
-        // Delete
         feed.querySelectorAll(".delete-btn").forEach(btn => {
           btn.addEventListener("click", async () => {
             if (!confirm("Ei post delete korbe?")) return;
@@ -391,6 +435,48 @@
       return String(str || "").replace(/[&<>"']/g, m => ({
         "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
       }[m]));
+    }
+  </script>
+
+  <script>
+    // PWA install prompt
+    let deferredPrompt = null;
+    const installPrompt = document.getElementById("installPrompt");
+    const installBtn = document.getElementById("installBtn");
+    const dismissBtn = document.getElementById("dismissBtn");
+
+    window.addEventListener("beforeinstallprompt", (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      const dismissed = localStorage.getItem("bondhu_install_dismissed");
+      const lastDismiss = parseInt(dismissed || "0");
+      const threeDays = 3 * 24 * 60 * 60 * 1000;
+      if (Date.now() - lastDismiss > threeDays) {
+        installPrompt.style.display = "flex";
+      }
+    });
+
+    installBtn?.addEventListener("click", async () => {
+      if (!deferredPrompt) return;
+      deferredPrompt.prompt();
+      const choice = await deferredPrompt.userChoice;
+      console.log("Install choice:", choice.outcome);
+      deferredPrompt = null;
+      installPrompt.style.display = "none";
+    });
+
+    dismissBtn?.addEventListener("click", () => {
+      installPrompt.style.display = "none";
+      localStorage.setItem("bondhu_install_dismissed", Date.now().toString());
+    });
+
+    // Service Worker
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("/bondhu/sw.js").catch((e) => {
+          console.warn("SW fail:", e);
+        });
+      });
     }
   </script>
 </body>
