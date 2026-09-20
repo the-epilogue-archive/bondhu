@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>বন্ধু - Reel Upload</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { font-family: sans-serif; background: #fafafa; margin: 0 auto; padding: 20px; max-width: 500px; }
+    .topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    .topbar h2 { color: #e1306c; margin: 0; }
+    .topbar a { color: #e1306c; text-decoration: none; font-weight: bold; }
+    .box { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+    input[type="file"] { margin: 10px 0; padding: 10px; width: 100%; box-sizing: border-box; }
+    textarea {
+      width: 100%; padding: 12px; border: 1px solid #ddd;
+      border-radius: 8px; font-size: 15px; font-family: inherit;
+      resize: vertical; min-height: 60px; margin-top: 10px; box-sizing: border-box;
+    }
+    button {
+      width: 100%; background: #e1306c; color: white; border: none;
+      padding: 14px; border-radius: 8px; font-size: 16px;
+      font-weight: bold; cursor: pointer; margin-top: 12px;
+    }
+    button:disabled { background: #ccc; cursor: not-allowed; }
+    #status {
+      margin-top: 15px; padding: 10px; border-radius: 8px;
+      font-size: 14px; display: none; white-space: pre-wrap;
+    }
+    .ok { background: #d4edda; color: #155724; display: block; }
+    .err { background: #f8d7da; color: #721c24; display: block; }
+    .info { background: #d1ecf1; color: #0c5460; display: block; }
+    #preview { margin-top: 15px; max-width: 100%; border-radius: 8px; display: none; max-height: 400px; }
+    .progress-wrap {
+      margin-top: 12px; background: #eee; border-radius: 8px;
+      overflow: hidden; display: none;
+    }
+    .progress-wrap.active { display: block; }
+    .progress-bar {
+      height: 8px; background: #e1306c; width: 0%;
+      transition: width 0.2s;
+    }
+    .progress-text {
+      font-size: 12px; color: #666; text-align: center;
+      padding: 4px; background: #f9f9f9;
+    }
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <h2>Reel Upload</h2>
+    <a href="reels.html">← Reels</a>
+  </div>
+
+  <div class="box">
+    <input type="file" id="fileInput" accept="video/*">
+    <video id="preview" controls></video>
+    <textarea id="captionInput" placeholder="Caption likho..."></textarea>
+    <button id="postBtn" type="button">Reel post koro</button>
+    <div class="progress-wrap" id="progressWrap">
+      <div class="progress-bar" id="progressBar"></div>
+      <div class="progress-text" id="progressText">0%</div>
+    </div>
+    <div id="status"></div>
+  </div>
+
+  <script type="module">
+    import { requireAuth } from "./js/auth.js";
+    import { uploadVideoToCloudinary, createReel } from "./js/reels.js";
+
+    requireAuth(() => {});
+
+    const fileInput = document.getElementById("fileInput");
+    const captionInput = document.getElementById("captionInput");
+    const postBtn = document.getElementById("postBtn");
+    const status = document.getElementById("status");
+    const preview = document.getElementById("preview");
+    const progressWrap = document.getElementById("progressWrap");
+    const progressBar = document.getElementById("progressBar");
+    const progressText = document.getElementById("progressText");
+
+    function showStatus(cls, msg) {
+      status.className = cls;
+      status.style.display = "block";
+      status.textContent = msg;
+    }
+
+    fileInput.addEventListener("change", () => {
+      const f = fileInput.files[0];
+      if (f) {
+        preview.src = URL.createObjectURL(f);
+        preview.style.display = "block";
+      }
+    });
+
+    postBtn.addEventListener("click", async () => {
+      const file = fileInput.files[0];
+      if (!file) { showStatus("err", "Video select koro"); return; }
+
+      postBtn.disabled = true;
+      progressWrap.classList.add("active");
+      showStatus("info", "Upload hocche... ektu wait koro ⏳");
+
+      try {
+        const videoUrl = await uploadVideoToCloudinary(file, (pct) => {
+          progressBar.style.width = pct + "%";
+          progressText.textContent = pct + "%";
+        });
+
+        showStatus("info", "Firestore e save hocche...");
+        await createReel(videoUrl, captionInput.value.trim());
+
+        showStatus("ok", "✅ Reel post hoyeche! Reels page e jaccho...");
+        setTimeout(() => window.location.href = "reels.html", 1200);
+      } catch (e) {
+        console.error(e);
+        showStatus("err", "❌ " + e.message);
+        postBtn.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>
