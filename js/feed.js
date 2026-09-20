@@ -1,39 +1,34 @@
 // ==========================================
-// Bondhu - Feed + Posts (Firestore)
+// Bondhu - Feed + Posts + Comments + Search + Follow
 // ==========================================
 
-import { db } from "./firebase-config.js";
-import { getCurrentUser, getUserData, getAllUsersList } from "./auth.js";
+import { db, auth } from "./firebase-config.js";
 import {
-  collection, addDoc, getDocs, doc, getDoc, setDoc,
-  updateDoc, deleteDoc, query, orderBy, serverTimestamp,
-  arrayUnion, arrayRemove
+  collection, addDoc, getDocs, doc, getDoc, updateDoc, deleteDoc,
+  query, orderBy, serverTimestamp, arrayUnion, arrayRemove
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-// ==========================================
-// Notun post create
-// ==========================================
+// Post create
 export async function createPost(imageUrl, caption) {
-  const user = getCurrentUser();
+  const user = auth.currentUser;
   if (!user) throw new Error("Login koro age");
-
+  const snap = await getDoc(doc(db, "users", user.uid));
+  const userData = snap.exists() ? snap.data() : {};
   const ref = await addDoc(collection(db, "posts"), {
     userId: user.uid,
-    username: user.username,
-    userName: user.name,
-    userPhoto: user.photoURL || "",
+    username: userData.username || "unknown",
+    userName: userData.name || "User",
+    userPhoto: userData.photoURL || "",
     imageUrl,
     caption: caption || "",
     likes: [],
+    commentCount: 0,
     createdAt: serverTimestamp()
   });
-
   return ref.id;
 }
 
-// ==========================================
-// Sob post load (feed er jonno)
-// ==========================================
+// Feed load
 export async function loadFeed() {
   const snap = await getDocs(query(collection(db, "posts"), orderBy("createdAt", "desc")));
   const posts = [];
@@ -41,71 +36,102 @@ export async function loadFeed() {
   return posts;
 }
 
-// ==========================================
-// Ekta user er sob post
-// ==========================================
+// User er post
 export async function loadUserPosts(uid) {
-  const snap = await getDocs(collection(db, "posts"));
+  const snap = await getDocs(query(collection(db, "posts"), orderBy("createdAt", "desc")));
   const posts = [];
   snap.forEach(d => {
     const data = d.data();
     if (data.userId === uid) posts.push({ id: d.id, ...data });
   });
-  // newest first
-  posts.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
   return posts;
 }
 
-// ==========================================
-// Like / Unlike toggle
-// ==========================================
+// Like toggle
 export async function toggleLike(postId, currentLikes) {
-  const user = getCurrentUser();
+  const user = auth.currentUser;
   if (!user) throw new Error("Login koro");
-
   const ref = doc(db, "posts", postId);
   const alreadyLiked = currentLikes.includes(user.uid);
-
   await updateDoc(ref, {
     likes: alreadyLiked ? arrayRemove(user.uid) : arrayUnion(user.uid)
   });
-
   return !alreadyLiked;
 }
 
-// ==========================================
-// Post delete
-// ==========================================
+// Delete post
 export async function deletePost(postId) {
-  const user = getCurrentUser();
-  if (!user) throw new Error("Login koro");
   await deleteDoc(doc(db, "posts", postId));
 }
 
-// ==========================================
 // Comment add
-// ==========================================
 export async function addComment(postId, text) {
-  const user = getCurrentUser();
+  const user = auth.currentUser;
   if (!user) throw new Error("Login koro");
+  const userSnap = await getDoc(doc(db, "users", user.uid));
+  const userData = userSnap.exists() ? userSnap.data() : {};
 
   await addDoc(collection(db, "posts", postId, "comments"), {
     userId: user.uid,
-    username: user.username,
-    userName: user.name,
+    username: userData.username || "unknown",
+    userName: userData.name || "User",
     text: text,
     createdAt: serverTimestamp()
   });
+
+  const postRef = doc(db, "posts", postId);
+  const postSnap = await getDoc(postRef);
+  if (postSnap.exists()) {
+    const cur = postSnap.data().commentCount || 0;
+    await updateDoc(postRef, { commentCount: cur + 1 });
+  }
 }
 
-// ==========================================
-// Comment load
-// ==========================================
+// Comments load
 export async function loadComments(postId) {
-  const snap = await getDocs(collection(db, "posts", postId, "comments"));
+  const snap = await getDocs(query(
+    collection(db, "posts", postId, "comments"),
+    orderBy("createdAt", "asc")
+  ));
   const arr = [];
   snap.forEach(d => arr.push({ id: d.id, ...d.data() }));
   return arr;
 }
 
-export { getUserData, getAllUsersList };
+// User search
+export async function searchUsers(term) {
+  const t = term.toLowerCase().trim();
+  if (!t) return [];
+  const snap = await getDocs(collection(db, "users"));
+  const arr = [];
+  snap.forEach(d => {
+    const u = d.data();
+    if ((u.username || "").toLowerCase().includes(t) ||
+        (u.name || "").toLowerCase().includes(t)) {
+      arr.push(u);
+    }
+  });
+  return arr.slice(0, 20);
+}
+
+// Follow toggle
+export async function toggleFollow(targetUid) {
+  const user = auth.currentUser;
+  if (!user) throw new Error("Login koro");
+  if (user.uid === targetUid) throw new Error("Nijeke follow korte parba na");
+
+  const meRef = doc(db, "users", user.uid);
+  const targetRef = doc(db, "users", targetUid);
+  const meSnap = await getDoc(meRef);
+  const alreadyFollowing = (meSnap.data().following || []).includes(targetUid);
+
+  if (alreadyFollowing) {
+    await updateDoc(meRef, { following: arrayRemove(targetUid) });
+    await updateDoc(targetRef, { followers: arrayRemove(user.uid) });
+    return false;
+  } else {
+    await updateDoc(meRef, { following: arrayUnion(targetUid) });
+    await updateDoc(targetRef, { followers: arrayUnion(user.uid) });
+    return true;
+  }
+}
