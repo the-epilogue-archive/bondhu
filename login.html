@@ -78,8 +78,10 @@
       margin-top: 12px;
       padding: 10px;
       border-radius: 8px;
-      font-size: 14px;
+      font-size: 13px;
       display: none;
+      white-space: pre-wrap;
+      word-break: break-word;
     }
     .ok { background: #d4edda; color: #155724; display: block; }
     .err { background: #f8d7da; color: #721c24; display: block; }
@@ -157,6 +159,7 @@
       e.preventDefault();
       submitBtn.disabled = true;
       status.className = "info";
+      status.style.display = "block";
       status.textContent = mode === "login" ? "Login hocche..." : "Account banacchi...";
 
       const email = emailInput.value.trim();
@@ -173,7 +176,12 @@
             throw new Error("Username 3-20 char, sudhu a-z, 0-9, _");
           }
 
+          console.log("🟡 Signup shuru:", { email, name, username });
+
           await signup(email, password, name, username);
+
+          console.log("🟢 Signup successful");
+
           status.className = "ok";
           status.textContent = "✅ Account create hoyeche!";
         } else {
@@ -182,10 +190,17 @@
           status.textContent = "✅ Login successful!";
         }
 
-        setTimeout(() => window.location.href = "index.html", 800);
+        setTimeout(() => window.location.href = "index.html", 1000);
       } catch (err) {
+        console.error("🔴 Error ashche:", err);
+        console.error("   Code:", err.code);
+        console.error("   Message:", err.message);
+
         status.className = "err";
-        status.textContent = "❌ " + prettyError(err);
+        status.style.display = "block";
+        status.textContent = "❌ " + prettyError(err) +
+          "\n\nCode: " + (err.code || "no-code") +
+          "\nMessage: " + (err.message || "no-message");
         submitBtn.disabled = false;
       }
     });
@@ -199,7 +214,54 @@
       if (code === "auth/wrong-password") return "Password bhul";
       if (code === "auth/invalid-credential") return "Email ba password bhul";
       if (code === "auth/too-many-requests") return "Onek bar try korecho, ektu wait koro";
+      if (code === "permission-denied") return "Firestore rules block korche — rules publish koro";
+      if (code === "unavailable") return "Network problem — internet check koro";
       return err.message || "Kichu bhul hoyeche";
+    }
+
+    // ==========================================
+    // URL e ?debug=1 dile auto diagnose cholbe
+    // ==========================================
+    if (window.location.search.includes("debug=1")) {
+      setTimeout(async () => {
+        try {
+          const fb = await import("./js/firebase-config.js");
+          const { doc, getDoc, setDoc } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+
+          console.log("========== DEBUG INFO ==========");
+          console.log("Firebase Auth current user:", fb.auth.currentUser);
+          console.log("Current UID:", fb.auth.currentUser?.uid);
+
+          if (fb.auth.currentUser) {
+            const uid = fb.auth.currentUser.uid;
+            console.log("setDoc manual test shuru...");
+            try {
+              await setDoc(doc(fb.db, "users", uid), {
+                uid: uid,
+                email: fb.auth.currentUser.email,
+                name: "Debug User",
+                username: "debuguser_" + Date.now(),
+                bio: "",
+                photoURL: "",
+                followers: [],
+                following: []
+              });
+              console.log("✅ Manual setDoc SUCCESS");
+
+              const snap = await getDoc(doc(fb.db, "users", uid));
+              console.log("Doc exists?", snap.exists());
+              console.log("Doc data:", snap.data());
+            } catch (e) {
+              console.error("❌ Manual setDoc FAILED");
+              console.error("   Code:", e.code);
+              console.error("   Message:", e.message);
+            }
+          }
+          console.log("========== END DEBUG ==========");
+        } catch (e) {
+          console.error("Debug script fail:", e);
+        }
+      }, 1500);
     }
   </script>
 </body>
