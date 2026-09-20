@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>বন্ধু - Upload Test</title>
+  <title>বন্ধু</title>
   <style>
     body {
       font-family: sans-serif;
@@ -11,6 +11,7 @@
       padding: 20px;
       max-width: 500px;
       margin: 0 auto;
+      text-align: center;
     }
     h1 { color: #e1306c; }
     .box {
@@ -18,12 +19,7 @@
       padding: 20px;
       border-radius: 12px;
       box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-    }
-    input[type="file"] {
-      margin: 10px 0;
-      padding: 10px;
-      width: 100%;
-      box-sizing: border-box;
+      text-align: left;
     }
     button {
       background: #e1306c;
@@ -31,85 +27,69 @@
       border: none;
       padding: 12px 24px;
       border-radius: 8px;
-      font-size: 16px;
+      font-size: 15px;
       cursor: pointer;
-      width: 100%;
+      margin: 4px;
     }
-    button:disabled { background: #ccc; cursor: not-allowed; }
-    #status {
-      margin-top: 15px;
-      padding: 10px;
-      border-radius: 8px;
-      font-size: 14px;
-    }
-    .ok { background: #d4edda; color: #155724; }
-    .err { background: #f8d7da; color: #721c24; }
-    .info { background: #d1ecf1; color: #0c5460; }
-    #preview {
-      margin-top: 15px;
-      max-width: 100%;
-      border-radius: 8px;
-      display: none;
-    }
-    .nav {
-      margin-top: 20px;
-      text-align: center;
-    }
+    button.secondary { background: #666; }
+    .nav { margin-top: 20px; }
     .nav a {
       color: #e1306c;
       text-decoration: none;
       margin: 0 10px;
       font-weight: bold;
     }
+    #welcome {
+      background: #d4edda;
+      color: #155724;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 15px;
+    }
+    #loading { color: #666; padding: 40px; }
   </style>
 </head>
 <body>
   <h1>বন্ধু 🚀</h1>
-  <div class="box">
-    <h3>Image Upload Test</h3>
-    <input type="file" id="fileInput" accept="image/*">
-    <button id="uploadBtn">Upload koro</button>
-    <div id="status"></div>
-    <img id="preview" alt="preview">
-  </div>
 
-  <div class="nav">
-    <a href="settings.html">⚙️ Settings</a>
+  <div id="loading">Loading...</div>
+
+  <div id="content" style="display:none;">
+    <div id="welcome"></div>
+
+    <div class="box">
+      <h3>Feed ekhon khali</h3>
+      <p style="color:#666; font-size:14px;">
+        Ekhon tui login korecho. Pore step 5-6 e feed, post, profile add korbo.
+      </p>
+    </div>
+
+    <div class="nav">
+      <a href="settings.html">⚙️ Settings</a>
+      <button id="logoutBtn" class="secondary">Logout</button>
+    </div>
   </div>
 
   <script type="module">
-    import { uploadToGitHub } from "./js/upload.js";
+    import { requireAuth, getUserData, logout } from "./js/auth.js";
 
-    const fileInput = document.getElementById("fileInput");
-    const uploadBtn = document.getElementById("uploadBtn");
-    const status = document.getElementById("status");
-    const preview = document.getElementById("preview");
+    const loading = document.getElementById("loading");
+    const content = document.getElementById("content");
+    const welcome = document.getElementById("welcome");
 
-    uploadBtn.addEventListener("click", async () => {
-      const file = fileInput.files[0];
-      if (!file) {
-        status.className = "err";
-        status.textContent = "Age ekta image select koro";
-        return;
-      }
+    // Login na korle login.html e pathabe
+    requireAuth(async (user) => {
+      loading.style.display = "none";
+      content.style.display = "block";
 
-      uploadBtn.disabled = true;
-      status.className = "info";
-      status.textContent = "Upload hocche... ektu wait koro ⏳";
+      const data = await getUserData(user.uid);
+      const name = data?.name || user.displayName || "Bondhu";
+      welcome.textContent = `স্বাগতম, ${name}! 👋`;
+    });
 
-      try {
-        const url = await uploadToGitHub(file, "posts");
-        status.className = "ok";
-        status.innerHTML = `✅ Upload successful!<br><br>
-          <a href="${url}" target="_blank">${url}</a>`;
-        preview.src = url;
-        preview.style.display = "block";
-      } catch (err) {
-        status.className = "err";
-        status.textContent = "❌ Error: " + err.message;
-      } finally {
-        uploadBtn.disabled = false;
-      }
+    document.getElementById("logoutBtn").addEventListener("click", async () => {
+      await logout();
+      window.location.href = "login.html";
     });
   </script>
 </body>
