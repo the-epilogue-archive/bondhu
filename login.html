@@ -1,235 +1,276 @@
 <!DOCTYPE html>
-<html lang="bn">
+<html lang="bn" data-theme="light">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>বন্ধু - Login</title>
-  <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#e1306c">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-title" content="বন্ধু">
-  <style>
-    * { box-sizing: border-box; }
-    body {
-      font-family: sans-serif;
-      background: linear-gradient(135deg, #feda75, #fa7e1e, #d62976, #962fbf, #4f5bd5);
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
-      margin: 0;
-    }
-    .card {
-      background: white;
-      padding: 40px 30px;
-      border-radius: 16px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-      width: 100%;
-      max-width: 380px;
-    }
-    h1 {
-      color: #e1306c;
-      text-align: center;
-      margin: 0 0 8px;
-      font-size: 32px;
-    }
-    .subtitle {
-      text-align: center;
-      color: #666;
-      margin-bottom: 24px;
-      font-size: 14px;
-    }
-    input {
-      width: 100%;
-      padding: 12px 14px;
-      margin-bottom: 12px;
-      border: 1px solid #ddd;
-      border-radius: 8px;
-      font-size: 16px;
-      transition: border 0.2s;
-      box-sizing: border-box;
-    }
-    input:focus {
-      outline: none;
-      border-color: #e1306c;
-    }
-    button {
-      width: 100%;
-      background: #e1306c;
-      color: white;
-      border: none;
-      padding: 14px;
-      border-radius: 8px;
-      font-size: 16px;
-      font-weight: bold;
-      cursor: pointer;
-      margin-top: 8px;
-    }
-    button:disabled { background: #ccc; cursor: not-allowed; }
-    .toggle {
-      text-align: center;
-      margin-top: 20px;
-      font-size: 14px;
-      color: #666;
-    }
-    .toggle a {
-      color: #e1306c;
-      cursor: pointer;
-      font-weight: bold;
-      text-decoration: none;
-    }
-    #status {
-      margin-top: 12px;
-      padding: 10px;
-      border-radius: 8px;
-      font-size: 13px;
-      display: none;
-      white-space: pre-wrap;
-      word-break: break-word;
-    }
-    .ok { background: #d4edda; color: #155724; display: block; }
-    .err { background: #f8d7da; color: #721c24; display: block; }
-    .info { background: #d1ecf1; color: #0c5460; display: block; }
-    .hidden { display: none; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#f5f0e2">
+<title>বন্ধু — প্রবেশ</title>
+<link rel="manifest" href="manifest.json">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,500;0,600;0,700;0,800;1,500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/app.css">
+<script src="js/theme.js"></script>
+<style>
+  body{padding-bottom:0;display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px}
+  .auth-card{
+    width:100%;max-width:420px;
+    background:var(--paper-elev);
+    border:1px solid var(--rule);
+    border-radius:16px;
+    padding:36px 28px 28px;
+    box-shadow:var(--shadow-lg);
+    position:relative;
+    opacity:0;transform:translateY(20px);
+    animation:enter .7s cubic-bezier(.22,1,.36,1) forwards;
+    transition:background .3s,border-color .3s;
+  }
+  @keyframes enter{to{opacity:1;transform:translateY(0)}}
 
-    /* Mobile polish */
-    @media (max-width: 500px) {
-      .card { padding: 32px 22px; }
-      h1 { font-size: 28px; }
-    }
-    button, a { -webkit-tap-highlight-color: transparent; }
-  </style>
+  .auth-topbar{
+    position:absolute;top:12px;right:12px;
+  }
+
+  .auth-brand{text-align:center;margin-bottom:28px}
+  .auth-brand .logo{
+    font-family:'Playfair Display',serif;
+    font-size:42px;font-weight:800;
+    letter-spacing:-1.5px;line-height:1;
+    color:var(--ink);
+    margin-bottom:8px;
+  }
+  .auth-brand .logo em{color:var(--accent);font-style:italic;font-weight:500}
+  .auth-brand .sub{
+    font-size:11.5px;color:var(--ink-mute);
+    font-style:italic;
+    font-family:'Playfair Display',serif;
+    letter-spacing:.5px;
+    display:flex;align-items:center;justify-content:center;gap:10px;
+    margin-top:10px;
+  }
+  .auth-brand .sub::before,
+  .auth-brand .sub::after{
+    content:'';width:24px;height:1px;background:var(--rule-dark);
+  }
+
+  .mode-tabs{
+    display:flex;gap:4px;
+    background:var(--paper-2);
+    padding:4px;border-radius:30px;
+    margin-bottom:22px;
+  }
+  .mode-tab{
+    flex:1;padding:10px;
+    border-radius:26px;
+    font-size:13px;font-weight:600;
+    color:var(--ink-mute);
+    transition:all .3s cubic-bezier(.34,1.56,.64,1);
+  }
+  .mode-tab.active{
+    background:var(--paper-elev);
+    color:var(--ink);
+    box-shadow:var(--shadow-sm);
+  }
+
+  .field{margin-bottom:14px}
+  .input-wrap{position:relative}
+  .input-icon{
+    position:absolute;left:14px;top:50%;
+    transform:translateY(-50%);
+    width:18px;height:18px;
+    stroke:var(--ink-mute);
+    fill:none;stroke-width:1.8;
+    stroke-linecap:round;stroke-linejoin:round;
+    pointer-events:none;
+    transition:stroke .25s;
+  }
+  .input-wrap .input{padding-left:42px}
+  .input-wrap .input:focus ~ .input-icon{stroke:var(--accent)}
+
+  .hidden{display:none}
+
+  .auth-footer{
+    text-align:center;margin-top:20px;
+    font-size:12px;color:var(--ink-mute);
+    font-family:'Playfair Display',serif;
+    font-style:italic;
+  }
+  .auth-footer a{color:var(--accent);font-weight:600;font-family:'Hind Siliguri',sans-serif;font-style:normal}
+
+  @media (max-width:480px){
+    .auth-card{padding:30px 22px 24px}
+    .auth-brand .logo{font-size:36px}
+  }
+</style>
 </head>
 <body>
-  <div class="card">
-    <h1>বন্ধু</h1>
-    <p class="subtitle" id="subtitle">Login koro</p>
 
-    <form id="authForm">
-      <input type="text" id="nameInput" placeholder="Tomar naam" class="hidden">
-      <input type="text" id="usernameInput" placeholder="Username (@rahim)" class="hidden">
-      <input type="email" id="emailInput" placeholder="Email" required>
-      <input type="password" id="passwordInput" placeholder="Password (min 6 char)" required minlength="6">
-      <button type="submit" id="submitBtn">Login</button>
-    </form>
-
-    <div id="status"></div>
-
-    <div class="toggle">
-      <span id="toggleText">Account nei?</span>
-      <a id="toggleLink">Signup koro</a>
-    </div>
+<div class="auth-card">
+  <div class="auth-topbar">
+    <button class="theme-toggle" onclick="toggleBondhuTheme()" aria-label="Theme">
+      <svg class="icon-moon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      <svg class="icon-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+    </button>
   </div>
 
-  <script type="module">
-    import { signup, login, redirectIfLoggedIn } from "./js/auth.js";
+  <div class="auth-brand">
+    <div class="logo">বন্ধু<em>.</em></div>
+    <div class="sub" id="subtitle">স্বাগতম</div>
+  </div>
 
-    redirectIfLoggedIn("index.html");
+  <div class="mode-tabs">
+    <button type="button" class="mode-tab active" data-mode="login">প্রবেশ</button>
+    <button type="button" class="mode-tab" data-mode="signup">নতুন অ্যাকাউন্ট</button>
+  </div>
 
-    const form = document.getElementById("authForm");
-    const nameInput = document.getElementById("nameInput");
-    const usernameInput = document.getElementById("usernameInput");
-    const emailInput = document.getElementById("emailInput");
-    const passwordInput = document.getElementById("passwordInput");
-    const submitBtn = document.getElementById("submitBtn");
-    const status = document.getElementById("status");
-    const subtitle = document.getElementById("subtitle");
-    const toggleText = document.getElementById("toggleText");
-    const toggleLink = document.getElementById("toggleLink");
+  <form id="authForm" autocomplete="on">
+    <div class="field hidden" id="nameField">
+      <label class="field-label">আপনার নাম</label>
+      <div class="input-wrap">
+        <input class="input" type="text" id="nameInput" placeholder="যেমন: রাহিম আহমেদ">
+        <svg class="input-icon" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21v-2a4 4 0 0 1 4-4h8a4 4 0 0 1 4 4v2"/></svg>
+      </div>
+    </div>
 
-    let mode = "login";
+    <div class="field hidden" id="usernameField">
+      <label class="field-label">ইউজারনেম</label>
+      <div class="input-wrap">
+        <input class="input" type="text" id="usernameInput" placeholder="যেমন: rahim" autocomplete="username">
+        <svg class="input-icon" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      </div>
+    </div>
 
-    function setMode(newMode) {
-      mode = newMode;
+    <div class="field">
+      <label class="field-label">ইমেইল</label>
+      <div class="input-wrap">
+        <input class="input" type="email" id="emailInput" placeholder="you@example.com" required autocomplete="email">
+        <svg class="input-icon" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>
+      </div>
+    </div>
+
+    <div class="field">
+      <label class="field-label">পাসওয়ার্ড</label>
+      <div class="input-wrap">
+        <input class="input" type="password" id="passwordInput" placeholder="কমপক্ষে ৬ অক্ষর" required minlength="6" autocomplete="current-password">
+        <svg class="input-icon" viewBox="0 0 24 24"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+      </div>
+    </div>
+
+    <button type="submit" class="btn" id="submitBtn" style="margin-top:8px">
+      <svg viewBox="0 0 24 24"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+      <span id="submitText">প্রবেশ করুন</span>
+    </button>
+  </form>
+
+  <div class="alert" id="status"></div>
+
+  <div class="auth-footer">
+    প্রবেশ করে আপনি আমাদের <a href="#">শর্তাবলী</a> মেনে নিচ্ছেন
+  </div>
+</div>
+
+<script type="module">
+  import { signup, login, redirectIfLoggedIn } from "./js/auth.js";
+
+  redirectIfLoggedIn("index.html");
+
+  const form = document.getElementById("authForm");
+  const nameField = document.getElementById("nameField");
+  const usernameField = document.getElementById("usernameField");
+  const nameInput = document.getElementById("nameInput");
+  const usernameInput = document.getElementById("usernameInput");
+  const emailInput = document.getElementById("emailInput");
+  const passwordInput = document.getElementById("passwordInput");
+  const submitBtn = document.getElementById("submitBtn");
+  const submitText = document.getElementById("submitText");
+  const status = document.getElementById("status");
+  const subtitle = document.getElementById("subtitle");
+
+  let mode = "login";
+
+  document.querySelectorAll(".mode-tab").forEach(tab => {
+    tab.addEventListener("click", () => {
+      mode = tab.dataset.mode;
+      document.querySelectorAll(".mode-tab").forEach(t => t.classList.remove("active"));
+      tab.classList.add("active");
+
       if (mode === "signup") {
-        nameInput.classList.remove("hidden");
-        usernameInput.classList.remove("hidden");
-        submitBtn.textContent = "Signup koro";
-        subtitle.textContent = "Notun account banao";
-        toggleText.textContent = "Account ache?";
-        toggleLink.textContent = "Login koro";
+        nameField.classList.remove("hidden");
+        usernameField.classList.remove("hidden");
+        submitText.textContent = "অ্যাকাউন্ট তৈরি করুন";
+        subtitle.textContent = "নতুন যাত্রা শুরু হোক";
+        passwordInput.setAttribute("autocomplete", "new-password");
       } else {
-        nameInput.classList.add("hidden");
-        usernameInput.classList.add("hidden");
-        submitBtn.textContent = "Login";
-        subtitle.textContent = "Login koro";
-        toggleText.textContent = "Account nei?";
-        toggleLink.textContent = "Signup koro";
+        nameField.classList.add("hidden");
+        usernameField.classList.add("hidden");
+        submitText.textContent = "প্রবেশ করুন";
+        subtitle.textContent = "স্বাগতম";
+        passwordInput.setAttribute("autocomplete", "current-password");
       }
-      status.className = "";
-      status.style.display = "none";
-    }
-
-    toggleLink.addEventListener("click", (e) => {
-      e.preventDefault();
-      setMode(mode === "login" ? "signup" : "login");
+      status.classList.remove("show");
     });
+  });
 
-    form.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      submitBtn.disabled = true;
-      status.className = "info";
-      status.style.display = "block";
-      status.textContent = mode === "login" ? "Login hocche..." : "Account banacchi...";
+  function showStatus(type, msg) {
+    status.className = "alert " + type + " show";
+    status.textContent = msg;
+  }
 
-      const email = emailInput.value.trim();
-      const password = passwordInput.value;
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    submitBtn.disabled = true;
+    showStatus("info", mode === "login" ? "প্রবেশ করা হচ্ছে..." : "অ্যাকাউন্ট তৈরি হচ্ছে...");
 
-      try {
-        if (mode === "signup") {
-          const name = nameInput.value.trim();
-          const username = usernameInput.value.trim().replace("@", "").toLowerCase();
+    const email = emailInput.value.trim();
+    const password = passwordInput.value;
 
-          if (!name) throw new Error("Naam likho");
-          if (!username) throw new Error("Username likho");
-          if (!/^[a-z0-9_]{3,20}$/.test(username)) {
-            throw new Error("Username 3-20 char, sudhu a-z, 0-9, _");
-          }
+    try {
+      if (mode === "signup") {
+        const name = nameInput.value.trim();
+        const username = usernameInput.value.trim().replace("@", "").toLowerCase();
 
-          await signup(email, password, name, username);
-          status.className = "ok";
-          status.textContent = "✅ Account create hoyeche!";
-        } else {
-          await login(email, password);
-          status.className = "ok";
-          status.textContent = "✅ Login successful!";
+        if (!name) throw new Error("আপনার নাম লিখুন");
+        if (!username) throw new Error("ইউজারনেম লিখুন");
+        if (!/^[a-z0-9_]{3,20}$/.test(username)) {
+          throw new Error("ইউজারনেম ৩-২০ অক্ষর, শুধু a-z, 0-9, _");
         }
 
-        setTimeout(() => window.location.href = "index.html", 1000);
-      } catch (err) {
-        console.error("Auth error:", err);
-        status.className = "err";
-        status.style.display = "block";
-        status.textContent = "❌ " + prettyError(err) +
-          "\n\nCode: " + (err.code || "no-code");
-        submitBtn.disabled = false;
+        await signup(email, password, name, username);
+        showStatus("ok", "✅ অ্যাকাউন্ট তৈরি হয়েছে!");
+      } else {
+        await login(email, password);
+        showStatus("ok", "✅ প্রবেশ সফল!");
       }
-    });
 
-    function prettyError(err) {
-      const code = err.code || "";
-      if (code === "auth/email-already-in-use") return "Ei email diye account already ache";
-      if (code === "auth/invalid-email") return "Email ta thik nei";
-      if (code === "auth/weak-password") return "Password onek durbol (min 6 char)";
-      if (code === "auth/user-not-found") return "Ei email diye account nei";
-      if (code === "auth/wrong-password") return "Password bhul";
-      if (code === "auth/invalid-credential") return "Email ba password bhul";
-      if (code === "auth/too-many-requests") return "Onek bar try korecho, ektu wait koro";
-      if (code === "auth/network-request-failed") return "Network problem — internet check koro";
-      if (code === "permission-denied") return "Firestore rules block korche";
-      return err.message || "Kichu bhul hoyeche";
+      setTimeout(() => window.location.href = "index.html", 800);
+    } catch (err) {
+      showStatus("err", "❌ " + prettyError(err));
+      submitBtn.disabled = false;
     }
-  </script>
+  });
 
-  <script>
-    if ("serviceWorker" in navigator) {
-      window.addEventListener("load", () => {
-        navigator.serviceWorker.register("/bondhu/sw.js").catch((e) => {
-          console.warn("SW fail:", e);
-        });
-      });
-    }
-  </script>
+  function prettyError(err) {
+    const code = err.code || "";
+    const map = {
+      "auth/email-already-in-use": "এই ইমেইল দিয়ে অ্যাকাউন্ট আছে",
+      "auth/invalid-email": "ইমেইলটি সঠিক নয়",
+      "auth/weak-password": "পাসওয়ার্ড দুর্বল (কমপক্ষে ৬ অক্ষর)",
+      "auth/user-not-found": "এই ইমেইল দিয়ে অ্যাকাউন্ট নেই",
+      "auth/wrong-password": "পাসওয়ার্ড ভুল",
+      "auth/invalid-credential": "ইমেইল বা পাসওয়ার্ড ভুল",
+      "auth/too-many-requests": "অনেকবার চেষ্টা করেছেন, একটু অপেক্ষা করুন",
+      "auth/network-request-failed": "নেটওয়ার্ক সমস্যা",
+      "permission-denied": "Firestore নিয়ম আটকে দিয়েছে"
+    };
+    return map[code] || err.message || "কিছু ভুল হয়েছে";
+  }
+</script>
+
+<script>
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => navigator.serviceWorker.register("/bondhu/sw.js").catch(() => {}));
+  }
+</script>
+
 </body>
 </html>
