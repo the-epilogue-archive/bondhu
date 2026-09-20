@@ -1,245 +1,344 @@
 <!DOCTYPE html>
-<html lang="bn">
+<html lang="bn" data-theme="light">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>বন্ধু - Settings</title>
-  <style>
-    * { box-sizing: border-box; }
-    body {
-      font-family: sans-serif; background: #fafafa;
-      padding: 20px; max-width: 500px; margin: 0 auto;
-      padding-bottom: 40px;
-    }
-    h1 { color: #e1306c; margin: 0 0 20px; }
-    .topbar {
-      display: flex; justify-content: space-between; align-items: center;
-      margin-bottom: 20px;
-    }
-    .topbar a { color: #e1306c; text-decoration: none; font-weight: bold; }
-    .box {
-      background: white; padding: 20px; border-radius: 12px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin-bottom: 20px;
-    }
-    .box h3 { margin: 0 0 15px; color: #333; }
-    input {
-      width: 100%; padding: 10px; margin: 8px 0;
-      border: 1px solid #ddd; border-radius: 8px;
-      box-sizing: border-box; font-size: 14px;
-    }
-    textarea {
-      width: 100%; padding: 10px; margin: 8px 0;
-      border: 1px solid #ddd; border-radius: 8px;
-      box-sizing: border-box; font-size: 14px;
-      font-family: inherit; min-height: 70px; resize: vertical;
-    }
-    button {
-      background: #e1306c; color: white; border: none;
-      padding: 12px 24px; border-radius: 8px;
-      font-size: 15px; cursor: pointer;
-      font-weight: bold; margin-right: 8px;
-    }
-    button:disabled { background: #ccc; cursor: not-allowed; }
-    button.danger { background: #dc3545; }
-    #status {
-      margin-top: 10px; padding: 10px;
-      border-radius: 8px; font-size: 14px; display: none;
-    }
-    .ok { background: #d4edda; color: #155724; display: block; }
-    .err { background: #f8d7da; color: #721c24; display: block; }
-    .info { background: #d1ecf1; color: #0c5460; display: block; }
-    small { color: #666; font-size: 12px; display: block; margin-bottom: 8px; }
-    .avatar-section {
-      display: flex; align-items: center; gap: 16px; margin-bottom: 12px;
-    }
-    .avatar-big {
-      width: 80px; height: 80px; border-radius: 50%;
-      background: linear-gradient(135deg, #feda75, #d62976);
-      display: flex; align-items: center; justify-content: center;
-      color: white; font-size: 32px; font-weight: bold;
-      overflow: hidden; flex-shrink: 0;
-    }
-    .avatar-big img { width: 100%; height: 100%; object-fit: cover; }
-    .avatar-actions { flex: 1; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#f5f0e2">
+<title>বন্ধু — সেটিংস</title>
+<link rel="manifest" href="manifest.json">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,500;0,600;0,700;0,800;1,500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/app.css">
+<script src="js/theme.js"></script>
+<style>
+  .settings-card{
+    background:var(--paper-elev);
+    border:1px solid var(--rule);
+    border-radius:14px;
+    padding:20px;
+    margin-bottom:16px;
+    box-shadow:var(--shadow-sm);
+    transition:transform .35s cubic-bezier(.34,1.56,.64,1),border-color .3s,box-shadow .3s;
+    will-change:transform;
+  }
+  .settings-card:hover{
+    transform:translateY(-2px);
+    border-color:var(--rule-dark);
+    box-shadow:var(--shadow-md);
+  }
+  .settings-title{
+    font-family:'Playfair Display',serif;
+    font-size:15px;
+    font-weight:700;
+    color:var(--ink);
+    margin-bottom:16px;
+    padding-bottom:12px;
+    border-bottom:1px solid var(--rule);
+    display:flex;
+    align-items:center;
+    gap:8px;
+    letter-spacing:.3px;
+  }
+  .settings-title svg{
+    width:18px;height:18px;
+    stroke:var(--accent);fill:none;stroke-width:1.8;
+    stroke-linecap:round;stroke-linejoin:round;
+  }
+
+  .avatar-row{
+    display:flex;align-items:center;gap:16px;margin-bottom:16px;
+  }
+  .avatar-preview{
+    width:80px;height:80px;border-radius:50%;
+    background:var(--ink);color:var(--paper);
+    display:flex;align-items:center;justify-content:center;
+    font-family:'Playfair Display',serif;font-weight:700;font-size:30px;
+    overflow:hidden;flex-shrink:0;
+    box-shadow:var(--shadow-md);
+    border:3px solid var(--paper-elev);
+    background-image:linear-gradient(135deg,rgba(255,255,255,.08),transparent 60%);
+    transition:transform .3s;
+  }
+  .avatar-preview:hover{transform:scale(1.05)}
+  .avatar-preview img{width:100%;height:100%;object-fit:cover}
+
+  .avatar-actions{flex:1}
+
+  .theme-toggle-row{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:12px 0;
+  }
+  .theme-toggle-row .label{
+    display:flex;flex-direction:column;gap:2px;
+  }
+  .theme-toggle-row .label span:first-child{
+    font-size:14px;color:var(--ink);font-weight:500;
+  }
+  .theme-toggle-row .label span:last-child{
+    font-size:11.5px;color:var(--ink-mute);font-style:italic;
+    font-family:'Playfair Display',serif;
+  }
+
+  /* Big toggle switch */
+  .switch{
+    position:relative;
+    width:52px;height:30px;
+    border-radius:30px;
+    background:var(--rule);
+    cursor:pointer;
+    transition:background .3s;
+    flex-shrink:0;
+    border:none;
+  }
+  .switch::after{
+    content:'';
+    position:absolute;top:3px;left:3px;
+    width:24px;height:24px;
+    border-radius:50%;
+    background:var(--paper-elev);
+    box-shadow:var(--shadow-sm);
+    transition:transform .35s cubic-bezier(.34,1.56,.64,1);
+    will-change:transform;
+  }
+  [data-theme="dark"] .switch{background:var(--accent)}
+  [data-theme="dark"] .switch::after{transform:translateX(22px)}
+
+  .field-row{margin-bottom:14px}
+  .field-row:last-child{margin-bottom:0}
+
+  @media (max-width:480px){
+    .settings-card{padding:16px}
+    .avatar-preview{width:70px;height:70px;font-size:26px}
+  }
+</style>
 </head>
 <body>
-  <div class="topbar">
-    <h1>⚙️ Settings</h1>
-    <a href="index.html">← Feed</a>
-  </div>
 
-  <!-- Profile Edit -->
-  <div class="box">
-    <h3>Profile</h3>
+<div class="page">
 
-    <div class="avatar-section">
-      <div class="avatar-big" id="avatarBig">?</div>
+  <nav class="topbar">
+    <div class="topbar-brand" style="font-size:18px">সেটিংস</div>
+    <div class="topbar-actions">
+      <button class="theme-toggle" onclick="toggleBondhuTheme()" aria-label="Theme">
+        <svg class="icon-moon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        <svg class="icon-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+      </button>
+      <a href="index.html" class="icon-btn" aria-label="Home">
+        <svg viewBox="0 0 24 24"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+      </a>
+    </div>
+  </nav>
+
+  <!-- PROFILE -->
+  <div class="settings-card">
+    <div class="settings-title">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21v-2a4 4 0 0 1 4-4h8a4 4 0 0 1 4 4v2"/></svg>
+      প্রোফাইল
+    </div>
+
+    <div class="avatar-row">
+      <div class="avatar-preview" id="avatarPreview">?</div>
       <div class="avatar-actions">
-        <input type="file" id="picInput" accept="image/*" style="font-size:13px;">
-        <button id="picBtn" style="font-size:13px;padding:8px 16px;">Pic upload</button>
+        <input type="file" id="picInput" accept="image/*" style="display:none">
+        <button class="btn btn-sm btn-ghost" id="picBtn" style="width:100%">
+          <svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+          ছবি পরিবর্তন
+        </button>
       </div>
     </div>
 
-    <small>Naam</small>
-    <input type="text" id="nameInput" placeholder="Tomar naam">
-    <small>Bio</small>
-    <textarea id="bioInput" placeholder="Tomar somporke kichu..."></textarea>
-    <button id="saveProfileBtn">Save profile</button>
-    <div id="profileStatus"></div>
+    <div class="field-row">
+      <label class="field-label">নাম</label>
+      <input class="input" type="text" id="nameInput" placeholder="আপনার নাম">
+    </div>
+
+    <div class="field-row">
+      <label class="field-label">পরিচিতি</label>
+      <textarea class="textarea" id="bioInput" placeholder="নিজের সম্পর্কে লিখুন..." maxlength="200"></textarea>
+    </div>
+
+    <button class="btn" id="saveProfileBtn">
+      <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+      সংরক্ষণ করুন
+    </button>
+    <div class="alert" id="profileStatus"></div>
   </div>
 
-  <!-- GitHub Token -->
-  <div class="box">
-    <h3>GitHub Token Setup</h3>
-    <small>Image upload korar jonno GitHub token. Browser e save thakbe.</small>
-    <input type="password" id="tokenInput" placeholder="github_pat_...">
-    <button id="saveTokenBtn">Save token</button>
-    <button id="clearTokenBtn" class="danger">Clear</button>
-    <div id="tokenStatus"></div>
+  <!-- APPEARANCE -->
+  <div class="settings-card">
+    <div class="settings-title">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+      থিম
+    </div>
+
+    <div class="theme-toggle-row">
+      <div class="label">
+        <span>ডার্ক মোড</span>
+        <span>রাতের জন্য আরামদায়ক</span>
+      </div>
+      <button class="switch" id="themeSwitch" onclick="toggleBondhuTheme()" aria-label="Toggle theme"></button>
+    </div>
   </div>
 
-  <!-- Account info -->
-  <div class="box">
-    <h3>Account</h3>
-    <small>Email</small>
-    <input type="text" id="emailView" disabled>
-    <small>Username</small>
-    <input type="text" id="usernameView" disabled>
+  <!-- ACCOUNT -->
+  <div class="settings-card">
+    <div class="settings-title">
+      <svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>
+      অ্যাকাউন্ট
+    </div>
+    <div class="field-row">
+      <label class="field-label">ইমেইল</label>
+      <input class="input" type="text" id="emailView" disabled>
+    </div>
+    <div class="field-row">
+      <label class="field-label">ইউজারনেম</label>
+      <input class="input" type="text" id="usernameView" disabled>
+    </div>
   </div>
 
-  <script type="module">
-    import { requireAuth, updateUserData } from "./js/auth.js";
-    import { uploadToGitHub, hasToken, setToken, clearToken } from "./js/upload.js";
+  <!-- GITHUB TOKEN -->
+  <div class="settings-card">
+    <div class="settings-title">
+      <svg viewBox="0 0 24 24"><path d="M21 2H3v16h5v4l4-4h9V2z"/><path d="M7 8h10M7 12h7"/></svg>
+      GitHub টোকেন
+    </div>
+    <p style="font-size:12px;color:var(--ink-mute);font-style:italic;font-family:'Playfair Display',serif;margin-bottom:14px;line-height:1.5">
+      ছবি আপলোড করার জন্য টোকেন। ব্রাউজারে সংরক্ষিত থাকবে।
+    </p>
+    <div class="field-row">
+      <input class="input" type="password" id="tokenInput" placeholder="github_pat_...">
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-sm" id="saveTokenBtn" style="flex:1">সংরক্ষণ</button>
+      <button class="btn btn-sm btn-ghost" id="clearTokenBtn" style="flex:1">মুছে ফেলুন</button>
+    </div>
+    <div class="alert" id="tokenStatus"></div>
+  </div>
 
-    let currentUser = null;
+  <!-- LOGOUT -->
+  <div class="settings-card">
+    <button class="btn btn-ghost" id="logoutBtn" style="width:100%;color:#c62828;border-color:rgba(198,40,40,.3)">
+      <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      প্রস্থান করুন
+    </button>
+  </div>
 
-    requireAuth(async (user) => {
-      currentUser = user;
-      renderProfile(user);
-      renderToken();
-    });
+</div>
 
-    function renderProfile(user) {
-      const initial = (user.name || "?")[0].toUpperCase();
-      const avatarBig = document.getElementById("avatarBig");
-      avatarBig.innerHTML = user.photoURL
-        ? `<img src="${user.photoURL}">` : initial;
+<nav class="bottom-nav">
+  <a href="index.html"><svg viewBox="0 0 24 24"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg></a>
+  <a href="search.html"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.35-4.35"/></svg></a>
+  <a href="upload.html"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="5"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg></a>
+  <a href="reels.html"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="5"/><path d="M9 8v8l6-4z"/></svg></a>
+  <a href="profile.html"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21v-2a4 4 0 0 1 4-4h8a4 4 0 0 1 4 4v2"/></svg></a>
+</nav>
 
-      document.getElementById("nameInput").value = user.name || "";
-      document.getElementById("bioInput").value = user.bio || "";
-      document.getElementById("emailView").value = user.email || "";
-      document.getElementById("usernameView").value = "@" + (user.username || "");
+<script type="module">
+  import { requireAuth, logout, updateUserData } from "./js/auth.js";
+  import { uploadToGitHub, hasToken, setToken, clearToken } from "./js/upload.js";
+
+  let currentUser = null;
+
+  requireAuth(async (user) => {
+    currentUser = user;
+    renderProfile(user);
+    renderToken();
+  });
+
+  function renderProfile(user) {
+    const initial = (user.name || "?")[0].toUpperCase();
+    const av = document.getElementById("avatarPreview");
+    av.innerHTML = user.photoURL ? `<img src="${user.photoURL}">` : initial;
+    document.getElementById("nameInput").value = user.name || "";
+    document.getElementById("bioInput").value = user.bio || "";
+    document.getElementById("emailView").value = user.email || "";
+    document.getElementById("usernameView").value = "@" + (user.username || "");
+  }
+
+  function renderToken() {
+    const status = document.getElementById("tokenStatus");
+    if (hasToken()) {
+      status.className = "alert ok show";
+      status.textContent = "✅ টোকেন সেট আছে";
+    } else {
+      status.className = "alert err show";
+      status.textContent = "❌ টোকেন সেট নেই";
+    }
+  }
+
+  document.getElementById("picBtn").addEventListener("click", () => {
+    document.getElementById("picInput").click();
+  });
+
+  document.getElementById("picInput").addEventListener("change", async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    if (!hasToken()) {
+      alert("আগে GitHub টোকেন সেট করুন");
+      return;
+    }
+    const status = document.getElementById("profileStatus");
+    status.className = "alert info show";
+    status.textContent = "আপলোড হচ্ছে... ⏳";
+    try {
+      const url = await uploadToGitHub(file, "profiles");
+      await updateUserData(currentUser.uid, { photoURL: url });
+      currentUser.photoURL = url;
+      renderProfile(currentUser);
+      status.className = "alert ok show";
+      status.textContent = "✅ প্রোফাইল ছবি আপডেট হয়েছে!";
+    } catch (err) {
+      status.className = "alert err show";
+      status.textContent = "❌ " + err.message;
+    }
+  });
+
+  document.getElementById("saveProfileBtn").addEventListener("click", async () => {
+    const name = document.getElementById("nameInput").value.trim();
+    const bio = document.getElementById("bioInput").value.trim();
+    const status = document.getElementById("profileStatus");
+
+    if (!name) {
+      status.className = "alert err show";
+      status.textContent = "নাম খালি রাখা যাবে না";
+      return;
     }
 
-    function renderToken() {
-      const status = document.getElementById("tokenStatus");
-      if (hasToken()) {
-        status.className = "ok";
-        status.style.display = "block";
-        status.textContent = "✅ Token set ache";
-      } else {
-        status.className = "err";
-        status.style.display = "block";
-        status.textContent = "❌ Token set nei";
-      }
+    status.className = "alert info show";
+    status.textContent = "সংরক্ষণ হচ্ছে...";
+    try {
+      await updateUserData(currentUser.uid, { name, bio });
+      status.className = "alert ok show";
+      status.textContent = "✅ সংরক্ষিত হয়েছে!";
+    } catch (e) {
+      status.className = "alert err show";
+      status.textContent = "❌ " + e.message;
     }
+  });
 
-    // ==========================================
-    // Profile pic upload
-    // ==========================================
-    document.getElementById("picBtn").addEventListener("click", async () => {
-      const file = document.getElementById("picInput").files[0];
-      const status = document.getElementById("profileStatus");
+  document.getElementById("saveTokenBtn").addEventListener("click", () => {
+    const t = document.getElementById("tokenInput").value.trim();
+    if (!t || !t.startsWith("github_pat_")) {
+      alert("টোকেন 'github_pat_' দিয়ে শুরু হতে হবে");
+      return;
+    }
+    setToken(t);
+    document.getElementById("tokenInput").value = "";
+    renderToken();
+  });
 
-      if (!file) {
-        status.className = "err";
-        status.style.display = "block";
-        status.textContent = "Age image select koro";
-        return;
-      }
-      if (!hasToken()) {
-        status.className = "err";
-        status.style.display = "block";
-        status.textContent = "Age GitHub token set koro (niche)";
-        return;
-      }
+  document.getElementById("clearTokenBtn").addEventListener("click", () => {
+    clearToken();
+    renderToken();
+  });
 
-      const btn = document.getElementById("picBtn");
-      btn.disabled = true;
-      status.className = "info";
-      status.style.display = "block";
-      status.textContent = "Upload hocche... ⏳";
+  document.getElementById("logoutBtn").addEventListener("click", async () => {
+    if (!confirm("প্রস্থান করবেন?")) return;
+    await logout();
+    window.location.href = "login.html";
+  });
+</script>
 
-      try {
-        const url = await uploadToGitHub(file, "profiles");
-        await updateUserData(currentUser.uid, { photoURL: url });
-        currentUser.photoURL = url;
-        renderProfile(currentUser);
-        status.className = "ok";
-        status.textContent = "✅ Profile pic update hoyeche!";
-        btn.disabled = false;
-      } catch (e) {
-        status.className = "err";
-        status.textContent = "❌ " + e.message;
-        btn.disabled = false;
-      }
-    });
-
-    // ==========================================
-    // Profile save (naam + bio)
-    // ==========================================
-    document.getElementById("saveProfileBtn").addEventListener("click", async () => {
-      const status = document.getElementById("profileStatus");
-      const name = document.getElementById("nameInput").value.trim();
-      const bio = document.getElementById("bioInput").value.trim();
-
-      if (!name) {
-        status.className = "err";
-        status.style.display = "block";
-        status.textContent = "Naam khali rakha jabe na";
-        return;
-      }
-
-      const btn = document.getElementById("saveProfileBtn");
-      btn.disabled = true;
-      status.className = "info";
-      status.style.display = "block";
-      status.textContent = "Save hocche...";
-
-      try {
-        await updateUserData(currentUser.uid, { name, bio });
-        currentUser.name = name;
-        currentUser.bio = bio;
-        status.className = "ok";
-        status.textContent = "✅ Profile save hoyeche!";
-      } catch (e) {
-        status.className = "err";
-        status.textContent = "❌ " + e.message;
-      }
-      btn.disabled = false;
-    });
-
-    // ==========================================
-    // Token save / clear
-    // ==========================================
-    document.getElementById("saveTokenBtn").addEventListener("click", () => {
-      const t = document.getElementById("tokenInput").value.trim();
-      const status = document.getElementById("tokenStatus");
-      if (!t || !t.startsWith("github_pat_")) {
-        status.className = "err";
-        status.textContent = "Token 'github_pat_' diye shuru hote hobe";
-        return;
-      }
-      setToken(t);
-      document.getElementById("tokenInput").value = "";
-      renderToken();
-    });
-
-    document.getElementById("clearTokenBtn").addEventListener("click", () => {
-      clearToken();
-      renderToken();
-    });
-  </script>
 </body>
 </html>
