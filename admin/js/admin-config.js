@@ -1,23 +1,25 @@
 // ==========================================
 // Bondhu Admin - Configuration
-// ⚠️ Ei file e tomar info update koro
+// ⚠️ Ei file e tomar admin email + PIN update koro
 // ==========================================
 
 window.ADMIN_CONFIG = {
-  // 🚨 Ei email gulo diye login korte parbe
-  // Tomar Google email ei list e add koro
+  // 🚨 Ei email diye Bondhu তে login korলে admin button dekhbe
+  // Tomar actual Google email ekhane boshaw
   ADMIN_EMAILS: [
-    "csaad9822@gmail.com"
+    "csaad9822@gmail.com"        // 👈 ei line ta tomar email diye replace koro
   ],
 
-  // 🔐 PIN (4-6 digit)
-  // Ei PIN ta tomake chhara keu jane na
-  ADMIN_PIN: "ilovepoetry",
+  // 🔐 Admin panel e dhukar PIN (4 digit)
+  ADMIN_PIN: "1234",              // 👈 notun PIN boshao
 
-  // ⏱️ Session koto ghonta valid thakbe
+  // ⏱️ Admin session koto ghonta active thakbe
   SESSION_HOURS: 12,
 
   // App info
   APP_NAME: "বন্ধু",
-  ADMIN_TITLE: "বন্ধু অ্যাডমিন"
+  ADMIN_TITLE: "বন্ধু অ্যাডমিন",
+
+  // Admin panel URL (relative)
+  ADMIN_URL: "admin/"
 };
