@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>বন্ধু - Search</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { font-family: sans-serif; background: #fafafa; margin: 0; }
+    .topbar {
+      background: white; padding: 12px 16px;
+      display: flex; justify-content: space-between; align-items: center;
+      border-bottom: 1px solid #eee;
+    }
+    .topbar h1 { color: #e1306c; margin: 0; font-size: 22px; }
+    .topbar a { color: #e1306c; text-decoration: none; font-weight: bold; font-size: 14px; }
+    .container { max-width: 500px; margin: 0 auto; padding: 16px; }
+    .search-bar { display: flex; gap: 8px; margin-bottom: 16px; }
+    .search-bar input {
+      flex: 1; padding: 12px 14px; border: 1px solid #ddd;
+      border-radius: 24px; font-size: 15px;
+    }
+    .user-item {
+      display: flex; align-items: center; gap: 12px;
+      background: white; padding: 12px 14px;
+      border-radius: 12px; margin-bottom: 10px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+      text-decoration: none; color: inherit;
+    }
+    .avatar {
+      width: 46px; height: 46px; border-radius: 50%;
+      background: linear-gradient(135deg, #feda75, #d62976);
+      display: flex; align-items: center; justify-content: center;
+      color: white; font-weight: bold; font-size: 20px;
+      overflow: hidden; flex-shrink: 0;
+    }
+    .avatar img { width: 100%; height: 100%; object-fit: cover; }
+    .info { flex: 1; }
+    .info .name { font-weight: bold; font-size: 15px; }
+    .info .username { color: #888; font-size: 13px; }
+    .empty { text-align: center; color: #999; padding: 40px; }
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <h1>Search</h1>
+    <a href="index.html">← Feed</a>
+  </div>
+
+  <div class="container">
+    <div class="search-bar">
+      <input type="text" id="searchInput" placeholder="Username ba naam likho..." autofocus>
+    </div>
+    <div id="results"><div class="empty">Naam likho khুঁjte...</div></div>
+  </div>
+
+  <script type="module">
+    import { requireAuth } from "./js/auth.js";
+    import { searchUsers } from "./js/feed.js";
+
+    requireAuth(() => {});
+
+    const input = document.getElementById("searchInput");
+    const results = document.getElementById("results");
+    let timer = null;
+
+    input.addEventListener("input", () => {
+      clearTimeout(timer);
+      timer = setTimeout(doSearch, 350);
+    });
+
+    async function doSearch() {
+      const term = input.value.trim();
+      if (!term) {
+        results.innerHTML = `<div class="empty">Naam likho khুঁjte...</div>`;
+        return;
+      }
+      results.innerHTML = `<div class="empty">Khুঁjchi...</div>`;
+      try {
+        const users = await searchUsers(term);
+        if (users.length === 0) {
+          results.innerHTML = `<div class="empty">Kono user nei</div>`;
+          return;
+        }
+        results.innerHTML = users.map(u => {
+          const initial = (u.name || "?")[0].toUpperCase();
+          return `
+            <a class="user-item" href="user.html?u=${encodeURIComponent(u.username)}">
+              <div class="avatar">${u.photoURL ? `<img src="${u.photoURL}">` : initial}</div>
+              <div class="info">
+                <div class="name">${escapeHtml(u.name)}</div>
+                <div class="username">@${escapeHtml(u.username)}</div>
+              </div>
+            </a>
+          `;
+        }).join("");
+      } catch (e) {
+        results.innerHTML = `<div class="empty">❌ ${e.message}</div>`;
+      }
+    }
+
+    function escapeHtml(str) {
+      return String(str || "").replace(/[&<>"']/g, m => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+      }[m]));
+    }
+  </script>
+</body>
+</html>
