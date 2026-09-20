@@ -1,123 +1,216 @@
 <!DOCTYPE html>
-<html lang="bn">
+<html lang="bn" data-theme="light">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>বন্ধু - Reel Upload</title>
-  <style>
-    * { box-sizing: border-box; }
-    body { font-family: sans-serif; background: #fafafa; margin: 0 auto; padding: 20px; max-width: 500px; }
-    .topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-    .topbar h2 { color: #e1306c; margin: 0; }
-    .topbar a { color: #e1306c; text-decoration: none; font-weight: bold; }
-    .box { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
-    input[type="file"] { margin: 10px 0; padding: 10px; width: 100%; box-sizing: border-box; }
-    textarea {
-      width: 100%; padding: 12px; border: 1px solid #ddd;
-      border-radius: 8px; font-size: 15px; font-family: inherit;
-      resize: vertical; min-height: 60px; margin-top: 10px; box-sizing: border-box;
-    }
-    button {
-      width: 100%; background: #e1306c; color: white; border: none;
-      padding: 14px; border-radius: 8px; font-size: 16px;
-      font-weight: bold; cursor: pointer; margin-top: 12px;
-    }
-    button:disabled { background: #ccc; cursor: not-allowed; }
-    #status {
-      margin-top: 15px; padding: 10px; border-radius: 8px;
-      font-size: 14px; display: none; white-space: pre-wrap;
-    }
-    .ok { background: #d4edda; color: #155724; display: block; }
-    .err { background: #f8d7da; color: #721c24; display: block; }
-    .info { background: #d1ecf1; color: #0c5460; display: block; }
-    #preview { margin-top: 15px; max-width: 100%; border-radius: 8px; display: none; max-height: 400px; }
-    .progress-wrap {
-      margin-top: 12px; background: #eee; border-radius: 8px;
-      overflow: hidden; display: none;
-    }
-    .progress-wrap.active { display: block; }
-    .progress-bar {
-      height: 8px; background: #e1306c; width: 0%;
-      transition: width 0.2s;
-    }
-    .progress-text {
-      font-size: 12px; color: #666; text-align: center;
-      padding: 4px; background: #f9f9f9;
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#f5f0e2">
+<title>বন্ধু — রিল তৈরি</title>
+<link rel="manifest" href="manifest.json">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,500;0,600;0,700;0,800;1,500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/app.css">
+<script src="js/theme.js"></script>
+<style>
+  .upload-card{
+    background:var(--paper-elev);
+    border:1px solid var(--rule);
+    border-radius:14px;
+    padding:22px;
+    margin-top:16px;
+    box-shadow:var(--shadow-sm);
+  }
+  .drop-zone{
+    aspect-ratio:9/16;
+    max-height:460px;
+    border:2px dashed var(--rule-dark);
+    border-radius:12px;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    gap:12px;
+    cursor:pointer;
+    transition:all .3s cubic-bezier(.34,1.56,.64,1);
+    background:var(--paper-2);
+    position:relative;
+    overflow:hidden;
+    margin-bottom:16px;
+  }
+  .drop-zone:hover{
+    border-color:var(--accent);
+    background:var(--accent-soft);
+    transform:translateY(-2px);
+  }
+  .drop-zone svg{
+    width:56px;height:56px;
+    stroke:var(--ink-mute);fill:none;stroke-width:1.5;
+    stroke-linecap:round;stroke-linejoin:round;
+    transition:stroke .3s,transform .3s;
+  }
+  .drop-zone:hover svg{stroke:var(--accent);transform:scale(1.1)}
+  .drop-zone-text{
+    font-size:13px;color:var(--ink-mute);
+    text-align:center;line-height:1.5;
+    padding:0 20px;
+  }
+  .drop-zone-text b{color:var(--ink-soft);font-family:'Playfair Display',serif;font-size:15px;display:block;margin-bottom:4px}
+  .drop-zone video{
+    position:absolute;inset:0;
+    width:100%;height:100%;object-fit:contain;
+    background:#000;
+    display:none;
+  }
+  .drop-zone.has-video{
+    border-style:solid;
+    border-color:var(--accent-border);
+    aspect-ratio:auto;
+    height:auto;
+    max-height:none;
+  }
+  .drop-zone.has-video video{display:block;position:relative;aspect-ratio:9/16;max-height:460px;margin:0 auto}
+  .drop-zone.has-video .drop-zone-inner{display:none}
+
+  .progress-wrap{
+    margin-top:14px;
+    background:var(--paper-2);
+    border-radius:20px;
+    overflow:hidden;
+    display:none;
+    border:1px solid var(--rule);
+  }
+  .progress-wrap.show{display:block}
+  .progress-bar{
+    height:6px;
+    background:linear-gradient(90deg,var(--accent),var(--accent-2));
+    width:0%;
+    transition:width .25s ease;
+  }
+  .progress-text{
+    font-size:11px;color:var(--ink-mute);
+    text-align:center;padding:6px;
+    font-family:'Playfair Display',serif;
+    font-style:italic;
+  }
+</style>
 </head>
 <body>
-  <div class="topbar">
-    <h2>Reel Upload</h2>
-    <a href="reels.html">← Reels</a>
-  </div>
 
-  <div class="box">
-    <input type="file" id="fileInput" accept="video/*">
-    <video id="preview" controls></video>
-    <textarea id="captionInput" placeholder="Caption likho..."></textarea>
-    <button id="postBtn" type="button">Reel post koro</button>
+<div class="page">
+
+  <nav class="topbar">
+    <div class="topbar-brand" style="font-size:18px">রিল তৈরি</div>
+    <div class="topbar-actions">
+      <button class="theme-toggle" onclick="toggleBondhuTheme()" aria-label="Theme">
+        <svg class="icon-moon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        <svg class="icon-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+      </button>
+      <a href="reels.html" class="icon-btn" aria-label="Reels">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="5"/><path d="M9 8v8l6-4z"/></svg>
+      </a>
+    </div>
+  </nav>
+
+  <div class="section-head">নতুন রিল</div>
+
+  <div class="upload-card">
+    <div class="drop-zone" id="dropZone" onclick="document.getElementById('fileInput').click()">
+      <video id="preview" controls muted playsinline></video>
+      <div class="drop-zone-inner" style="text-align:center">
+        <svg viewBox="0 0 24 24"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
+        <div class="drop-zone-text" style="margin-top:12px">
+          <b>ভিডিও যুক্ত করুন</b>
+          সর্বোচ্চ ৫০ MB · MP4, WebM
+        </div>
+      </div>
+    </div>
+
+    <input type="file" id="fileInput" accept="video/*" style="display:none">
+
+    <div class="field">
+      <label class="field-label">শিরোনাম</label>
+      <textarea class="textarea" id="captionInput" placeholder="এই রিল সম্পর্কে কিছু লিখুন..." maxlength="500" style="min-height:60px"></textarea>
+      <div style="text-align:right;font-size:11px;color:var(--ink-mute);margin-top:6px;font-family:'Playfair Display',serif;font-style:italic"><span id="charCount">0</span> / 500</div>
+    </div>
+
+    <button class="btn" id="postBtn" type="button">
+      <svg viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+      রিল প্রকাশ করুন
+    </button>
+
     <div class="progress-wrap" id="progressWrap">
       <div class="progress-bar" id="progressBar"></div>
-      <div class="progress-text" id="progressText">0%</div>
+      <div class="progress-text" id="progressText">০%</div>
     </div>
-    <div id="status"></div>
+
+    <div class="alert" id="status"></div>
   </div>
 
-  <script type="module">
-    import { requireAuth } from "./js/auth.js";
-    import { uploadVideoToCloudinary, createReel } from "./js/reels.js";
+</div>
 
-    requireAuth(() => {});
+<nav class="bottom-nav">
+  <a href="index.html"><svg viewBox="0 0 24 24"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg></a>
+  <a href="search.html"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.35-4.35"/></svg></a>
+  <a href="upload.html"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="5"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg></a>
+  <a href="reels.html" class="active"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="5"/><path d="M9 8v8l6-4z"/></svg></a>
+  <a href="profile.html"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21v-2a4 4 0 0 1 4-4h8a4 4 0 0 1 4 4v2"/></svg></a>
+</nav>
 
-    const fileInput = document.getElementById("fileInput");
-    const captionInput = document.getElementById("captionInput");
-    const postBtn = document.getElementById("postBtn");
-    const status = document.getElementById("status");
-    const preview = document.getElementById("preview");
-    const progressWrap = document.getElementById("progressWrap");
-    const progressBar = document.getElementById("progressBar");
-    const progressText = document.getElementById("progressText");
+<script type="module">
+  import { requireAuth } from "./js/auth.js";
+  import { uploadVideoToCloudinary, createReel } from "./js/reels.js";
 
-    function showStatus(cls, msg) {
-      status.className = cls;
-      status.style.display = "block";
-      status.textContent = msg;
+  requireAuth(() => {});
+
+  const dropZone = document.getElementById("dropZone");
+  const fileInput = document.getElementById("fileInput");
+  const preview = document.getElementById("preview");
+  const captionInput = document.getElementById("captionInput");
+  const charCount = document.getElementById("charCount");
+  const postBtn = document.getElementById("postBtn");
+  const status = document.getElementById("status");
+  const progressWrap = document.getElementById("progressWrap");
+  const progressBar = document.getElementById("progressBar");
+  const progressText = document.getElementById("progressText");
+
+  captionInput.addEventListener("input", () => {
+    charCount.textContent = captionInput.value.length;
+  });
+
+  fileInput.addEventListener("change", () => {
+    const f = fileInput.files[0];
+    if (f) {
+      preview.src = URL.createObjectURL(f);
+      dropZone.classList.add("has-video");
     }
+  });
 
-    fileInput.addEventListener("change", () => {
-      const f = fileInput.files[0];
-      if (f) {
-        preview.src = URL.createObjectURL(f);
-        preview.style.display = "block";
-      }
-    });
+  function showStatus(type, msg) {
+    status.className = "alert " + type + " show";
+    status.textContent = msg;
+  }
 
-    postBtn.addEventListener("click", async () => {
-      const file = fileInput.files[0];
-      if (!file) { showStatus("err", "Video select koro"); return; }
+  postBtn.addEventListener("click", async () => {
+    const file = fileInput.files[0];
+    if (!file) { showStatus("err", "প্রথমে একটি ভিডিও নির্বাচন করুন"); return; }
 
-      postBtn.disabled = true;
-      progressWrap.classList.add("active");
-      showStatus("info", "Upload hocche... ektu wait koro ⏳");
+    postBtn.disabled = true;
+    progressWrap.classList.add("show");
+    showStatus("info", "আপলোড হচ্ছে... ⏳");
 
-      try {
-        const videoUrl = await uploadVideoToCloudinary(file, (pct) => {
-          progressBar.style.width = pct + "%";
-          progressText.textContent = pct + "%";
-        });
+    try {
+      const videoUrl = await uploadVideoToCloudinary(file, (pct) => {
+        progressBar.style.width = pct + "%";
+        progressText.textContent = pct + "%";
+      });
+      showStatus("info", "সংরক্ষণ হচ্ছে...");
+      await createReel(videoUrl, captionInput.value.trim());
+      showStatus("ok", "✅ রিল প্রকাশিত!");
+      setTimeout(() => window.location.href = "reels.html", 1000);
+    } catch (e) {
+      showStatus("err", "❌ " + e.message);
+      postBtn.disabled = false;
+      progressWrap.classList.remove("show");
+    }
+  });
+</script>
 
-        showStatus("info", "Firestore e save hocche...");
-        await createReel(videoUrl, captionInput.value.trim());
-
-        showStatus("ok", "✅ Reel post hoyeche! Reels page e jaccho...");
-        setTimeout(() => window.location.href = "reels.html", 1200);
-      } catch (e) {
-        console.error(e);
-        showStatus("err", "❌ " + e.message);
-        postBtn.disabled = false;
-      }
-    });
-  </script>
 </body>
 </html>
