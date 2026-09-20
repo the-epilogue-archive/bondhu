@@ -46,13 +46,11 @@ export function renderTopbar(options = {}) {
   const el = document.querySelector('[data-component="topbar"]');
   if (!el) return;
 
-  const {
-    title = "",
-    showTheme = true,
-    showBack = false,
-    showHome = true,
-    actions = ""   // extra HTML
-  } = options;
+  const title = options.title !== undefined ? options.title : (el.dataset.title || "");
+  const showTheme = options.showTheme !== undefined ? options.showTheme : (el.dataset.theme !== "false");
+  const showBack = options.showBack !== undefined ? options.showBack : (el.dataset.back === "true");
+  const showHome = options.showHome !== undefined ? options.showHome : (el.dataset.home !== "false");
+  const actions = options.actions !== undefined ? options.actions : (el.dataset.actions || "");
 
   el.className = "topbar";
   el.innerHTML = `
@@ -111,6 +109,7 @@ function autoMount() {
       showTheme: topbarEl.dataset.theme !== "false",
       showBack: topbarEl.dataset.back === "true",
       showHome: topbarEl.dataset.home !== "false",
+      actions: topbarEl.dataset.actions || ""
     });
     topbarEl.dataset.mounted = "1";
   }
@@ -129,7 +128,7 @@ if (document.readyState === "loading") {
   autoMount();
 }
 
-// Expose globally (jodi kono page manually call korte chay)
+// Expose globally
 window.renderTopbar = renderTopbar;
 window.renderBottomNav = renderBottomNav;
 window.renderLoading = renderLoading;
