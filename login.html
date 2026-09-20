@@ -24,64 +24,24 @@
       width: 100%;
       max-width: 380px;
     }
-    h1 {
-      color: #e1306c;
-      text-align: center;
-      margin: 0 0 8px;
-      font-size: 32px;
-    }
-    .subtitle {
-      text-align: center;
-      color: #666;
-      margin-bottom: 24px;
-      font-size: 14px;
-    }
+    h1 { color: #e1306c; text-align: center; margin: 0 0 8px; font-size: 32px; }
+    .subtitle { text-align: center; color: #666; margin-bottom: 24px; font-size: 14px; }
     input {
-      width: 100%;
-      padding: 12px 14px;
-      margin-bottom: 12px;
-      border: 1px solid #ddd;
-      border-radius: 8px;
-      font-size: 15px;
-      transition: border 0.2s;
+      width: 100%; padding: 12px 14px; margin-bottom: 12px;
+      border: 1px solid #ddd; border-radius: 8px; font-size: 15px;
     }
-    input:focus {
-      outline: none;
-      border-color: #e1306c;
-    }
+    input:focus { outline: none; border-color: #e1306c; }
     button {
-      width: 100%;
-      background: #e1306c;
-      color: white;
-      border: none;
-      padding: 14px;
-      border-radius: 8px;
-      font-size: 16px;
-      font-weight: bold;
-      cursor: pointer;
-      margin-top: 8px;
+      width: 100%; background: #e1306c; color: white; border: none;
+      padding: 14px; border-radius: 8px; font-size: 16px;
+      font-weight: bold; cursor: pointer; margin-top: 8px;
     }
     button:disabled { background: #ccc; cursor: not-allowed; }
-    .toggle {
-      text-align: center;
-      margin-top: 20px;
-      font-size: 14px;
-      color: #666;
-    }
-    .toggle a {
-      color: #e1306c;
-      cursor: pointer;
-      font-weight: bold;
-      text-decoration: none;
-    }
+    .toggle { text-align: center; margin-top: 20px; font-size: 14px; color: #666; }
+    .toggle a { color: #e1306c; cursor: pointer; font-weight: bold; text-decoration: none; }
     #status {
-      margin-top: 12px;
-      padding: 10px;
-      border-radius: 8px;
-      font-size: 13px;
-      display: none;
-      white-space: pre-wrap;
-      word-break: break-word;
+      margin-top: 12px; padding: 10px; border-radius: 8px;
+      font-size: 13px; display: none; white-space: pre-wrap; word-break: break-word;
     }
     .ok { background: #d4edda; color: #155724; display: block; }
     .err { background: #f8d7da; color: #721c24; display: block; }
@@ -113,7 +73,6 @@
   <script type="module">
     import { signup, login, redirectIfLoggedIn } from "./js/auth.js";
 
-    // Already logged in hole index e pathao
     redirectIfLoggedIn("index.html");
 
     const form = document.getElementById("authForm");
@@ -176,12 +135,7 @@
             throw new Error("Username 3-20 char, sudhu a-z, 0-9, _");
           }
 
-          console.log("🟡 Signup shuru:", { email, name, username });
-
           await signup(email, password, name, username);
-
-          console.log("🟢 Signup successful");
-
           status.className = "ok";
           status.textContent = "✅ Account create hoyeche!";
         } else {
@@ -192,15 +146,11 @@
 
         setTimeout(() => window.location.href = "index.html", 1000);
       } catch (err) {
-        console.error("🔴 Error ashche:", err);
-        console.error("   Code:", err.code);
-        console.error("   Message:", err.message);
-
+        console.error("Auth error:", err);
         status.className = "err";
         status.style.display = "block";
         status.textContent = "❌ " + prettyError(err) +
-          "\n\nCode: " + (err.code || "no-code") +
-          "\nMessage: " + (err.message || "no-message");
+          "\n\nCode: " + (err.code || "no-code");
         submitBtn.disabled = false;
       }
     });
@@ -214,54 +164,9 @@
       if (code === "auth/wrong-password") return "Password bhul";
       if (code === "auth/invalid-credential") return "Email ba password bhul";
       if (code === "auth/too-many-requests") return "Onek bar try korecho, ektu wait koro";
-      if (code === "permission-denied") return "Firestore rules block korche — rules publish koro";
-      if (code === "unavailable") return "Network problem — internet check koro";
+      if (code === "auth/network-request-failed") return "Network problem — internet check koro";
+      if (code === "permission-denied") return "Firestore rules block korche";
       return err.message || "Kichu bhul hoyeche";
-    }
-
-    // ==========================================
-    // URL e ?debug=1 dile auto diagnose cholbe
-    // ==========================================
-    if (window.location.search.includes("debug=1")) {
-      setTimeout(async () => {
-        try {
-          const fb = await import("./js/firebase-config.js");
-          const { doc, getDoc, setDoc } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
-
-          console.log("========== DEBUG INFO ==========");
-          console.log("Firebase Auth current user:", fb.auth.currentUser);
-          console.log("Current UID:", fb.auth.currentUser?.uid);
-
-          if (fb.auth.currentUser) {
-            const uid = fb.auth.currentUser.uid;
-            console.log("setDoc manual test shuru...");
-            try {
-              await setDoc(doc(fb.db, "users", uid), {
-                uid: uid,
-                email: fb.auth.currentUser.email,
-                name: "Debug User",
-                username: "debuguser_" + Date.now(),
-                bio: "",
-                photoURL: "",
-                followers: [],
-                following: []
-              });
-              console.log("✅ Manual setDoc SUCCESS");
-
-              const snap = await getDoc(doc(fb.db, "users", uid));
-              console.log("Doc exists?", snap.exists());
-              console.log("Doc data:", snap.data());
-            } catch (e) {
-              console.error("❌ Manual setDoc FAILED");
-              console.error("   Code:", e.code);
-              console.error("   Message:", e.message);
-            }
-          }
-          console.log("========== END DEBUG ==========");
-        } catch (e) {
-          console.error("Debug script fail:", e);
-        }
-      }, 1500);
     }
   </script>
 </body>
