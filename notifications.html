@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>বন্ধু - Notifications</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { font-family: sans-serif; background: #fafafa; margin: 0; }
+    .topbar {
+      background: white; padding: 12px 16px;
+      display: flex; justify-content: space-between; align-items: center;
+      border-bottom: 1px solid #eee;
+    }
+    .topbar h1 { color: #e1306c; margin: 0; font-size: 22px; }
+    .topbar a { color: #e1306c; text-decoration: none; font-weight: bold; font-size: 14px; }
+    .mark-all-btn {
+      background: none; border: none; color: #e1306c;
+      font-weight: bold; font-size: 13px; cursor: pointer;
+    }
+    .list { max-width: 500px; margin: 0 auto; padding: 12px; }
+    .notif {
+      background: white; padding: 12px 14px;
+      border-radius: 10px; margin-bottom: 8px;
+      display: flex; gap: 12px; align-items: flex-start;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+      cursor: pointer; transition: background 0.15s;
+    }
+    .notif:hover { background: #fafafa; }
+    .notif.unread { background: #fff0f5; border-left: 3px solid #e1306c; }
+    .notif-icon {
+      font-size: 22px; width: 40px; height: 40px;
+      display: flex; align-items: center; justify-content: center;
+      background: #f5f5f5; border-radius: 50%; flex-shrink: 0;
+    }
+    .notif-body { flex: 1; min-width: 0; }
+    .notif-text { font-size: 14px; color: #333; line-height: 1.4; }
+    .notif-text b { color: #000; }
+    .notif-text .extra { color: #666; font-style: italic; }
+    .notif-time { font-size: 11px; color: #999; margin-top: 4px; }
+    .empty { text-align: center; color: #999; padding: 60px 20px; font-size: 14px; }
+    .loading { text-align: center; color: #999; padding: 40px; }
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <h1>Notifications</h1>
+    <div>
+      <button class="mark-all-btn" id="markAllBtn">Sob read</button>
+      <a href="index.html" style="margin-left:12px;">← Feed</a>
+    </div>
+  </div>
+
+  <div class="list" id="list">
+    <div class="loading">Loading...</div>
+  </div>
+
+  <script type="module">
+    import { requireAuth } from "./js/auth.js";
+    import { loadMyNotifications, markRead, markAllRead } from "./js/notifications.js";
+    import { getAllUsersList } from "./js/auth.js";
+
+    let allUsers = {};
+    let currentUser = null;
+
+    requireAuth(async (user) => {
+      currentUser = user;
+      // Sob user load koro (nam dekhanor jonno)
+      const users = await getAllUsersList();
+      users.forEach(u => { allUsers[u.uid] = u; });
+      await load();
+    });
+
+    document.getElementById("markAllBtn").addEventListener("click", async () => {
+      await markAllRead();
+      await load();
+    });
+
+    async function load() {
+      const list = document.getElementById("list");
+      try {
+        const notifs = await loadMyNotifications();
+        if (notifs.length === 0) {
+          list.innerHTML = `<div class="empty">Kono notification nei</div>`;
+          return;
+        }
+
+        list.innerHTML = notifs.map(n => {
+          const fromUser = allUsers[n.fromUid] || {};
+          const fromName = fromUser.name || "Keu ekjon";
+          const fromUsername = fromUser.username || "";
+
+          let icon = "🔔";
+          let text = "";
+
+          if (n.type === "like") {
+            icon = "❤️";
+            text = `<b>${escapeHtml(fromName)}</b> tomar post like koreche`;
+          } else if (n.type === "comment") {
+            icon = "💬";
+            text = `<b>${escapeHtml(fromName)}</b> comment koreche${n.extra ? `: <span class="extra">"${escapeHtml(n.extra)}"</span>` : ""}`;
+          } else if (n.type === "follow") {
+            icon = "👤";
+            text = `<b>${escapeHtml(fromName)}</b> tomake follow koreche`;
+          }
+
+          const time = timeAgo(n.createdAt?.seconds ? n.createdAt.seconds * 1000 : Date.now());
+
+          return `
+            <div class="notif ${n.read ? "" : "unread"}" data-id="${n.id}" data-from="${n.fromUid}" data-post="${n.postId || ""}" data-type="${n.type}">
+              <div class="notif-icon">${icon}</div>
+              <div class="notif-body">
+                <div class="notif-text">${text}</div>
+                <div class="notif-time">${time}</div>
+              </div>
+            </div>
+          `;
+        }).join("");
+
+        // Click handler
+        list.querySelectorAll(".notif").forEach(el => {
+          el.addEventListener("click", async () => {
+            await markRead(el.dataset.id);
+            el.classList.remove("unread");
+
+            const type = el.dataset.type;
+            const fromUid = el.dataset.from;
+            const fromUser = allUsers[fromUid] || {};
+
+            if (type === "follow" && fromUser.username) {
+              window.location.href = `user.html?u=${encodeURIComponent(fromUser.username)}`;
+            } else if ((type === "like" || type === "comment") && el.dataset.post) {
+              window.location.href = "index.html";
+            }
+          });
+        });
+      } catch (e) {
+        list.innerHTML = `<div class="empty">❌ ${e.message}</div>`;
+      }
+    }
+
+    function timeAgo(t) {
+      const diff = Math.floor((Date.now() - t) / 1000);
+      if (diff < 60) return `${diff}s age`;
+      if (diff < 3600) return `${Math.floor(diff / 60)}m age`;
+      if (diff < 86400) return `${Math.floor(diff / 3600)}h age`;
+      return `${Math.floor(diff / 86400)}d age`;
+    }
+
+    function escapeHtml(str) {
+      return String(str || "").replace(/[&<>"']/g, m => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+      }[m]));
+    }
+  </script>
+</body>
+</html>
