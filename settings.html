@@ -5,111 +5,241 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>বন্ধু - Settings</title>
   <style>
+    * { box-sizing: border-box; }
     body {
-      font-family: sans-serif;
-      background: #fafafa;
-      padding: 20px;
-      max-width: 500px;
-      margin: 0 auto;
+      font-family: sans-serif; background: #fafafa;
+      padding: 20px; max-width: 500px; margin: 0 auto;
+      padding-bottom: 40px;
     }
-    h1 { color: #e1306c; }
-    .box {
-      background: white;
-      padding: 20px;
-      border-radius: 12px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    h1 { color: #e1306c; margin: 0 0 20px; }
+    .topbar {
+      display: flex; justify-content: space-between; align-items: center;
       margin-bottom: 20px;
     }
+    .topbar a { color: #e1306c; text-decoration: none; font-weight: bold; }
+    .box {
+      background: white; padding: 20px; border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin-bottom: 20px;
+    }
+    .box h3 { margin: 0 0 15px; color: #333; }
     input {
-      width: 100%;
-      padding: 10px;
-      margin: 10px 0;
-      border: 1px solid #ddd;
-      border-radius: 8px;
-      box-sizing: border-box;
-      font-size: 14px;
+      width: 100%; padding: 10px; margin: 8px 0;
+      border: 1px solid #ddd; border-radius: 8px;
+      box-sizing: border-box; font-size: 14px;
+    }
+    textarea {
+      width: 100%; padding: 10px; margin: 8px 0;
+      border: 1px solid #ddd; border-radius: 8px;
+      box-sizing: border-box; font-size: 14px;
+      font-family: inherit; min-height: 70px; resize: vertical;
     }
     button {
-      background: #e1306c;
-      color: white;
-      border: none;
-      padding: 12px 24px;
-      border-radius: 8px;
-      font-size: 16px;
-      cursor: pointer;
-      margin-right: 8px;
+      background: #e1306c; color: white; border: none;
+      padding: 12px 24px; border-radius: 8px;
+      font-size: 15px; cursor: pointer;
+      font-weight: bold; margin-right: 8px;
     }
-    .danger { background: #dc3545; }
+    button:disabled { background: #ccc; cursor: not-allowed; }
+    button.danger { background: #dc3545; }
     #status {
-      margin-top: 10px;
-      padding: 10px;
-      border-radius: 8px;
-      font-size: 14px;
+      margin-top: 10px; padding: 10px;
+      border-radius: 8px; font-size: 14px; display: none;
     }
-    .ok { background: #d4edda; color: #155724; }
-    .err { background: #f8d7da; color: #721c24; }
-    .info { background: #d1ecf1; color: #0c5460; }
-    small { color: #666; }
+    .ok { background: #d4edda; color: #155724; display: block; }
+    .err { background: #f8d7da; color: #721c24; display: block; }
+    .info { background: #d1ecf1; color: #0c5460; display: block; }
+    small { color: #666; font-size: 12px; display: block; margin-bottom: 8px; }
+    .avatar-section {
+      display: flex; align-items: center; gap: 16px; margin-bottom: 12px;
+    }
+    .avatar-big {
+      width: 80px; height: 80px; border-radius: 50%;
+      background: linear-gradient(135deg, #feda75, #d62976);
+      display: flex; align-items: center; justify-content: center;
+      color: white; font-size: 32px; font-weight: bold;
+      overflow: hidden; flex-shrink: 0;
+    }
+    .avatar-big img { width: 100%; height: 100%; object-fit: cover; }
+    .avatar-actions { flex: 1; }
   </style>
 </head>
 <body>
-  <h1>বন্ধু ⚙️</h1>
-
-  <div class="box">
-    <h3>GitHub Token Setup</h3>
-    <p><small>Upload korar jonno ekbar token paste koro. Browser e save thakbe.</small></p>
-<input type="password" id="tokenInput" placeholder="github_pat_...">
-    <button id="saveBtn">Save</button>
-    <button id="clearBtn" class="danger">Clear</button>
-    <div id="status"></div>
+  <div class="topbar">
+    <h1>⚙️ Settings</h1>
+    <a href="index.html">← Feed</a>
   </div>
 
+  <!-- Profile Edit -->
   <div class="box">
-    <h3>Status</h3>
-    <div id="currentStatus"></div>
+    <h3>Profile</h3>
+
+    <div class="avatar-section">
+      <div class="avatar-big" id="avatarBig">?</div>
+      <div class="avatar-actions">
+        <input type="file" id="picInput" accept="image/*" style="font-size:13px;">
+        <button id="picBtn" style="font-size:13px;padding:8px 16px;">Pic upload</button>
+      </div>
+    </div>
+
+    <small>Naam</small>
+    <input type="text" id="nameInput" placeholder="Tomar naam">
+    <small>Bio</small>
+    <textarea id="bioInput" placeholder="Tomar somporke kichu..."></textarea>
+    <button id="saveProfileBtn">Save profile</button>
+    <div id="profileStatus"></div>
+  </div>
+
+  <!-- GitHub Token -->
+  <div class="box">
+    <h3>GitHub Token Setup</h3>
+    <small>Image upload korar jonno GitHub token. Browser e save thakbe.</small>
+    <input type="password" id="tokenInput" placeholder="github_pat_...">
+    <button id="saveTokenBtn">Save token</button>
+    <button id="clearTokenBtn" class="danger">Clear</button>
+    <div id="tokenStatus"></div>
+  </div>
+
+  <!-- Account info -->
+  <div class="box">
+    <h3>Account</h3>
+    <small>Email</small>
+    <input type="text" id="emailView" disabled>
+    <small>Username</small>
+    <input type="text" id="usernameView" disabled>
   </div>
 
   <script type="module">
-    import { setToken, clearToken, hasToken } from "./js/upload.js";
+    import { requireAuth, updateUserData } from "./js/auth.js";
+    import { uploadToGitHub, hasToken, setToken, clearToken } from "./js/upload.js";
 
-    const tokenInput = document.getElementById("tokenInput");
-    const saveBtn = document.getElementById("saveBtn");
-    const clearBtn = document.getElementById("clearBtn");
-    const status = document.getElementById("status");
-    const currentStatus = document.getElementById("currentStatus");
+    let currentUser = null;
 
-    function updateCurrentStatus() {
+    requireAuth(async (user) => {
+      currentUser = user;
+      renderProfile(user);
+      renderToken();
+    });
+
+    function renderProfile(user) {
+      const initial = (user.name || "?")[0].toUpperCase();
+      const avatarBig = document.getElementById("avatarBig");
+      avatarBig.innerHTML = user.photoURL
+        ? `<img src="${user.photoURL}">` : initial;
+
+      document.getElementById("nameInput").value = user.name || "";
+      document.getElementById("bioInput").value = user.bio || "";
+      document.getElementById("emailView").value = user.email || "";
+      document.getElementById("usernameView").value = "@" + (user.username || "");
+    }
+
+    function renderToken() {
+      const status = document.getElementById("tokenStatus");
       if (hasToken()) {
-        currentStatus.innerHTML = "✅ Token set ache";
-        currentStatus.className = "ok";
+        status.className = "ok";
+        status.style.display = "block";
+        status.textContent = "✅ Token set ache";
       } else {
-        currentStatus.innerHTML = "❌ Token set nei";
-        currentStatus.className = "err";
+        status.className = "err";
+        status.style.display = "block";
+        status.textContent = "❌ Token set nei";
       }
     }
 
-    saveBtn.addEventListener("click", () => {
-      const t = tokenInput.value.trim();
+    // ==========================================
+    // Profile pic upload
+    // ==========================================
+    document.getElementById("picBtn").addEventListener("click", async () => {
+      const file = document.getElementById("picInput").files[0];
+      const status = document.getElementById("profileStatus");
+
+      if (!file) {
+        status.className = "err";
+        status.style.display = "block";
+        status.textContent = "Age image select koro";
+        return;
+      }
+      if (!hasToken()) {
+        status.className = "err";
+        status.style.display = "block";
+        status.textContent = "Age GitHub token set koro (niche)";
+        return;
+      }
+
+      const btn = document.getElementById("picBtn");
+      btn.disabled = true;
+      status.className = "info";
+      status.style.display = "block";
+      status.textContent = "Upload hocche... ⏳";
+
+      try {
+        const url = await uploadToGitHub(file, "profiles");
+        await updateUserData(currentUser.uid, { photoURL: url });
+        currentUser.photoURL = url;
+        renderProfile(currentUser);
+        status.className = "ok";
+        status.textContent = "✅ Profile pic update hoyeche!";
+        btn.disabled = false;
+      } catch (e) {
+        status.className = "err";
+        status.textContent = "❌ " + e.message;
+        btn.disabled = false;
+      }
+    });
+
+    // ==========================================
+    // Profile save (naam + bio)
+    // ==========================================
+    document.getElementById("saveProfileBtn").addEventListener("click", async () => {
+      const status = document.getElementById("profileStatus");
+      const name = document.getElementById("nameInput").value.trim();
+      const bio = document.getElementById("bioInput").value.trim();
+
+      if (!name) {
+        status.className = "err";
+        status.style.display = "block";
+        status.textContent = "Naam khali rakha jabe na";
+        return;
+      }
+
+      const btn = document.getElementById("saveProfileBtn");
+      btn.disabled = true;
+      status.className = "info";
+      status.style.display = "block";
+      status.textContent = "Save hocche...";
+
+      try {
+        await updateUserData(currentUser.uid, { name, bio });
+        currentUser.name = name;
+        currentUser.bio = bio;
+        status.className = "ok";
+        status.textContent = "✅ Profile save hoyeche!";
+      } catch (e) {
+        status.className = "err";
+        status.textContent = "❌ " + e.message;
+      }
+      btn.disabled = false;
+    });
+
+    // ==========================================
+    // Token save / clear
+    // ==========================================
+    document.getElementById("saveTokenBtn").addEventListener("click", () => {
+      const t = document.getElementById("tokenInput").value.trim();
+      const status = document.getElementById("tokenStatus");
       if (!t || !t.startsWith("github_pat_")) {
         status.className = "err";
         status.textContent = "Token 'github_pat_' diye shuru hote hobe";
         return;
       }
       setToken(t);
-      status.className = "ok";
-      status.textContent = "✅ Token save hoyeche!";
-      tokenInput.value = "";
-      updateCurrentStatus();
+      document.getElementById("tokenInput").value = "";
+      renderToken();
     });
 
-    clearBtn.addEventListener("click", () => {
+    document.getElementById("clearTokenBtn").addEventListener("click", () => {
       clearToken();
-      status.className = "info";
-      status.textContent = "Token clear hoyeche";
-      updateCurrentStatus();
+      renderToken();
     });
-
-    updateCurrentStatus();
   </script>
 </body>
 </html>
