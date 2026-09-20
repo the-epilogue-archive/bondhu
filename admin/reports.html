@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="bn" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#f5f0e2">
+<title>বন্ধু — রিপোর্ট</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,500;0,600;0,700;0,800;1,500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/app.css">
+<link rel="stylesheet" href="css/admin.css">
+<script src="../js/theme.js"></script>
+<script src="js/admin-config.js"></script>
+<style>
+  .report-list{
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+  }
+  .report-card{
+    background:var(--paper-elev);
+    border:1px solid var(--rule);
+    border-left:4px solid var(--accent);
+    border-radius:12px;
+    padding:14px 16px;
+    transition:all .3s cubic-bezier(.34,1.56,.64,1);
+  }
+  .report-card:hover{
+    transform:translateY(-2px);
+    box-shadow:0 8px 22px var(--shadow-md);
+  }
+  .report-card.resolved{
+    opacity:.65;
+    border-left-color:#4caf50;
+  }
+  .report-card.ignored{
+    opacity:.5;
+    border-left-color:var(--ink-mute);
+  }
+  .report-head{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    gap:12px;
+    margin-bottom:10px;
+  }
+  .report-type{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    padding:3px 10px;
+    background:rgba(198,40,40,.1);
+    color:#c62828;
+    border-radius:20px;
+    font-size:10.5px;
+    font-weight:700;
+    letter-spacing:.5px;
+    text-transform:uppercase;
+  }
+  .report-reason{
+    font-size:13.5px;
+    color:var(--ink-soft);
+    line-height:1.5;
+    margin-bottom:10px;
+    padding:10px 12px;
+    background:var(--paper-2);
+    border-radius:8px;
+    font-family:'Playfair Display',serif;
+    font-style:italic;
+  }
+  .report-meta{
+    display:flex;
+    flex-wrap:wrap;
+    gap:14px;
+    font-size:11.5px;
+    color:var(--ink-mute);
+    margin-bottom:12px;
+  }
+  .report-meta span{
+    display:inline-flex;
+    align-items:center;
+    gap:5px;
+  }
+  .report-meta b{
+    color:var(--ink);
+    font-weight:600;
+  }
+  .report-actions{
+    display:flex;
+    gap:6px;
+    flex-wrap:wrap;
+  }
+</style>
+</head>
+<body class="admin">
+
+<div class="admin-shell">
+  <aside id="adminSidebar"></aside>
+
+  <div class="admin-main">
+    <header class="admin-topbar" id="adminTopbar">
+      <div class="admin-topbar-brand">
+        রিপোর্ট
+        <span class="admin-badge" id="reportCountBadge">—</span>
+      </div>
+      <div class="admin-topbar-actions">
+        <button class="theme-toggle" onclick="toggleBondhuTheme()" aria-label="Theme">
+          <svg class="icon-moon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+          <svg class="icon-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <div class="admin-page">
+      <div class="admin-page-head">
+        <div>
+          <div class="admin-page-title">রিপোর্ট</div>
+          <div class="admin-page-sub">ব্যবহারকারীদের রিপোর্ট দেখুন এবং ব্যবস্থা নিন</div>
+        </div>
+      </div>
+
+      <div class="posts-filters" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px" id="filterTabs">
+        <button class="filter-tab active" data-filter="pending" style="padding:7px 14px;border-radius:20px;font-size:12px;font-weight:600;background:var(--accent);color:var(--accent-text);border:1px solid var(--accent);cursor:pointer;font-family:inherit">অমীমাংসিত</button>
+        <button class="filter-tab" data-filter="resolved" style="padding:7px 14px;border-radius:20px;font-size:12px;font-weight:600;background:var(--paper-elev);border:1px solid var(--rule);cursor:pointer;font-family:inherit;color:var(--ink-soft)">মীমাংসিত</button>
+        <button class="filter-tab" data-filter="all" style="padding:7px 14px;border-radius:20px;font-size:12px;font-weight:600;background:var(--paper-elev);border:1px solid var(--rule);cursor:pointer;font-family:inherit;color:var(--ink-soft)">সব</button>
+      </div>
+
+      <div class="report-list" id="reportList">
+        <div class="admin-empty">
+          <div class="spinner" style="margin:0 auto 12px;border-color:var(--rule);border-top-color:var(--accent)"></div>
+          লোড হচ্ছে...
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+  import { requireAdmin } from "./js/admin-auth.js";
+  import { db } from "../../js/firebase-config.js";
+  import {
+    collection, getDocs, doc, updateDoc, deleteDoc, query, orderBy, limit
+  } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+  import { showToast, showConfirm } from "../js/toast.js";
+  import "./js/admin-sidebar.js";
+
+  let allReports = [];
+  let filtered = [];
+  let currentFilter = "pending";
+
+  requireAdmin(() => {
+    loadReports();
+    document.querySelectorAll(".filter-tab").forEach(tab => {
+      tab.addEventListener("click", () => {
+        currentFilter = tab.dataset.filter;
+        document.querySelectorAll(".filter-tab").forEach(t => {
+          t.style.background = "var(--paper-elev)";
+          t.style.color = "var(--ink-soft)";
+          t.style.borderColor = "var(--rule)";
+        });
+        tab.style.background = "var(--accent)";
+        tab.style.color = "var(--accent-text)";
+        tab.style.borderColor = "var(--accent)";
+        applyFilter();
+      });
+    });
+  });
+
+  async function loadReports() {
+    const list = document.getElementById("reportList");
+    try {
+      const q = query(collection(db, "reports"), orderBy("createdAt", "desc"), limit(200));
+      const snap = await getDocs(q);
+      allReports = [];
+      snap.forEach(d => allReports.push({ id: d.id, ...d.data() }));
+      applyFilter();
+      document.getElementById("reportCountBadge").textContent = `${bnNum(allReports.filter(r => !r.status || r.status === "pending").length)} অমীমাংসিত`;
+    } catch (e) {
+      // Fallback query without orderBy
+      try {
+        const snap = await getDocs(collection(db, "reports"));
+        allReports = [];
+        snap.forEach(d => allReports.push({ id: d.id, ...d.data() }));
+        allReports.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
+        applyFilter();
+        document.getElementById("reportCountBadge").textContent = `${bnNum(allReports.filter(r => !r.status || r.status === "pending").length)} অমীমাংসিত`;
+      } catch (e2) {
+        list.innerHTML = `<div class="admin-empty">লোড ব্যর্থ: ${e2.message}</div>`;
+      }
+    }
+  }
+
+  function applyFilter() {
+    if (currentFilter === "all") filtered = [...allReports];
+    else if (currentFilter === "resolved") filtered = allReports.filter(r => r.status === "resolved" || r.status === "ignored");
+    else filtered = allReports.filter(r => !r.status || r.status === "pending");
+    renderList();
+  }
+
+  function renderList() {
+    const list = document.getElementById("reportList");
+    if (filtered.length === 0) {
+      list.innerHTML = `<div class="admin-empty">
+        <svg viewBox="0 0 24 24"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        কোনো রিপোর্ট নেই
+      </div>`;
+      return;
+    }
+
+    list.innerHTML = filtered.map(r => {
+      const statusClass = r.status === "resolved" ? "resolved" : (r.status === "ignored" ? "ignored" : "");
+      const typeLabels = {
+        post: "পোস্ট", user: "ব্যবহারকারী", comment: "মন্তব্য", reel: "রিল", story: "স্টোরি"
+      };
+      const typeLabel = typeLabels[r.targetType] || (r.targetType || "—");
+      const targetLink = r.targetType === "user" && r.targetUsername
+        ? `<a href="../user.html?u=${encodeURIComponent(r.targetUsername)}" target="_blank" style="color:var(--accent);text-decoration:none;font-weight:600">@${escapeHtml(r.targetUsername)}</a>`
+        : r.targetType === "post" && r.targetId
+          ? `<span style="color:var(--accent);font-weight:600">পোস্ট আইডি ${r.targetId.slice(0, 8)}...</span>`
+          : r.targetType === "reel" && r.targetId
+            ? `<span style="color:var(--accent);font-weight:600">রিল আইডি ${r.targetId.slice(0, 8)}...</span>`
+            : "—";
+
+      return `
+        <div class="report-card ${statusClass}" data-id="${r.id}">
+          <div class="report-head">
+            <span class="report-type">
+              <svg viewBox="0 0 24 24" style="width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg>
+              ${escapeHtml(typeLabel)}
+            </span>
+            <span style="font-size:11px;color:var(--ink-mute);font-style:italic;font-family:'Playfair Display',serif">
+              ${r.createdAt?.seconds ? timeAgo(r.createdAt.seconds * 1000) : "—"}
+            </span>
+          </div>
+
+          ${r.reason ? `<div class="report-reason">"${escapeHtml(r.reason)}"</div>` : ""}
+
+          <div class="report-meta">
+            <span>রিপোর্টকারী: <b>@${escapeHtml(r.reporterUsername || "—")}</b></span>
+            <span>টার্গেট: ${targetLink}</span>
+            ${r.status ? `<span>স্ট্যাটাস: <b style="color:${r.status === "resolved" ? "#4caf50" : "var(--ink-mute)"}">${r.status === "resolved" ? "মীমাংসিত" : "উপেক্ষা"}</b></span>` : ""}
+          </div>
+
+          <div class="report-actions">
+            ${(!r.status || r.status === "pending") ? `
+              <button class="admin-btn admin-btn-primary admin-btn-sm" data-action="resolve" data-id="${r.id}">মীমাংসিত</button>
+              <button class="admin-btn admin-btn-ghost admin-btn-sm" data-action="ignore" data-id="${r.id}">উপেক্ষা</button>
+            ` : ""}
+            ${r.targetType === "post" && r.targetId ? `
+              <button class="admin-btn admin-btn-danger admin-btn-sm" data-action="delete-post" data-target="${r.targetId}" data-id="${r.id}">পোস্ট মুছুন</button>
+            ` : ""}
+            ${r.targetType === "reel" && r.targetId ? `
+              <button class="admin-btn admin-btn-danger admin-btn-sm" data-action="delete-reel" data-target="${r.targetId}" data-id="${r.id}">রিল মুছুন</button>
+            ` : ""}
+            <button class="admin-btn admin-btn-ghost admin-btn-sm" data-action="delete-report" data-id="${r.id}" style="margin-left:auto;color:#c62828">রিপোর্ট মুছুন</button>
+          </div>
+        </div>
+      `;
+    }).join("");
+
+    list.querySelectorAll("[data-action]").forEach(btn => {
+      btn.addEventListener("click", () => handleAction(btn));
+    });
+  }
+
+  async function handleAction(btn) {
+    const action = btn.dataset.action;
+    const id = btn.dataset.id;
+    const target = btn.dataset.target;
+
+    if (action === "resolve") {
+      try {
+        await updateDoc(doc(db, "reports", id), { status: "resolved", resolvedAt: new Date() });
+        const r = allReports.find(x => x.id === id);
+        if (r) r.status = "resolved";
+        applyFilter();
+        showToast("✅ মীমাংসিত চিহ্নিত", "ok");
+      } catch (e) { showToast("❌ " + e.message, "err"); }
+    } else if (action === "ignore") {
+      try {
+        await updateDoc(doc(db, "reports", id), { status: "ignored" });
+        const r = allReports.find(x => x.id === id);
+        if (r) r.status = "ignored";
+        applyFilter();
+        showToast("উপেক্ষা করা হয়েছে", "info");
+      } catch (e) { showToast("❌ " + e.message, "err"); }
+    } else if (action === "delete-post") {
+      const ok = await showConfirm("রিপোর্টকৃত পোস্টটি মুছে ফেলবেন?", { title: "পোস্ট মুছুন", okText: "মুছে ফেলুন" });
+      if (!ok) return;
+      try {
+        await deleteDoc(doc(db, "posts", target));
+        await updateDoc(doc(db, "reports", id), { status: "resolved", resolvedAt: new Date() });
+        const r = allReports.find(x => x.id === id);
+        if (r) r.status = "resolved";
+        applyFilter();
+        showToast("✅ পোস্ট মুছে ফেলা হয়েছে", "ok");
+      } catch (e) { showToast("❌ " + e.message, "err"); }
+    } else if (action === "delete-reel") {
+      const ok = await showConfirm("রিপোর্টকৃত রিলটি মুছে ফেলবেন?", { title: "রিল মুছুন", okText: "মুছে ফেলুন" });
+      if (!ok) return;
+      try {
+        await deleteDoc(doc(db, "reels", target));
+        await updateDoc(doc(db, "reports", id), { status: "resolved", resolvedAt: new Date() });
+        const r = allReports.find(x => x.id === id);
+        if (r) r.status = "resolved";
+        applyFilter();
+        showToast("✅ রিল মুছে ফেলা হয়েছে", "ok");
+      } catch (e) { showToast("❌ " + e.message, "err"); }
+    } else if (action === "delete-report") {
+      const ok = await showConfirm("রিপোর্টটি মুছে ফেলবেন?", { title: "মুছুন", okText: "মুছে ফেলুন" });
+      if (!ok) return;
+      try {
+        await deleteDoc(doc(db, "reports", id));
+        allReports = allReports.filter(x => x.id !== id);
+        applyFilter();
+        showToast("✅ রিপোর্ট মুছে ফেলা হয়েছে", "ok");
+      } catch (e) { showToast("❌ " + e.message, "err"); }
+    }
+  }
+
+  function bnNum(n) {
+    const en = "0123456789", bn = "০১২৩৪৫৬৭৮৯";
+    return String(n).replace(/[0-9]/g, d => bn[en.indexOf(d)]);
+  }
+  function timeAgo(t) {
+    const d = Math.floor((Date.now() - t) / 1000);
+    if (d < 60) return `${d} সেঃ আগে`;
+    if (d < 3600) return `${Math.floor(d / 60)} মিঃ আগে`;
+    if (d < 86400) return `${Math.floor(d / 3600)} ঘঃ আগে`;
+    if (d < 604800) return `${Math.floor(d / 86400)} দিন আগে`;
+    return new Date(t).toLocaleDateString("bn-BD");
+  }
+  function escapeHtml(s) {
+    return String(s || "").replace(/[&<>"']/g, m => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[m]));
+  }
+</script>
+
+</body>
+</html>
