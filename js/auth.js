@@ -1,56 +1,50 @@
 // ==========================================
-// Bondhu - Simple Auth (localStorage based)
-// Pore Firebase Auth e upgrade kora jabe
+// Bondhu - Firebase Auth + Firestore
 // ==========================================
 
-const USERS_KEY = "bondhu_users";       // sob user list
-const CURRENT_KEY = "bondhu_current";   // current logged in user
+import { auth, db } from "./firebase-config.js";
+import {
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signOut,
+  onAuthStateChanged,
+  updateProfile
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import {
+  doc, setDoc, getDoc, updateDoc, collection, getDocs, query, where,
+  serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 // ==========================================
-// Helper — sob user list
-// ==========================================
-function getAllUsers() {
-  return JSON.parse(localStorage.getItem(USERS_KEY) || "[]");
-}
-
-function saveAllUsers(users) {
-  localStorage.setItem(USERS_KEY, JSON.stringify(users));
-}
-
-// ==========================================
-// Signup
+// Signup — Auth + Firestore duitai
 // ==========================================
 export async function signup(email, password, displayName, username) {
-  const users = getAllUsers();
+  // 1. Auth e user create
+  const cred = await createUserWithEmailAndPassword(auth, email, password);
+  const user = cred.user;
 
-  // Email already ache?
-  if (users.find(u => u.email.toLowerCase() === email.toLowerCase())) {
-    throw new Error("Ei email diye account already ache");
+  // 2. Auth displayName set
+  await updateProfile(user, { displayName });
+
+  // 3. Firestore e user doc
+  try {
+    await setDoc(doc(db, "users", user.uid), {
+      uid: user.uid,
+      email: email.toLowerCase(),
+      name: displayName,
+      username: username.toLowerCase(),
+      bio: "",
+      photoURL: "",
+      followers: [],
+      following: [],
+      createdAt: serverTimestamp()
+    });
+    console.log("✅ Firestore user doc create hoyeche:", user.uid);
+  } catch (e) {
+    console.error("❌ Firestore doc create fail:", e.code, e.message);
+    throw new Error("Firestore e user save hoy ni: " + e.message);
   }
 
-  // Username already ache?
-  if (users.find(u => u.username.toLowerCase() === username.toLowerCase())) {
-    throw new Error("Ei username already neowa");
-  }
-
-  const user = {
-    uid: "local_" + Date.now() + "_" + Math.random().toString(36).slice(2, 8),
-    email: email.toLowerCase(),
-    password: password, // ⚠️ plaintext — only for local testing
-    name: displayName,
-    username: username.toLowerCase(),
-    bio: "",
-    photoURL: "",
-    followers: [],
-    following: [],
-    createdAt: Date.now()
-  };
-
-  users.push(user);
-  saveAllUsers(users);
-
-  // Auto login
-  localStorage.setItem(CURRENT_KEY, JSON.stringify(user));
   return user;
 }
 
@@ -58,72 +52,96 @@ export async function signup(email, password, displayName, username) {
 // Login
 // ==========================================
 export async function login(email, password) {
-  const users = getAllUsers();
-  const user = users.find(u => u.email.toLowerCase() === email.toLowerCase());
-
-  if (!user) throw new Error("Ei email diye account nei");
-  if (user.password !== password) throw new Error("Password bhul");
-
-  localStorage.setItem(CURRENT_KEY, JSON.stringify(user));
-  return user;
+  const cred = await signInWithEmailAndPassword(auth, email, password);
+  return cred.user;
 }
 
 // ==========================================
 // Logout
 // ==========================================
 export async function logout() {
-  localStorage.removeItem(CURRENT_KEY);
+  await signOut(auth);
 }
 
 // ==========================================
-// Current user
+// Current user (sync — cached)
 // ==========================================
+let _cachedUser = null;
+onAuthStateChanged(auth, (user) => {
+  _cachedUser = user;
+});
+
 export function getCurrentUser() {
-  const data = localStorage.getItem(CURRENT_KEY);
-  return data ? JSON.parse(data) : null;
+  return _cachedUser;
 }
 
+// ==========================================
+// Firestore theke user data
+// ==========================================
 export async function getUserData(uid) {
-  const users = getAllUsers();
-  return users.find(u => u.uid === uid) || null;
+  const snap = await getDoc(doc(db, "users", uid));
+  return snap.exists() ? snap.data() : null;
 }
 
 // ==========================================
-// User data update koro (bio, photo etc.)
+// User data update
 // ==========================================
-export function updateUserData(uid, updates) {
-  const users = getAllUsers();
-  const idx = users.findIndex(u => u.uid === uid);
-  if (idx === -1) return null;
-  users[idx] = { ...users[idx], ...updates };
-  saveAllUsers(users);
-  localStorage.setItem(CURRENT_KEY, JSON.stringify(users[idx]));
-  return users[idx];
+export async function updateUserData(uid, updates) {
+  await updateDoc(doc(db, "users", uid), updates);
+  return { uid, ...updates };
 }
 
 // ==========================================
 // Page protect — login na korle login.html e
 // ==========================================
 export function requireAuth(callback) {
-  const user = getCurrentUser();
-  if (!user) {
-    window.location.href = "login.html";
-  } else {
-    callback(user);
-  }
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) {
+      window.location.href = "login.html";
+    } else {
+      // Firestore theke full data load koro
+      let data = await getUserData(user.uid);
+
+      // Jodi Firestore e doc na thake, create koro (safety)
+      if (!data) {
+        console.warn("⚠️ Firestore e user doc nei, create korchi...");
+        const fallbackUsername = user.email.split("@")[0].toLowerCase().replace(/[^a-z0-9_]/g, "");
+        await setDoc(doc(db, "users", user.uid), {
+          uid: user.uid,
+          email: user.email,
+          name: user.displayName || "User",
+          username: fallbackUsername,
+          bio: "",
+          photoURL: "",
+          followers: [],
+          following: [],
+          createdAt: serverTimestamp()
+        });
+        data = await getUserData(user.uid);
+      }
+
+      callback({ ...user, ...data });
+    }
+  });
 }
 
 // ==========================================
 // Already logged in hole index e
 // ==========================================
 export function redirectIfLoggedIn(to = "index.html") {
-  const user = getCurrentUser();
-  if (user) window.location.href = to;
+  onAuthStateChanged(auth, (user) => {
+    if (user) window.location.href = to;
+  });
 }
 
 // ==========================================
 // Sob user (search er jonno)
 // ==========================================
-export function getAllUsersList() {
-  return getAllUsers();
+export async function getAllUsersList() {
+  const snap = await getDocs(collection(db, "users"));
+  const arr = [];
+  snap.forEach(d => arr.push(d.data()));
+  return arr;
 }
+
+export { auth };
