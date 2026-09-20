@@ -20,7 +20,6 @@
     margin-bottom:16px;
     box-shadow:var(--shadow-sm);
     transition:transform .35s cubic-bezier(.34,1.56,.64,1),border-color .3s,box-shadow .3s;
-    will-change:transform;
   }
   .settings-card:hover{
     transform:translateY(-2px);
@@ -29,15 +28,10 @@
   }
   .settings-title{
     font-family:'Playfair Display',serif;
-    font-size:15px;
-    font-weight:700;
-    color:var(--ink);
-    margin-bottom:16px;
-    padding-bottom:12px;
+    font-size:15px;font-weight:700;color:var(--ink);
+    margin-bottom:16px;padding-bottom:12px;
     border-bottom:1px solid var(--rule);
-    display:flex;
-    align-items:center;
-    gap:8px;
+    display:flex;align-items:center;gap:8px;
     letter-spacing:.3px;
   }
   .settings-title svg{
@@ -46,9 +40,7 @@
     stroke-linecap:round;stroke-linejoin:round;
   }
 
-  .avatar-row{
-    display:flex;align-items:center;gap:16px;margin-bottom:16px;
-  }
+  .avatar-row{display:flex;align-items:center;gap:16px;margin-bottom:16px}
   .avatar-preview{
     width:80px;height:80px;border-radius:50%;
     background:var(--ink);color:var(--paper);
@@ -62,50 +54,64 @@
   }
   .avatar-preview:hover{transform:scale(1.05)}
   .avatar-preview img{width:100%;height:100%;object-fit:cover}
-
   .avatar-actions{flex:1}
 
   .theme-toggle-row{
     display:flex;align-items:center;justify-content:space-between;
     padding:12px 0;
   }
-  .theme-toggle-row .label{
-    display:flex;flex-direction:column;gap:2px;
-  }
-  .theme-toggle-row .label span:first-child{
-    font-size:14px;color:var(--ink);font-weight:500;
-  }
+  .theme-toggle-row .label{display:flex;flex-direction:column;gap:2px}
+  .theme-toggle-row .label span:first-child{font-size:14px;color:var(--ink);font-weight:500}
   .theme-toggle-row .label span:last-child{
     font-size:11.5px;color:var(--ink-mute);font-style:italic;
     font-family:'Playfair Display',serif;
   }
 
-  /* Big toggle switch */
   .switch{
     position:relative;
-    width:52px;height:30px;
-    border-radius:30px;
-    background:var(--rule);
-    cursor:pointer;
-    transition:background .3s;
-    flex-shrink:0;
-    border:none;
+    width:52px;height:30px;border-radius:30px;
+    background:var(--rule);cursor:pointer;
+    transition:background .3s;flex-shrink:0;border:none;
   }
   .switch::after{
-    content:'';
-    position:absolute;top:3px;left:3px;
-    width:24px;height:24px;
-    border-radius:50%;
-    background:var(--paper-elev);
-    box-shadow:var(--shadow-sm);
+    content:'';position:absolute;top:3px;left:3px;
+    width:24px;height:24px;border-radius:50%;
+    background:var(--paper-elev);box-shadow:var(--shadow-sm);
     transition:transform .35s cubic-bezier(.34,1.56,.64,1);
-    will-change:transform;
   }
   [data-theme="dark"] .switch{background:var(--accent)}
   [data-theme="dark"] .switch::after{transform:translateX(22px)}
 
   .field-row{margin-bottom:14px}
   .field-row:last-child{margin-bottom:0}
+
+  /* Username change UI */
+  .username-display{
+    display:flex;align-items:center;gap:10px;
+    padding:12px 16px;
+    background:var(--paper-2);
+    border:1px solid var(--rule);
+    border-radius:12px;
+    margin-bottom:10px;
+  }
+  .username-display .at{
+    color:var(--accent);font-weight:600;
+    font-family:'Playfair Display',serif;
+  }
+  .username-display .val{
+    flex:1;font-size:14px;color:var(--ink);
+    font-weight:500;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  }
+  .username-edit-row{
+    display:none;
+    gap:8px;margin-top:10px;
+  }
+  .username-edit-row.show{display:flex}
+  .username-edit-row .input{flex:1}
+  .username-edit-row .btn{width:auto}
+
+  .btn-row{display:flex;gap:8px}
 
   @media (max-width:480px){
     .settings-card{padding:16px}
@@ -153,6 +159,24 @@
       <input class="input" type="text" id="nameInput" placeholder="আপনার নাম">
     </div>
 
+    <!-- USERNAME CHANGE -->
+    <div class="field-row">
+      <label class="field-label">ইউজারনেম</label>
+      <div class="username-display">
+        <span class="at">@</span>
+        <span class="val" id="usernameValue">...</span>
+        <button class="btn btn-sm btn-ghost" id="editUsernameBtn" style="padding:6px 12px;font-size:12px">পরিবর্তন</button>
+      </div>
+      <div class="username-edit-row" id="usernameEditRow">
+        <input class="input" type="text" id="newUsernameInput" placeholder="নতুন ইউজারনেম">
+        <button class="btn btn-sm" id="saveUsernameBtn">সংরক্ষণ</button>
+        <button class="btn btn-sm btn-ghost" id="cancelUsernameBtn">বাতিল</button>
+      </div>
+      <div style="font-size:11.5px;color:var(--ink-mute);margin-top:8px;font-style:italic;font-family:'Playfair Display',serif;line-height:1.5">
+        ⚠️ ইউজারনেম পরিবর্তন করলে আপনার পুরোনো সব পোস্ট, চ্যাট, স্টোরি ও রিলে নতুন ইউজারনেম আপডেট হবে।
+      </div>
+    </div>
+
     <div class="field-row">
       <label class="field-label">পরিচিতি</label>
       <textarea class="textarea" id="bioInput" placeholder="নিজের সম্পর্কে লিখুন..." maxlength="200"></textarea>
@@ -160,7 +184,7 @@
 
     <button class="btn" id="saveProfileBtn">
       <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
-      সংরক্ষণ করুন
+      প্রোফাইল সংরক্ষণ করুন
     </button>
     <div class="alert" id="profileStatus"></div>
   </div>
@@ -171,13 +195,12 @@
       <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
       থিম
     </div>
-
     <div class="theme-toggle-row">
       <div class="label">
         <span>ডার্ক মোড</span>
         <span>রাতের জন্য আরামদায়ক</span>
       </div>
-      <button class="switch" id="themeSwitch" onclick="toggleBondhuTheme()" aria-label="Toggle theme"></button>
+      <button class="switch" onclick="toggleBondhuTheme()" aria-label="Toggle theme"></button>
     </div>
   </div>
 
@@ -192,9 +215,12 @@
       <input class="input" type="text" id="emailView" disabled>
     </div>
     <div class="field-row">
-      <label class="field-label">ইউজারনেম</label>
-      <input class="input" type="text" id="usernameView" disabled>
+      <label class="field-label">যোগদান</label>
+      <input class="input" type="text" id="joinedView" disabled>
     </div>
+    <p style="font-size:11px;color:var(--ink-mute);margin-top:8px;font-style:italic;font-family:'Playfair Display',serif">
+      🔒 আপনার ইমেইল শুধু আপনি দেখতে পাচ্ছেন — অন্য কেউ দেখতে পাবে না
+    </p>
   </div>
 
   <!-- GITHUB TOKEN -->
@@ -209,7 +235,7 @@
     <div class="field-row">
       <input class="input" type="password" id="tokenInput" placeholder="github_pat_...">
     </div>
-    <div style="display:flex;gap:8px">
+    <div class="btn-row">
       <button class="btn btn-sm" id="saveTokenBtn" style="flex:1">সংরক্ষণ</button>
       <button class="btn btn-sm btn-ghost" id="clearTokenBtn" style="flex:1">মুছে ফেলুন</button>
     </div>
@@ -235,8 +261,9 @@
 </nav>
 
 <script type="module">
-  import { requireAuth, logout, updateUserData } from "./js/auth.js";
+  import { requireAuth, logout, updateUserData, changeUsername } from "./js/auth.js";
   import { uploadToGitHub, hasToken, setToken, clearToken } from "./js/upload.js";
+  import { showToast, showConfirm } from "./js/toast.js";
 
   let currentUser = null;
 
@@ -250,10 +277,18 @@
     const initial = (user.name || "?")[0].toUpperCase();
     const av = document.getElementById("avatarPreview");
     av.innerHTML = user.photoURL ? `<img src="${user.photoURL}">` : initial;
+
     document.getElementById("nameInput").value = user.name || "";
     document.getElementById("bioInput").value = user.bio || "";
+    document.getElementById("usernameValue").textContent = user.username || "—";
     document.getElementById("emailView").value = user.email || "";
-    document.getElementById("usernameView").value = "@" + (user.username || "");
+
+    if (user.createdAt) {
+      const d = user.createdAt.seconds ? new Date(user.createdAt.seconds * 1000) : new Date(user.createdAt);
+      document.getElementById("joinedView").value = d.toLocaleDateString("bn-BD", {
+        day: "numeric", month: "long", year: "numeric"
+      });
+    }
   }
 
   function renderToken() {
@@ -267,6 +302,9 @@
     }
   }
 
+  // ==========================================
+  // Profile pic
+  // ==========================================
   document.getElementById("picBtn").addEventListener("click", () => {
     document.getElementById("picInput").click();
   });
@@ -274,13 +312,12 @@
   document.getElementById("picInput").addEventListener("change", async (e) => {
     const file = e.target.files[0];
     if (!file) return;
-    if (!hasToken()) {
-      alert("আগে GitHub টোকেন সেট করুন");
-      return;
-    }
+    if (!hasToken()) { showToast("আগে GitHub টোকেন সেট করুন", "err"); return; }
+
     const status = document.getElementById("profileStatus");
     status.className = "alert info show";
     status.textContent = "আপলোড হচ্ছে... ⏳";
+
     try {
       const url = await uploadToGitHub(file, "profiles");
       await updateUserData(currentUser.uid, { photoURL: url });
@@ -288,53 +325,118 @@
       renderProfile(currentUser);
       status.className = "alert ok show";
       status.textContent = "✅ প্রোফাইল ছবি আপডেট হয়েছে!";
+      showToast("প্রোফাইল ছবি আপডেট হয়েছে", "ok");
     } catch (err) {
       status.className = "alert err show";
       status.textContent = "❌ " + err.message;
     }
   });
 
+  // ==========================================
+  // Username change UI
+  // ==========================================
+  document.getElementById("editUsernameBtn").addEventListener("click", () => {
+    document.getElementById("usernameEditRow").classList.add("show");
+    const inp = document.getElementById("newUsernameInput");
+    inp.value = currentUser.username || "";
+    inp.focus();
+  });
+
+  document.getElementById("cancelUsernameBtn").addEventListener("click", () => {
+    document.getElementById("usernameEditRow").classList.remove("show");
+    document.getElementById("newUsernameInput").value = "";
+  });
+
+  document.getElementById("saveUsernameBtn").addEventListener("click", async () => {
+    const newU = document.getElementById("newUsernameInput").value.trim();
+    if (!newU) { showToast("ইউজারনেম লিখুন", "err"); return; }
+
+    if (newU.toLowerCase() === (currentUser.username || "").toLowerCase()) {
+      showToast("নতুন ইউজারনেম আগের মতোই", "warn");
+      return;
+    }
+
+    const ok = await showConfirm(
+      `আপনার ইউজারনেম পরিবর্তন করবেন @${currentUser.username} → @${newU}? \n\nপুরোনো পোস্ট/চ্যাট/স্টোরি/রিলে সব আপডেট হবে।`,
+      { title: "ইউজারনেম পরিবর্তন", okText: "পরিবর্তন", cancelText: "বাতিল" }
+    );
+    if (!ok) return;
+
+    const btn = document.getElementById("saveUsernameBtn");
+    btn.disabled = true;
+    btn.textContent = "আপডেট হচ্ছে...";
+
+    try {
+      const finalUsername = await changeUsername(currentUser.uid, newU);
+      currentUser.username = finalUsername;
+      document.getElementById("usernameValue").textContent = finalUsername;
+      document.getElementById("usernameEditRow").classList.remove("show");
+      document.getElementById("newUsernameInput").value = "";
+      showToast("✅ ইউজারনেম আপডেট হয়েছে!", "ok");
+    } catch (e) {
+      showToast("❌ " + e.message, "err", 4000);
+    }
+    btn.disabled = false;
+    btn.textContent = "সংরক্ষণ";
+  });
+
+  // ==========================================
+  // Profile save
+  // ==========================================
   document.getElementById("saveProfileBtn").addEventListener("click", async () => {
     const name = document.getElementById("nameInput").value.trim();
     const bio = document.getElementById("bioInput").value.trim();
     const status = document.getElementById("profileStatus");
 
-    if (!name) {
-      status.className = "alert err show";
-      status.textContent = "নাম খালি রাখা যাবে না";
-      return;
-    }
+    if (!name) { showToast("নাম খালি রাখা যাবে না", "err"); return; }
 
     status.className = "alert info show";
     status.textContent = "সংরক্ষণ হচ্ছে...";
+
     try {
       await updateUserData(currentUser.uid, { name, bio });
+      currentUser.name = name;
+      currentUser.bio = bio;
       status.className = "alert ok show";
       status.textContent = "✅ সংরক্ষিত হয়েছে!";
+      showToast("প্রোফাইল সংরক্ষিত", "ok");
     } catch (e) {
       status.className = "alert err show";
       status.textContent = "❌ " + e.message;
     }
   });
 
+  // ==========================================
+  // Token
+  // ==========================================
   document.getElementById("saveTokenBtn").addEventListener("click", () => {
     const t = document.getElementById("tokenInput").value.trim();
     if (!t || !t.startsWith("github_pat_")) {
-      alert("টোকেন 'github_pat_' দিয়ে শুরু হতে হবে");
+      showToast("টোকেন 'github_pat_' দিয়ে শুরু হতে হবে", "err");
       return;
     }
     setToken(t);
     document.getElementById("tokenInput").value = "";
     renderToken();
+    showToast("টোকেন সংরক্ষিত", "ok");
   });
 
   document.getElementById("clearTokenBtn").addEventListener("click", () => {
     clearToken();
     renderToken();
+    showToast("টোকেন মুছে ফেলা হয়েছে", "info");
   });
 
+  // ==========================================
+  // Logout
+  // ==========================================
   document.getElementById("logoutBtn").addEventListener("click", async () => {
-    if (!confirm("প্রস্থান করবেন?")) return;
+    const ok = await showConfirm("প্রস্থান করবেন?", {
+      title: "প্রস্থান",
+      okText: "প্রস্থান",
+      cancelText: "বাতিল"
+    });
+    if (!ok) return;
     await logout();
     window.location.href = "login.html";
   });
