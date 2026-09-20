@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="bn" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#f5f0e2">
+<title>বন্ধু — ব্যবহারকারী</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,500;0,600;0,700;0,800;1,500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/app.css">
+<link rel="stylesheet" href="css/admin.css">
+<script src="../js/theme.js"></script>
+<script src="js/admin-config.js"></script>
+</head>
+<body class="admin">
+
+<div class="admin-shell">
+  <aside id="adminSidebar"></aside>
+
+  <div class="admin-main">
+
+    <header class="admin-topbar" id="adminTopbar">
+      <div class="admin-topbar-brand">
+        ব্যবহারকারী
+        <span class="admin-badge" id="userCountBadge">—</span>
+      </div>
+      <div class="admin-topbar-actions">
+        <button class="theme-toggle" onclick="toggleBondhuTheme()" aria-label="Theme">
+          <svg class="icon-moon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+          <svg class="icon-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <div class="admin-page">
+
+      <div class="admin-page-head">
+        <div>
+          <div class="admin-page-title">সমস্ত ব্যবহারকারী</div>
+          <div class="admin-page-sub">সাইটের সব ব্যবহারকারীর তালিকা, ব্যবস্থাপনা ও নিয়ন্ত্রণ</div>
+        </div>
+        <div class="admin-search" style="max-width:280px;flex:1;min-width:220px">
+          <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.35-4.35"/></svg>
+          <input type="text" id="searchInput" placeholder="নাম বা ইউজারনেম...">
+        </div>
+      </div>
+
+      <div class="admin-table-wrap" id="tableWrap">
+        <div class="admin-empty">
+          <div class="spinner" style="margin:0 auto 12px;border-color:var(--rule);border-top-color:var(--accent)"></div>
+          লোড হচ্ছে...
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- User detail modal -->
+<div id="userModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);backdrop-filter:blur(4px);z-index:200;align-items:center;justify-content:center;padding:20px;opacity:0;transition:opacity .25s">
+  <div id="userModalBox" style="background:var(--paper-elev);border:1px solid var(--rule);border-radius:18px;padding:24px;max-width:460px;width:100%;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.3);transform:scale(.94);transition:transform .3s cubic-bezier(.34,1.56,.64,1)">
+    <div id="userModalContent"></div>
+  </div>
+</div>
+
+<script type="module">
+  import { requireAdmin } from "./js/admin-auth.js";
+  import { getAllUsers, setUserBanned, deleteUserCompletely } from "./js/admin-data.js";
+  import { showToast, showConfirm } from "../js/toast.js";
+  import "./js/admin-sidebar.js";
+
+  let allUsers = [];
+  let filteredUsers = [];
+
+  requireAdmin(() => {
+    loadUsers();
+    document.getElementById("searchInput").addEventListener("input", onSearch);
+  });
+
+  // ==========================================
+  // Load users
+  // ==========================================
+  async function loadUsers() {
+    const wrap = document.getElementById("tableWrap");
+    try {
+      allUsers = await getAllUsers();
+      filteredUsers = [...allUsers];
+      renderTable();
+      document.getElementById("userCountBadge").textContent = `${bnNum(allUsers.length)} জন`;
+    } catch (e) {
+      wrap.innerHTML = emptyState("লোড ব্যর্থ: " + e.message);
+    }
+  }
+
+  function onSearch(e) {
+    const term = e.target.value.trim().toLowerCase();
+    if (!term) {
+      filteredUsers = [...allUsers];
+    } else {
+      filteredUsers = allUsers.filter(u =>
+        (u.name || "").toLowerCase().includes(term) ||
+        (u.username || "").toLowerCase().includes(term) ||
+        (u.email || "").toLowerCase().includes(term)
+      );
+    }
+    renderTable();
+  }
+
+  // ==========================================
+  // Render table
+  // ==========================================
+  function renderTable() {
+    const wrap = document.getElementById("tableWrap");
+
+    if (filteredUsers.length === 0) {
+      wrap.innerHTML = emptyState("কোনো ব্যবহারকারী নেই");
+      return;
+    }
+
+    wrap.innerHTML = `
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>ব্যবহারকারী</th>
+            <th>ইউজারনেম</th>
+            <th>যোগদান</th>
+            <th>স্ট্যাটাস</th>
+            <th style="text-align:right">কর্ম</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${filteredUsers.map(u => `
+            <tr>
+              <td>
+                <div class="user-cell">
+                  <div class="avatar-sm">${u.photoURL ? `<img src="${u.photoURL}">` : (u.name || "?")[0].toUpperCase()}</div>
+                  <div style="min-width:0">
+                    <div style="font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200px">${escapeHtml(u.name || "—")}</div>
+                    <div style="font-size:11px;color:var(--ink-mute);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200px">${escapeHtml(u.email || "—")}</div>
+                  </div>
+                </div>
+              </td>
+              <td><span style="font-family:'Playfair Display',serif;font-style:italic;color:var(--ink-mute)">@${escapeHtml(u.username || "—")}</span></td>
+              <td>${u.createdAt?.seconds ? timeAgo(u.createdAt.seconds * 1000) : "—"}</td>
+              <td>
+                ${u.banned
+                  ? '<span class="status-badge banned">নিষিদ্ধ</span>'
+                  : '<span class="status-badge active">সক্রিয়</span>'}
+              </td>
+              <td style="text-align:right">
+                <button class="admin-btn admin-btn-ghost admin-btn-sm" data-action="view" data-uid="${u.uid}">
+                  দেখুন
+                </button>
+                ${u.banned
+                  ? `<button class="admin-btn admin-btn-primary admin-btn-sm" data-action="unban" data-uid="${u.uid}">আনব্যান</button>`
+                  : `<button class="admin-btn admin-btn-danger admin-btn-sm" data-action="ban" data-uid="${u.uid}">ব্যান</button>`}
+              </td>
+            </tr>
+          `).join("")}
+        </tbody>
+      </table>
+    `;
+
+    // Attach actions
+    wrap.querySelectorAll("[data-action]").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const action = btn.dataset.action;
+        const uid = btn.dataset.uid;
+        const user = allUsers.find(x => x.uid === uid);
+        if (!user) return;
+
+        if (action === "view") openModal(user);
+        else if (action === "ban") doBan(user, true);
+        else if (action === "unban") doBan(user, false);
+      });
+    });
+  }
+
+  // ==========================================
+  // Ban / Unban
+  // ==========================================
+  async function doBan(user, banned) {
+    const confirmMsg = banned
+      ? `@${user.username} কে নিষিদ্ধ করবেন? সে আর লগইন করতে পারবে না।`
+      : `@${user.username} কে আনব্যান করবেন?`;
+
+    const ok = await showConfirm(confirmMsg, {
+      title: banned ? "ব্যবহারকারী নিষিদ্ধ" : "আনব্যান",
+      okText: banned ? "নিষিদ্ধ করুন" : "আনব্যান",
+      cancelText: "বাতিল"
+    });
+    if (!ok) return;
+
+    try {
+      await setUserBanned(user.uid, banned);
+      user.banned = banned;
+      renderTable();
+      showToast(banned ? "✅ নিষিদ্ধ করা হয়েছে" : "✅ আনব্যান করা হয়েছে", "ok");
+    } catch (e) {
+      showToast("❌ ব্যর্থ: " + e.message, "err");
+    }
+  }
+
+  // ==========================================
+  // User detail modal
+  // ==========================================
+  function openModal(user) {
+    const modal = document.getElementById("userModal");
+    const box = document.getElementById("userModalBox");
+    const content = document.getElementById("userModalContent");
+
+    const initial = (user.name || "?")[0].toUpperCase();
+
+    content.innerHTML = `
+      <div style="display:flex;align-items:center;gap:14px;margin-bottom:20px">
+        <div style="width:64px;height:64px;border-radius:50%;background:var(--accent);color:var(--accent-text);display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-weight:700;font-size:24px;overflow:hidden;flex-shrink:0">
+          ${user.photoURL ? `<img src="${user.photoURL}" style="width:100%;height:100%;object-fit:cover">` : initial}
+        </div>
+        <div style="flex:1;min-width:0">
+          <div style="font-family:'Playfair Display',serif;font-size:20px;font-weight:700;color:var(--ink)">${escapeHtml(user.name || "—")}</div>
+          <div style="font-size:13px;color:var(--ink-mute);font-style:italic;font-family:'Playfair Display',serif;margin-top:2px">@${escapeHtml(user.username || "—")}</div>
+          <div style="margin-top:6px">
+            ${user.banned
+              ? '<span class="status-badge banned">নিষিদ্ধ</span>'
+              : '<span class="status-badge active">সক্রিয়</span>'}
+          </div>
+        </div>
+        <button class="admin-btn admin-btn-ghost admin-btn-sm" id="modalClose" style="align-self:flex-start">✕</button>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:10px;font-size:13.5px;color:var(--ink-soft);line-height:1.5">
+        <div style="display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:1px solid var(--rule)">
+          <span style="color:var(--ink-mute);font-size:11.5px;letter-spacing:1px;text-transform:uppercase;font-weight:600">ইমেইল</span>
+          <span style="text-align:right;word-break:break-all">${escapeHtml(user.email || "—")}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:1px solid var(--rule)">
+          <span style="color:var(--ink-mute);font-size:11.5px;letter-spacing:1px;text-transform:uppercase;font-weight:600">UID</span>
+          <span style="text-align:right;font-family:monospace;font-size:11px;word-break:break-all">${escapeHtml(user.uid || "—")}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:1px solid var(--rule)">
+          <span style="color:var(--ink-mute);font-size:11.5px;letter-spacing:1px;text-transform:uppercase;font-weight:600">প্রোভাইডার</span>
+          <span style="text-align:right">${escapeHtml(user.provider || "password")}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:1px solid var(--rule)">
+          <span style="color:var(--ink-mute);font-size:11.5px;letter-spacing:1px;text-transform:uppercase;font-weight:600">ফলোয়ার</span>
+          <span style="text-align:right">${(user.followers || []).length}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:1px solid var(--rule)">
+          <span style="color:var(--ink-mute);font-size:11.5px;letter-spacing:1px;text-transform:uppercase;font-weight:600">ফলোয়িং</span>
+          <span style="text-align:right">${(user.following || []).length}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:1px solid var(--rule)">
+          <span style="color:var(--ink-mute);font-size:11.5px;letter-spacing:1px;text-transform:uppercase;font-weight:600">বায়ো</span>
+          <span style="text-align:right;max-width:60%;word-break:break-word">${escapeHtml(user.bio || "—")}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;gap:12px;padding:8px 0">
+          <span style="color:var(--ink-mute);font-size:11.5px;letter-spacing:1px;text-transform:uppercase;font-weight:600">যোগদান</span>
+          <span style="text-align:right">${user.createdAt?.seconds ? new Date(user.createdAt.seconds * 1000).toLocaleDateString("bn-BD") : "—"}</span>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:8px;margin-top:20px">
+        ${user.banned
+          ? `<button class="admin-btn admin-btn-primary" id="modalUnban" style="flex:1">আনব্যান করুন</button>`
+          : `<button class="admin-btn admin-btn-danger" id="modalBan" style="flex:1">নিষিদ্ধ করুন</button>`}
+        <button class="admin-btn admin-btn-danger" id="modalDelete" style="flex:1">সম্পূর্ণ মুছুন</button>
+      </div>
+    `;
+
+    modal.style.display = "flex";
+    requestAnimationFrame(() => {
+      modal.style.opacity = "1";
+      box.style.transform = "scale(1)";
+    });
+
+    document.getElementById("modalClose").addEventListener("click", closeModal);
+
+    const banBtn = document.getElementById("modalBan");
+    const unbanBtn = document.getElementById("modalUnban");
+    if (banBtn) banBtn.addEventListener("click", () => { closeModal(); doBan(user, true); });
+    if (unbanBtn) unbanBtn.addEventListener("click", () => { closeModal(); doBan(user, false); });
+
+    document.getElementById("modalDelete").addEventListener("click", async () => {
+      closeModal();
+      const ok = await showConfirm(
+        `@${user.username} এর অ্যাকাউন্ট এবং সব পোস্ট, রিল, স্টোরি সম্পূর্ণ মুছে ফেলবেন?\n\nএই কাজ ফিরিয়ে আনা যাবে না!`,
+        { title: "সম্পূর্ণ মুছুন", okText: "মুছে ফেলুন", cancelText: "বাতিল" }
+      );
+      if (!ok) return;
+      try {
+        await deleteUserCompletely(user.uid);
+        allUsers = allUsers.filter(x => x.uid !== user.uid);
+        filteredUsers = filteredUsers.filter(x => x.uid !== user.uid);
+        renderTable();
+        document.getElementById("userCountBadge").textContent = `${bnNum(allUsers.length)} জন`;
+        showToast("✅ ব্যবহারকারী মুছে ফেলা হয়েছে", "ok");
+      } catch (e) {
+        showToast("❌ ব্যর্থ: " + e.message, "err");
+      }
+    });
+
+    modal.addEventListener("click", (e) => {
+      if (e.target === modal) closeModal();
+    });
+  }
+
+  function closeModal() {
+    const modal = document.getElementById("userModal");
+    const box = document.getElementById("userModalBox");
+    modal.style.opacity = "0";
+    box.style.transform = "scale(.94)";
+    setTimeout(() => { modal.style.display = "none"; }, 250);
+  }
+
+  // ==========================================
+  // Helpers
+  // ==========================================
+  function bnNum(n) {
+    const en = "0123456789";
+    const bn = "০১২৩৪৫৬৭৮৯";
+    return String(n).replace(/[0-9]/g, d => bn[en.indexOf(d)]);
+  }
+
+  function timeAgo(t) {
+    const diff = Math.floor((Date.now() - t) / 1000);
+    if (diff < 60) return `${diff} সেঃ আগে`;
+    if (diff < 3600) return `${Math.floor(diff / 60)} মিঃ আগে`;
+    if (diff < 86400) return `${Math.floor(diff / 3600)} ঘঃ আগে`;
+    if (diff < 604800) return `${Math.floor(diff / 86400)} দিন আগে`;
+    return new Date(t).toLocaleDateString("bn-BD");
+  }
+
+  function emptyState(msg) {
+    return `<div class="admin-empty">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      ${msg}
+    </div>`;
+  }
+
+  function escapeHtml(str) {
+    return String(str || "").replace(/[&<>"']/g, m => ({
+      "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+    }[m]));
+  }
+</script>
+
+</body>
+</html>
