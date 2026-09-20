@@ -1,122 +1,205 @@
 <!DOCTYPE html>
-<html lang="bn">
+<html lang="bn" data-theme="light">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>বন্ধু - Post</title>
-  <style>
-    * { box-sizing: border-box; }
-    body { font-family: sans-serif; background: #fafafa; margin: 0 auto; padding: 20px; max-width: 500px; }
-    .topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
-    .topbar h2 { color: #e1306c; margin: 0; }
-    .topbar a { color: #e1306c; text-decoration: none; font-weight: bold; }
-    .box { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
-    input[type="file"] { margin: 10px 0; padding: 10px; width: 100%; box-sizing: border-box; }
-    textarea { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 15px; font-family: inherit; resize: vertical; min-height: 80px; margin-top: 10px; box-sizing: border-box; }
-    button { width: 100%; background: #e1306c; color: white; border: none; padding: 14px; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 12px; }
-    button:disabled { background: #ccc; cursor: not-allowed; }
-    #status { margin-top: 15px; padding: 10px; border-radius: 8px; font-size: 14px; display: none; white-space: pre-wrap; word-break: break-word; }
-    .ok { background: #d4edda; color: #155724; display: block; }
-    .err { background: #f8d7da; color: #721c24; display: block; }
-    .info { background: #d1ecf1; color: #0c5460; display: block; }
-    #preview { margin-top: 15px; max-width: 100%; border-radius: 8px; display: none; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#f5f0e2">
+<title>বন্ধু — নতুন পোস্ট</title>
+<link rel="manifest" href="manifest.json">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,500;0,600;0,700;0,800;1,500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/app.css">
+<script src="js/theme.js"></script>
+<style>
+  .upload-card{
+    background:var(--paper-elev);
+    border:1px solid var(--rule);
+    border-radius:14px;
+    padding:22px;
+    margin-top:16px;
+    box-shadow:var(--shadow-sm);
+  }
+
+  .drop-zone{
+    aspect-ratio:1/1;
+    border:2px dashed var(--rule-dark);
+    border-radius:12px;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    gap:12px;
+    cursor:pointer;
+    transition:all .3s cubic-bezier(.34,1.56,.64,1);
+    background:var(--paper-2);
+    position:relative;
+    overflow:hidden;
+    margin-bottom:16px;
+  }
+  .drop-zone:hover{
+    border-color:var(--accent);
+    background:var(--accent-soft);
+    transform:translateY(-2px);
+  }
+  .drop-zone svg{
+    width:52px;height:52px;
+    stroke:var(--ink-mute);fill:none;stroke-width:1.5;
+    stroke-linecap:round;stroke-linejoin:round;
+    transition:stroke .3s,transform .3s;
+  }
+  .drop-zone:hover svg{stroke:var(--accent);transform:scale(1.1)}
+  .drop-zone-text{
+    font-size:13px;color:var(--ink-mute);
+    text-align:center;line-height:1.5;
+  }
+  .drop-zone-text b{color:var(--ink-soft);font-family:'Playfair Display',serif;font-size:15px}
+
+  .drop-zone img{
+    position:absolute;inset:0;
+    width:100%;height:100%;object-fit:cover;
+    display:none;
+  }
+  .drop-zone.has-image{
+    border-style:solid;
+    border-color:var(--accent-border);
+  }
+  .drop-zone.has-image img{display:block}
+  .drop-zone.has-image .drop-zone-inner{display:none}
+
+  .caption-counter{
+    text-align:right;
+    font-size:11px;color:var(--ink-mute);
+    margin-top:6px;
+    font-family:'Playfair Display',serif;
+    font-style:italic;
+  }
+</style>
 </head>
 <body>
-  <div class="topbar">
-    <h2>Post banao</h2>
-    <a href="index.html">← Feed</a>
+
+<div class="page">
+
+  <nav class="topbar">
+    <div class="topbar-brand" style="font-size:18px">নতুন পোস্ট</div>
+    <div class="topbar-actions">
+      <button class="theme-toggle" onclick="toggleBondhuTheme()" aria-label="Theme">
+        <svg class="icon-moon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        <svg class="icon-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+      </button>
+      <a href="index.html" class="icon-btn" aria-label="Home">
+        <svg viewBox="0 0 24 24"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+      </a>
+    </div>
+  </nav>
+
+  <div class="section-head">নতুন লেখা প্রকাশ</div>
+
+  <div class="upload-card">
+    <div class="drop-zone" id="dropZone" onclick="document.getElementById('fileInput').click()">
+      <img id="preview" alt="">
+      <div class="drop-zone-inner" style="text-align:center">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>
+        <div class="drop-zone-text" style="margin-top:12px">
+          <b>ছবি যুক্ত করুন</b><br>
+          এখানে ক্লিক করুন বা টেনে আনুন
+        </div>
+      </div>
+    </div>
+
+    <input type="file" id="fileInput" accept="image/*" style="display:none">
+
+    <div class="field">
+      <label class="field-label">শিরোনাম ও লেখা</label>
+      <textarea class="textarea" id="captionInput" placeholder="আপনার গল্প, ভাবনা বা অনুভূতি লিখুন..." maxlength="2000"></textarea>
+      <div class="caption-counter"><span id="charCount">0</span> / 2000</div>
+    </div>
+
+    <button class="btn" id="postBtn" type="button">
+      <svg viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+      প্রকাশ করুন
+    </button>
+
+    <div class="alert" id="status"></div>
   </div>
 
-  <div class="box">
-    <input type="file" id="fileInput" accept="image/*">
-    <img id="preview" alt="preview">
-    <textarea id="captionInput" placeholder="Caption likho..."></textarea>
-    <button id="postBtn" type="button">Post koro</button>
-    <div id="status"></div>
-  </div>
+</div>
 
-  <script type="module">
-    const statusEl = document.getElementById("status");
-    function showStatus(cls, msg) {
-      statusEl.className = cls;
-      statusEl.style.display = "block";
-      statusEl.textContent = msg;
+<nav class="bottom-nav">
+  <a href="index.html"><svg viewBox="0 0 24 24"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg></a>
+  <a href="search.html"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.35-4.35"/></svg></a>
+  <a href="upload.html" class="active"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="5"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg></a>
+  <a href="reels.html"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="5"/><path d="M9 8v8l6-4z"/></svg></a>
+  <a href="profile.html"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21v-2a4 4 0 0 1 4-4h8a4 4 0 0 1 4 4v2"/></svg></a>
+</nav>
+
+<script type="module">
+  import { requireAuth } from "./js/auth.js";
+  import { uploadToGitHub, hasToken } from "./js/upload.js";
+  import { createPost } from "./js/feed.js";
+
+  requireAuth(() => {});
+
+  const dropZone = document.getElementById("dropZone");
+  const fileInput = document.getElementById("fileInput");
+  const preview = document.getElementById("preview");
+  const captionInput = document.getElementById("captionInput");
+  const charCount = document.getElementById("charCount");
+  const postBtn = document.getElementById("postBtn");
+  const status = document.getElementById("status");
+
+  captionInput.addEventListener("input", () => {
+    charCount.textContent = captionInput.value.length;
+  });
+
+  fileInput.addEventListener("change", () => {
+    const f = fileInput.files[0];
+    if (f) {
+      preview.src = URL.createObjectURL(f);
+      dropZone.classList.add("has-image");
     }
+  });
 
-    // 1) Sob import ekbar e koro — error hole dhora porbe
-    let authMod, uploadMod, feedMod;
+  // Drag and drop
+  dropZone.addEventListener("dragover", (e) => {
+    e.preventDefault();
+    dropZone.style.borderColor = "var(--accent)";
+  });
+  dropZone.addEventListener("dragleave", () => {
+    dropZone.style.borderColor = "";
+  });
+  dropZone.addEventListener("drop", (e) => {
+    e.preventDefault();
+    dropZone.style.borderColor = "";
+    const f = e.dataTransfer.files[0];
+    if (f && f.type.startsWith("image/")) {
+      fileInput.files = e.dataTransfer.files;
+      preview.src = URL.createObjectURL(f);
+      dropZone.classList.add("has-image");
+    }
+  });
+
+  function showStatus(type, msg) {
+    status.className = "alert " + type + " show";
+    status.textContent = msg;
+  }
+
+  postBtn.addEventListener("click", async () => {
+    const file = fileInput.files[0];
+    if (!file) { showStatus("err", "আগে একটি ছবি নির্বাচন করুন"); return; }
+    if (!hasToken()) { showStatus("err", "সেটিংসে GitHub টোকেন সেট করুন"); return; }
+
+    postBtn.disabled = true;
+    showStatus("info", "আপলোড হচ্ছে... ⏳");
+
     try {
-      authMod = await import("./js/auth.js");
-      uploadMod = await import("./js/upload.js");
-      feedMod = await import("./js/feed.js");
+      const imageUrl = await uploadToGitHub(file, "posts");
+      await createPost(imageUrl, captionInput.value.trim());
+      showStatus("ok", "✅ পোস্ট প্রকাশিত! ফিডে যাচ্ছি...");
+      setTimeout(() => window.location.href = "index.html", 1000);
     } catch (e) {
-      console.error("Import fail:", e);
-      showStatus("err", "❌ Import fail: " + e.message);
-      throw e;
+      showStatus("err", "❌ " + e.message);
+      postBtn.disabled = false;
     }
+  });
+</script>
 
-    const { getCurrentUser } = authMod;
-    const { uploadToGitHub, hasToken } = uploadMod;
-    const { createPost } = feedMod;
-
-    // 2) Login check
-    const user = getCurrentUser();
-    if (!user) {
-      window.location.href = "login.html";
-      throw new Error("Not logged in");
-    }
-
-    console.log("✅ Script loaded. User:", user);
-
-    const fileInput = document.getElementById("fileInput");
-    const captionInput = document.getElementById("captionInput");
-    const postBtn = document.getElementById("postBtn");
-    const preview = document.getElementById("preview");
-
-    fileInput.addEventListener("change", () => {
-      const f = fileInput.files[0];
-      if (f) {
-        preview.src = URL.createObjectURL(f);
-        preview.style.display = "block";
-      }
-    });
-
-    postBtn.addEventListener("click", async () => {
-      console.log("🟡 Post button clicked");
-
-      const file = fileInput.files[0];
-      if (!file) {
-        showStatus("err", "Image select koro");
-        return;
-      }
-
-      if (!hasToken()) {
-        showStatus("err", "Settings page e giye GitHub token set koro");
-        return;
-      }
-
-      postBtn.disabled = true;
-      showStatus("info", "Upload hocche... ⏳");
-
-      try {
-        console.log("🟡 Uploading to GitHub...");
-        const imageUrl = await uploadToGitHub(file, "posts");
-        console.log("🟢 Image URL:", imageUrl);
-
-        console.log("🟡 Creating post in Firestore...");
-        const postId = await createPost(imageUrl, captionInput.value.trim());
-        console.log("🟢 Post created:", postId);
-
-        showStatus("ok", "✅ Post hoyeche! Feed e jaccho...");
-        setTimeout(() => window.location.href = "index.html", 1200);
-      } catch (e) {
-        console.error("🔴 Post error:", e);
-        showStatus("err", "❌ " + (e.message || "Unknown error") +
-          "\n\nCode: " + (e.code || "no-code"));
-        postBtn.disabled = false;
-      }
-    });
-  </script>
 </body>
 </html>
