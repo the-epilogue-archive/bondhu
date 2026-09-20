@@ -81,7 +81,7 @@ export async function sendMessage(chatId, text) {
 // ==========================================
 // Voice message — Cloudinary unsigned upload
 // ==========================================
-const CLOUDINARY_CLOUD_NAME = "TOMAR_CLOUD_NAME";       // 👈 tomar cloud name
+const CLOUDINARY_CLOUD_NAME = "kmquukhi";       // 👈 tomar cloud name
 const CLOUDINARY_VOICE_PRESET = "bondhu_reels";          // same preset works for audio
 
 export async function sendVoiceMessage(chatId, blob, onProgress) {
