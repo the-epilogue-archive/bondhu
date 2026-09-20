@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>বন্ধু - Reels</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: sans-serif;
+      background: #000;
+      color: white;
+      overflow: hidden;
+      height: 100vh;
+    }
+    .reels-container {
+      height: 100vh;
+      overflow-y: scroll;
+      scroll-snap-type: y mandatory;
+      scrollbar-width: none;
+    }
+    .reels-container::-webkit-scrollbar { display: none; }
+
+    .reel {
+      height: 100vh;
+      scroll-snap-align: start;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #000;
+    }
+    .reel video {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      background: #000;
+    }
+
+    .reel-overlay {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      padding: 20px;
+      background: linear-gradient(transparent, rgba(0,0,0,0.7));
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .reel-info { flex: 1; }
+    .reel-user {
+      display: flex; align-items: center; gap: 10px; margin-bottom: 8px;
+    }
+    .reel-avatar {
+      width: 36px; height: 36px; border-radius: 50%;
+      background: linear-gradient(135deg, #feda75, #d62976);
+      display: flex; align-items: center; justify-content: center;
+      color: white; font-weight: bold; font-size: 14px;
+      overflow: hidden;
+    }
+    .reel-avatar img { width: 100%; height: 100%; object-fit: cover; }
+    .reel-username { font-weight: bold; font-size: 14px; }
+    .reel-caption {
+      font-size: 14px; line-height: 1.4;
+      margin-left: 46px; word-break: break-word;
+    }
+
+    .reel-actions {
+      display: flex; flex-direction: column; gap: 16px;
+      align-items: center;
+    }
+    .reel-action-btn {
+      background: none; border: none; color: white;
+      cursor: pointer; display: flex; flex-direction: column;
+      align-items: center; gap: 4px;
+      font-size: 12px;
+    }
+    .reel-action-btn .icon { font-size: 28px; }
+    .reel-action-btn.liked .icon { color: #e1306c; }
+
+    .topbar-overlay {
+      position: absolute; top: 0; left: 0; right: 0;
+      padding: 12px 16px; z-index: 10;
+      display: flex; justify-content: space-between; align-items: center;
+      background: linear-gradient(rgba(0,0,0,0.6), transparent);
+    }
+    .topbar-overlay h1 {
+      font-size: 22px; color: #e1306c; margin: 0;
+    }
+    .topbar-overlay a {
+      color: white; text-decoration: none; font-weight: bold;
+      font-size: 14px; margin-left: 12px;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.6);
+    }
+
+    .empty {
+      display: flex; align-items: center; justify-content: center;
+      height: 100vh; color: #999; font-size: 15px;
+      text-align: center; padding: 40px;
+    }
+    .empty a { color: #e1306c; text-decoration: none; font-weight: bold; margin-left: 6px; }
+  </style>
+</head>
+<body>
+  <div class="topbar-overlay">
+    <h1>Reels</h1>
+    <div>
+      <a href="reel-upload.html">+ Upload</a>
+      <a href="index.html">← Feed</a>
+    </div>
+  </div>
+
+  <div class="reels-container" id="container">
+    <div class="empty">Loading...</div>
+  </div>
+
+  <script type="module">
+    import { requireAuth } from "./js/auth.js";
+    import { loadReels, toggleReelLike, deleteReel } from "./js/reels.js";
+
+    let currentUser = null;
+    const container = document.getElementById("container");
+
+    requireAuth(async (user) => {
+      currentUser = user;
+      await render();
+      setupIntersectionObserver();
+    });
+
+    async function render() {
+      try {
+        const reels = await loadReels();
+
+        if (reels.length === 0) {
+          container.innerHTML = `
+            <div class="empty">
+              Kono reel nei.
+              <a href="reel-upload.html">First reel banao →</a>
+            </div>`;
+          return;
+        }
+
+        container.innerHTML = reels.map(r => {
+          const isLiked = r.likes?.includes(currentUser.uid);
+          const isMine = r.userId === currentUser.uid;
+          const initial = (r.userName || "?")[0].toUpperCase();
+
+          return `
+            <div class="reel" data-id="${r.id}">
+              <video src="${r.videoUrl}" loop playsinline preload="metadata" muted></video>
+
+              <div class="reel-overlay">
+                <div class="reel-info">
+                  <div class="reel-user">
+                    <div class="reel-avatar">
+                      ${r.userPhoto ? `<img src="${r.userPhoto}">` : initial}
+                    </div>
+                    <div class="reel-username">@${escapeHtml(r.username || "?")}</div>
+                  </div>
+                  ${r.caption ? `<div class="reel-caption">${escapeHtml(r.caption)}</div>` : ""}
+                </div>
+
+                <div class="reel-actions">
+                  <button class="reel-action-btn like-btn ${isLiked ? "liked" : ""}" data-id="${r.id}">
+                    <span class="icon">${isLiked ? "❤️" : "🤍"}</span>
+                    <span class="like-count">${r.likes?.length || 0}</span>
+                  </button>
+                  ${isMine ? `
+                    <button class="reel-action-btn delete-btn" data-id="${r.id}">
+                      <span class="icon">🗑️</span>
+                      <span>Delete</span>
+                    </button>
+                  ` : ""}
+                </div>
+              </div>
+            </div>
+          `;
+        }).join("");
+
+        // Like handler
+        container.querySelectorAll(".like-btn").forEach(btn => {
+          btn.addEventListener("click", async (e) => {
+            e.stopPropagation();
+            const reelId = btn.dataset.id;
+            const reel = reels.find(r => r.id === reelId);
+            btn.disabled = true;
+            try {
+              const nowLiked = await toggleReelLike(reelId, reel.likes || []);
+              btn.classList.toggle("liked", nowLiked);
+              btn.querySelector(".icon").textContent = nowLiked ? "❤️" : "🤍";
+              const prev = reel.likes?.length || 0;
+              btn.querySelector(".like-count").textContent = prev + (nowLiked ? 1 : -1);
+            } catch (e) { alert("Like fail: " + e.message); }
+            btn.disabled = false;
+          });
+        });
+
+        // Delete handler
+        container.querySelectorAll(".delete-btn").forEach(btn => {
+          btn.addEventListener("click", async (e) => {
+            e.stopPropagation();
+            if (!confirm("Ei reel delete korbe?")) return;
+            try {
+              await deleteReel(btn.dataset.id);
+              btn.closest(".reel").remove();
+            } catch (e) { alert("Delete fail: " + e.message); }
+          });
+        });
+
+        // Video click → play/pause toggle
+        container.querySelectorAll("video").forEach(v => {
+          v.addEventListener("click", () => {
+            if (v.paused) v.play();
+            else v.pause();
+          });
+        });
+      } catch (e) {
+        container.innerHTML = `<div class="empty">❌ ${e.message}</div>`;
+      }
+    }
+
+    // ==========================================
+    // Auto play/pause with scroll
+    // ==========================================
+    function setupIntersectionObserver() {
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          const video = entry.target.querySelector("video");
+          if (!video) return;
+          if (entry.isIntersecting) {
+            video.muted = false;
+            video.play().catch(() => {
+              video.muted = true;
+              video.play().catch(() => {});
+            });
+          } else {
+            video.pause();
+            video.currentTime = 0;
+          }
+        });
+      }, { threshold: 0.6 });
+
+      container.querySelectorAll(".reel").forEach(r => observer.observe(r));
+    }
+
+    function escapeHtml(str) {
+      return String(str || "").replace(/[&<>"']/g, m => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+      }[m]));
+    }
+  </script>
+</body>
+</html>
