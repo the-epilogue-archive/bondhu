@@ -3,10 +3,114 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>বন্ধু</title>
+  <title>বন্ধু - Upload Test</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #fafafa;
+      padding: 20px;
+      max-width: 500px;
+      margin: 0 auto;
+    }
+    h1 { color: #e1306c; }
+    .box {
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+    input[type="file"] {
+      margin: 10px 0;
+      padding: 10px;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    button {
+      background: #e1306c;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+      width: 100%;
+    }
+    button:disabled { background: #ccc; cursor: not-allowed; }
+    #status {
+      margin-top: 15px;
+      padding: 10px;
+      border-radius: 8px;
+      font-size: 14px;
+    }
+    .ok { background: #d4edda; color: #155724; }
+    .err { background: #f8d7da; color: #721c24; }
+    .info { background: #d1ecf1; color: #0c5460; }
+    #preview {
+      margin-top: 15px;
+      max-width: 100%;
+      border-radius: 8px;
+      display: none;
+    }
+    .nav {
+      margin-top: 20px;
+      text-align: center;
+    }
+    .nav a {
+      color: #e1306c;
+      text-decoration: none;
+      margin: 0 10px;
+      font-weight: bold;
+    }
+  </style>
 </head>
-<body style="font-family: sans-serif; text-align: center; padding: 50px;">
+<body>
   <h1>বন্ধু 🚀</h1>
-  <p>Setup successful!</p>
+  <div class="box">
+    <h3>Image Upload Test</h3>
+    <input type="file" id="fileInput" accept="image/*">
+    <button id="uploadBtn">Upload koro</button>
+    <div id="status"></div>
+    <img id="preview" alt="preview">
+  </div>
+
+  <div class="nav">
+    <a href="settings.html">⚙️ Settings</a>
+  </div>
+
+  <script type="module">
+    import { uploadToGitHub } from "./js/upload.js";
+
+    const fileInput = document.getElementById("fileInput");
+    const uploadBtn = document.getElementById("uploadBtn");
+    const status = document.getElementById("status");
+    const preview = document.getElementById("preview");
+
+    uploadBtn.addEventListener("click", async () => {
+      const file = fileInput.files[0];
+      if (!file) {
+        status.className = "err";
+        status.textContent = "Age ekta image select koro";
+        return;
+      }
+
+      uploadBtn.disabled = true;
+      status.className = "info";
+      status.textContent = "Upload hocche... ektu wait koro ⏳";
+
+      try {
+        const url = await uploadToGitHub(file, "posts");
+        status.className = "ok";
+        status.innerHTML = `✅ Upload successful!<br><br>
+          <a href="${url}" target="_blank">${url}</a>`;
+        preview.src = url;
+        preview.style.display = "block";
+      } catch (err) {
+        status.className = "err";
+        status.textContent = "❌ Error: " + err.message;
+      } finally {
+        uploadBtn.disabled = false;
+      }
+    });
+  </script>
 </body>
 </html>
