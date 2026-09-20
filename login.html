@@ -13,6 +13,7 @@
 <script src="js/theme.js"></script>
 <style>
   body{padding-bottom:0;display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px}
+
   .auth-card{
     width:100%;max-width:420px;
     background:var(--paper-elev);
@@ -23,44 +24,74 @@
     position:relative;
     opacity:0;transform:translateY(20px);
     animation:enter .7s cubic-bezier(.22,1,.36,1) forwards;
-    transition:background .3s,border-color .3s;
   }
   @keyframes enter{to{opacity:1;transform:translateY(0)}}
 
-  .auth-topbar{
-    position:absolute;top:12px;right:12px;
-  }
+  .auth-topbar{position:absolute;top:12px;right:12px}
 
-  .auth-brand{text-align:center;margin-bottom:28px}
+  .auth-brand{text-align:center;margin-bottom:26px}
   .auth-brand .logo{
     font-family:'Playfair Display',serif;
     font-size:42px;font-weight:800;
     letter-spacing:-1.5px;line-height:1;
-    color:var(--ink);
-    margin-bottom:8px;
+    color:var(--ink);margin-bottom:8px;
   }
   .auth-brand .logo em{color:var(--accent);font-style:italic;font-weight:500}
   .auth-brand .sub{
     font-size:11.5px;color:var(--ink-mute);
-    font-style:italic;
-    font-family:'Playfair Display',serif;
-    letter-spacing:.5px;
-    display:flex;align-items:center;justify-content:center;gap:10px;
+    font-style:italic;font-family:'Playfair Display',serif;
+    letter-spacing:.5px;display:flex;align-items:center;justify-content:center;gap:10px;
     margin-top:10px;
   }
-  .auth-brand .sub::before,
-  .auth-brand .sub::after{
+  .auth-brand .sub::before,.auth-brand .sub::after{
     content:'';width:24px;height:1px;background:var(--rule-dark);
+  }
+
+  /* Google button */
+  .google-btn{
+    width:100%;
+    display:flex;align-items:center;justify-content:center;gap:10px;
+    padding:13px;
+    border:1px solid var(--rule-dark);
+    border-radius:12px;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Hind Siliguri',sans-serif;
+    font-size:14px;font-weight:600;
+    cursor:pointer;
+    transition:all .3s cubic-bezier(.34,1.56,.64,1);
+    will-change:transform;
+    margin-bottom:16px;
+  }
+  .google-btn:hover{
+    transform:translateY(-2px);
+    border-color:var(--accent-border);
+    box-shadow:0 6px 16px var(--shadow-sm);
+  }
+  .google-btn:active{transform:translateY(0) scale(.98)}
+  .google-btn:disabled{opacity:.6;cursor:not-allowed;transform:none}
+  .google-btn svg{width:20px;height:20px;flex-shrink:0}
+
+  .divider{
+    display:flex;align-items:center;gap:12px;
+    margin:16px 0;
+    color:var(--ink-mute);font-size:11px;
+    font-family:'Playfair Display',serif;font-style:italic;
+    letter-spacing:1px;
+  }
+  .divider::before,.divider::after{
+    content:'';flex:1;height:1px;
+    background:linear-gradient(90deg,transparent,var(--rule-dark),transparent);
   }
 
   .mode-tabs{
     display:flex;gap:4px;
     background:var(--paper-2);
     padding:4px;border-radius:30px;
-    margin-bottom:22px;
+    margin-bottom:20px;
   }
   .mode-tab{
-    flex:1;padding:10px;
+    flex:1;padding:9px;
     border-radius:26px;
     font-size:13px;font-weight:600;
     color:var(--ink-mute);
@@ -72,17 +103,15 @@
     box-shadow:var(--shadow-sm);
   }
 
-  .field{margin-bottom:14px}
+  .field{margin-bottom:12px}
   .input-wrap{position:relative}
   .input-icon{
     position:absolute;left:14px;top:50%;
     transform:translateY(-50%);
     width:18px;height:18px;
-    stroke:var(--ink-mute);
-    fill:none;stroke-width:1.8;
+    stroke:var(--ink-mute);fill:none;stroke-width:1.8;
     stroke-linecap:round;stroke-linejoin:round;
-    pointer-events:none;
-    transition:stroke .25s;
+    pointer-events:none;transition:stroke .25s;
   }
   .input-wrap .input{padding-left:42px}
   .input-wrap .input:focus ~ .input-icon{stroke:var(--accent)}
@@ -90,10 +119,9 @@
   .hidden{display:none}
 
   .auth-footer{
-    text-align:center;margin-top:20px;
+    text-align:center;margin-top:18px;
     font-size:12px;color:var(--ink-mute);
-    font-family:'Playfair Display',serif;
-    font-style:italic;
+    font-family:'Playfair Display',serif;font-style:italic;
   }
   .auth-footer a{color:var(--accent);font-weight:600;font-family:'Hind Siliguri',sans-serif;font-style:normal}
 
@@ -118,6 +146,19 @@
     <div class="sub" id="subtitle">স্বাগতম</div>
   </div>
 
+  <!-- Google Sign-in -->
+  <button class="google-btn" id="googleBtn" type="button">
+    <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+      <path fill="#FFC107" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24c0,11.045,8.955,20,20,20c11.045,0,20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z"/>
+      <path fill="#FF3D00" d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z"/>
+      <path fill="#4CAF50" d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36c-5.202,0-9.619-3.317-11.283-7.946l-6.522,5.025C9.505,39.556,16.227,44,24,44z"/>
+      <path fill="#1976D2" d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.571c0.001-0.001,0.002-0.001,0.003-0.002l6.19,5.238C36.971,39.205,44,34,44,24C44,22.659,43.862,21.35,43.611,20.083z"/>
+    </svg>
+    Google দিয়ে প্রবেশ করুন
+  </button>
+
+  <div class="divider">অথবা</div>
+
   <div class="mode-tabs">
     <button type="button" class="mode-tab active" data-mode="login">প্রবেশ</button>
     <button type="button" class="mode-tab" data-mode="signup">নতুন অ্যাকাউন্ট</button>
@@ -125,52 +166,48 @@
 
   <form id="authForm" autocomplete="on">
     <div class="field hidden" id="nameField">
-      <label class="field-label">আপনার নাম</label>
       <div class="input-wrap">
-        <input class="input" type="text" id="nameInput" placeholder="যেমন: রাহিম আহমেদ">
+        <input class="input" type="text" id="nameInput" placeholder="আপনার নাম" autocomplete="name">
         <svg class="input-icon" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21v-2a4 4 0 0 1 4-4h8a4 4 0 0 1 4 4v2"/></svg>
       </div>
     </div>
 
     <div class="field hidden" id="usernameField">
-      <label class="field-label">ইউজারনেম</label>
       <div class="input-wrap">
-        <input class="input" type="text" id="usernameInput" placeholder="যেমন: rahim" autocomplete="username">
+        <input class="input" type="text" id="usernameInput" placeholder="ইউজারনেম (যেমন: rahim)" autocomplete="username">
         <svg class="input-icon" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
       </div>
     </div>
 
     <div class="field">
-      <label class="field-label">ইমেইল</label>
       <div class="input-wrap">
-        <input class="input" type="email" id="emailInput" placeholder="you@example.com" required autocomplete="email">
+        <input class="input" type="email" id="emailInput" placeholder="ইমেইল" required autocomplete="email">
         <svg class="input-icon" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>
       </div>
     </div>
 
     <div class="field">
-      <label class="field-label">পাসওয়ার্ড</label>
       <div class="input-wrap">
-        <input class="input" type="password" id="passwordInput" placeholder="কমপক্ষে ৬ অক্ষর" required minlength="6" autocomplete="current-password">
+        <input class="input" type="password" id="passwordInput" placeholder="পাসওয়ার্ড (min 6)" required minlength="6" autocomplete="current-password">
         <svg class="input-icon" viewBox="0 0 24 24"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
       </div>
     </div>
 
-    <button type="submit" class="btn" id="submitBtn" style="margin-top:8px">
+    <button type="submit" class="btn" id="submitBtn" style="margin-top:6px">
       <svg viewBox="0 0 24 24"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
       <span id="submitText">প্রবেশ করুন</span>
     </button>
   </form>
-
-  <div class="alert" id="status"></div>
-
-  <div class="auth-footer">
-    প্রবেশ করে আপনি আমাদের <a href="#">শর্তাবলী</a> মেনে নিচ্ছেন
-  </div>
 </div>
 
 <script type="module">
-  import { signup, login, redirectIfLoggedIn } from "./js/auth.js";
+  import { signup, login, redirectIfLoggedIn, loginWithGoogle, handleGoogleRedirect } from "./js/auth.js";
+  import { showToast } from "./js/toast.js";
+
+  // Handle Google redirect result (mobile)
+  handleGoogleRedirect().then(user => {
+    if (user) window.location.href = "index.html";
+  });
 
   redirectIfLoggedIn("index.html");
 
@@ -183,11 +220,45 @@
   const passwordInput = document.getElementById("passwordInput");
   const submitBtn = document.getElementById("submitBtn");
   const submitText = document.getElementById("submitText");
-  const status = document.getElementById("status");
   const subtitle = document.getElementById("subtitle");
+  const googleBtn = document.getElementById("googleBtn");
 
   let mode = "login";
 
+  // ==========================================
+  // Google login
+  // ==========================================
+  googleBtn.addEventListener("click", async () => {
+    googleBtn.disabled = true;
+    try {
+      const user = await loginWithGoogle();
+      if (user) {
+        showToast("✅ Google দিয়ে প্রবেশ সফল!", "ok");
+        setTimeout(() => window.location.href = "index.html", 600);
+      }
+      // Mobile e redirect — page reload hobe
+    } catch (e) {
+      console.error(e);
+      showToast(prettyGoogleError(e), "err", 4000);
+      googleBtn.disabled = false;
+    }
+  });
+
+  function prettyGoogleError(e) {
+    const code = e.code || "";
+    if (code === "auth/popup-closed-by-user") return "প্রবেশ বাতিল করা হয়েছে";
+    if (code === "auth/popup-blocked") return "পপআপ আটকে গেছে, ব্রাউজার সেটিং দেখুন";
+    if (code === "auth/cancelled-popup-request") return "একটু অপেক্ষা করে আবার চেষ্টা করুন";
+    if (code === "auth/account-exists-with-different-credential") {
+      return "এই ইমেইল অন্য পদ্ধতিতে রেজিস্টার্ড";
+    }
+    if (code === "auth/network-request-failed") return "নেটওয়ার্ক সমস্যা";
+    return e.message || "Google প্রবেশ ব্যর্থ";
+  }
+
+  // ==========================================
+  // Mode switch
+  // ==========================================
   document.querySelectorAll(".mode-tab").forEach(tab => {
     tab.addEventListener("click", () => {
       mode = tab.dataset.mode;
@@ -207,19 +278,15 @@
         subtitle.textContent = "স্বাগতম";
         passwordInput.setAttribute("autocomplete", "current-password");
       }
-      status.classList.remove("show");
     });
   });
 
-  function showStatus(type, msg) {
-    status.className = "alert " + type + " show";
-    status.textContent = msg;
-  }
-
+  // ==========================================
+  // Email/password submit
+  // ==========================================
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
     submitBtn.disabled = true;
-    showStatus("info", mode === "login" ? "প্রবেশ করা হচ্ছে..." : "অ্যাকাউন্ট তৈরি হচ্ছে...");
 
     const email = emailInput.value.trim();
     const password = passwordInput.value;
@@ -236,15 +303,15 @@
         }
 
         await signup(email, password, name, username);
-        showStatus("ok", "✅ অ্যাকাউন্ট তৈরি হয়েছে!");
+        showToast("✅ অ্যাকাউন্ট তৈরি হয়েছে!", "ok");
       } else {
         await login(email, password);
-        showStatus("ok", "✅ প্রবেশ সফল!");
+        showToast("✅ প্রবেশ সফল!", "ok");
       }
 
-      setTimeout(() => window.location.href = "index.html", 800);
+      setTimeout(() => window.location.href = "index.html", 700);
     } catch (err) {
-      showStatus("err", "❌ " + prettyError(err));
+      showToast("❌ " + prettyError(err), "err", 3500);
       submitBtn.disabled = false;
     }
   });
@@ -254,11 +321,11 @@
     const map = {
       "auth/email-already-in-use": "এই ইমেইল দিয়ে অ্যাকাউন্ট আছে",
       "auth/invalid-email": "ইমেইলটি সঠিক নয়",
-      "auth/weak-password": "পাসওয়ার্ড দুর্বল (কমপক্ষে ৬ অক্ষর)",
+      "auth/weak-password": "পাসওয়ার্ড দুর্বল (min ৬ অক্ষর)",
       "auth/user-not-found": "এই ইমেইল দিয়ে অ্যাকাউন্ট নেই",
       "auth/wrong-password": "পাসওয়ার্ড ভুল",
       "auth/invalid-credential": "ইমেইল বা পাসওয়ার্ড ভুল",
-      "auth/too-many-requests": "অনেকবার চেষ্টা করেছেন, একটু অপেক্ষা করুন",
+      "auth/too-many-requests": "অনেকবার চেষ্টা, একটু অপেক্ষা করুন",
       "auth/network-request-failed": "নেটওয়ার্ক সমস্যা",
       "permission-denied": "Firestore নিয়ম আটকে দিয়েছে"
     };
