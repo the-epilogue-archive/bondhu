@@ -13,14 +13,24 @@
       border-bottom: 1px solid #eee; position: sticky; top: 0; z-index: 10;
     }
     .topbar h1 { color: #e1306c; margin: 0; font-size: 22px; }
-    .topbar a { color: #e1306c; text-decoration: none; font-weight: bold; font-size: 14px; margin-left: 12px; }
+    .topbar a {
+      color: #e1306c; text-decoration: none; font-weight: bold;
+      font-size: 14px; margin-left: 12px;
+      position: relative; display: inline-block;
+    }
+    .notif-badge {
+      display: none; position: absolute; top: -8px; right: -8px;
+      background: #e1306c; color: white; font-size: 10px;
+      padding: 1px 5px; border-radius: 10px; font-weight: bold;
+      min-width: 16px; text-align: center;
+    }
 
     /* Story bar */
     .story-bar {
-      background: white; padding: 10px 0;
+      background: white; padding: 10px 12px;
       border-bottom: 1px solid #eee;
       overflow-x: auto; white-space: nowrap;
-      display: flex; gap: 12px; padding-left: 12px; padding-right: 12px;
+      display: flex; gap: 12px;
     }
     .story-bar::-webkit-scrollbar { display: none; }
     .story-item {
@@ -34,9 +44,7 @@
       background: linear-gradient(135deg, #feda75, #fa7e1e, #d62976, #962fbf);
       display: flex; align-items: center; justify-content: center;
     }
-    .story-ring.mine {
-      background: #ddd;
-    }
+    .story-ring.mine { background: #ddd; }
     .story-ring-inner {
       width: 100%; height: 100%; border-radius: 50%;
       background: white; padding: 2px;
@@ -56,12 +64,10 @@
       overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
       text-align: center;
     }
-    .add-story-plus {
-      position: relative;
-    }
+    .add-story-plus { position: relative; }
     .add-story-plus::after {
       content: "+";
-      position: absolute; bottom: 14px; right: 0;
+      position: absolute; bottom: 22px; right: 0;
       width: 22px; height: 22px; border-radius: 50%;
       background: #e1306c; color: white;
       display: flex; align-items: center; justify-content: center;
@@ -80,6 +86,7 @@
       background: linear-gradient(135deg, #feda75, #d62976);
       display: flex; align-items: center; justify-content: center;
       color: white; font-weight: bold; font-size: 16px; overflow: hidden;
+      flex-shrink: 0;
     }
     .avatar img { width: 100%; height: 100%; object-fit: cover; }
     .post-head .name { font-weight: bold; font-size: 14px; }
@@ -88,10 +95,16 @@
     .actions { padding: 10px 14px; display: flex; gap: 14px; align-items: center; }
     .like-btn { background: none; border: none; cursor: pointer; font-size: 22px; padding: 0; }
     .like-btn.liked { color: #e1306c; }
-    .comment-toggle-btn { background: none; border: none; cursor: pointer; font-size: 18px; padding: 0; }
+    .comment-toggle-btn {
+      background: none; border: none; cursor: pointer;
+      font-size: 18px; padding: 0; color: #333;
+    }
     .caption { padding: 0 14px 8px; font-size: 14px; color: #333; word-break: break-word; }
     .caption b { margin-right: 6px; }
-    .delete-btn { background: none; border: none; color: #999; font-size: 12px; cursor: pointer; margin-left: auto; }
+    .delete-btn {
+      background: none; border: none; color: #999;
+      font-size: 12px; cursor: pointer; margin-left: auto;
+    }
     #empty { text-align: center; color: #999; padding: 40px; }
     .fab {
       position: fixed; bottom: 20px; right: 20px; background: #e1306c;
@@ -99,8 +112,11 @@
       border-radius: 50%; font-size: 28px; cursor: pointer;
       box-shadow: 0 4px 14px rgba(225,48,108,0.4); text-decoration: none;
       display: flex; align-items: center; justify-content: center;
+      z-index: 20;
     }
-    .comments-section { border-top: 1px solid #eee; padding: 10px 14px; display: none; }
+    .comments-section {
+      border-top: 1px solid #eee; padding: 10px 14px; display: none;
+    }
     .comments-section.open { display: block; }
     .comment { font-size: 13px; margin-bottom: 6px; word-break: break-word; }
     .comment b { margin-right: 6px; }
@@ -113,6 +129,7 @@
       background: #e1306c; color: white; border: none;
       padding: 8px 14px; border-radius: 8px; font-size: 13px; cursor: pointer;
     }
+    .comment-send:disabled { background: #ccc; }
   </style>
 </head>
 <body>
@@ -121,6 +138,9 @@
     <div>
       <a href="search.html">🔍</a>
       <a href="chat.html">💬</a>
+      <a href="notifications.html">
+        🔔<span class="notif-badge" id="notifBadge">0</span>
+      </a>
       <a href="profile.html">Profile</a>
       <a href="settings.html">⚙️</a>
       <a href="#" id="logoutLink">Logout</a>
@@ -139,6 +159,7 @@
     import { requireAuth, logout } from "./js/auth.js";
     import { loadFeed, toggleLike, deletePost, addComment, loadComments } from "./js/feed.js";
     import { loadActiveStories } from "./js/stories.js";
+    import { getUnreadCount } from "./js/notifications.js";
 
     let currentUser = null;
 
@@ -146,6 +167,7 @@
       currentUser = user;
       loadStories();
       loadPosts();
+      loadNotifBadge();
     });
 
     document.getElementById("logoutLink").addEventListener("click", async (e) => {
@@ -155,14 +177,28 @@
     });
 
     // ==========================================
+    // Notification badge
+    // ==========================================
+    async function loadNotifBadge() {
+      try {
+        const count = await getUnreadCount();
+        if (count > 0) {
+          const badge = document.getElementById("notifBadge");
+          badge.textContent = count > 9 ? "9+" : count;
+          badge.style.display = "inline-block";
+        }
+      } catch (e) {
+        console.warn("Badge load fail:", e);
+      }
+    }
+
+    // ==========================================
     // Story bar
     // ==========================================
     async function loadStories() {
       const bar = document.getElementById("storyBar");
       try {
         const groups = await loadActiveStories();
-
-        // Amar nijer story ache kina
         const myGroup = groups.find(g => g.userId === currentUser.uid);
 
         let html = "";
@@ -270,6 +306,7 @@
           feed.appendChild(div);
         });
 
+        // Like
         feed.querySelectorAll(".like-btn").forEach(btn => {
           btn.addEventListener("click", async () => {
             const postId = btn.dataset.id;
@@ -287,6 +324,7 @@
           });
         });
 
+        // Comment toggle
         feed.querySelectorAll(".comment-toggle-btn").forEach(btn => {
           btn.addEventListener("click", async () => {
             const postId = btn.dataset.id;
@@ -296,6 +334,7 @@
           });
         });
 
+        // Comment send
         feed.querySelectorAll(".comment-send").forEach(btn => {
           btn.addEventListener("click", async () => {
             const postId = btn.dataset.id;
@@ -315,6 +354,7 @@
           });
         });
 
+        // Delete
         feed.querySelectorAll(".delete-btn").forEach(btn => {
           btn.addEventListener("click", async () => {
             if (!confirm("Ei post delete korbe?")) return;
@@ -347,7 +387,7 @@
     }
 
     function escapeHtml(str) {
-      return String(str).replace(/[&<>"']/g, m => ({
+      return String(str || "").replace(/[&<>"']/g, m => ({
         "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
       }[m]));
     }
