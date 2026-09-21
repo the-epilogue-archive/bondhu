@@ -1,20 +1,20 @@
 // ==========================================
 // Bondhu - Notifications
+// Index-free version (client-side filter)
 // ==========================================
 
 import { db, auth } from "./firebase-config.js";
 import {
   collection, addDoc, getDocs, doc, updateDoc, deleteDoc,
-  query, where, orderBy, limit, serverTimestamp, writeBatch
+  serverTimestamp, writeBatch
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 // ==========================================
 // Notification create
-// type: "like" | "comment" | "follow"
 // ==========================================
 export async function createNotification(toUid, type, postId = "", extra = "") {
   const me = auth.currentUser;
-  if (!me || me.uid === toUid) return; // nijer ke notification na
+  if (!me || me.uid === toUid) return;
 
   try {
     await addDoc(collection(db, "notifications"), {
@@ -32,23 +32,35 @@ export async function createNotification(toUid, type, postId = "", extra = "") {
 }
 
 // ==========================================
-// Amar notification list
+// Amar notification list (index-free)
 // ==========================================
 export async function loadMyNotifications() {
   const me = auth.currentUser;
   if (!me) return [];
 
-  const q = query(
-    collection(db, "notifications"),
-    where("toUid", "==", me.uid),
-    orderBy("createdAt", "desc"),
-    limit(50)
-  );
+  try {
+    // Sob fetch koro, client-side filter
+    const snap = await getDocs(collection(db, "notifications"));
+    const arr = [];
+    snap.forEach(d => {
+      const data = d.data();
+      if (data.toUid === me.uid) {
+        arr.push({ id: d.id, ...data });
+      }
+    });
 
-  const snap = await getDocs(q);
-  const arr = [];
-  snap.forEach(d => arr.push({ id: d.id, ...d.data() }));
-  return arr;
+    // Sort: newest first
+    arr.sort((a, b) => {
+      const at = a.createdAt?.seconds || 0;
+      const bt = b.createdAt?.seconds || 0;
+      return bt - at;
+    });
+
+    return arr.slice(0, 50);
+  } catch (e) {
+    console.error("Notifications load fail:", e.message);
+    return [];
+  }
 }
 
 // ==========================================
@@ -57,12 +69,17 @@ export async function loadMyNotifications() {
 export async function getUnreadCount() {
   const me = auth.currentUser;
   if (!me) return 0;
-  const all = await loadMyNotifications();
-  return all.filter(n => !n.read).length;
+  try {
+    const all = await loadMyNotifications();
+    return all.filter(n => !n.read).length;
+  } catch (e) {
+    console.warn("Unread count fail:", e.message);
+    return 0;
+  }
 }
 
 // ==========================================
-// Ekta notification read mark
+// Mark read
 // ==========================================
 export async function markRead(id) {
   try {
@@ -71,22 +88,31 @@ export async function markRead(id) {
 }
 
 // ==========================================
-// Sob read mark
+// Mark all read
 // ==========================================
 export async function markAllRead() {
   const me = auth.currentUser;
   if (!me) return;
-  const all = await loadMyNotifications();
-  const batch = writeBatch(db);
-  all.forEach(n => {
-    if (!n.read) batch.update(doc(db, "notifications", n.id), { read: true });
-  });
-  await batch.commit();
+  try {
+    const all = await loadMyNotifications();
+    const unread = all.filter(n => !n.read);
+    if (unread.length === 0) return;
+
+    const batch = writeBatch(db);
+    unread.forEach(n => {
+      batch.update(doc(db, "notifications", n.id), { read: true });
+    });
+    await batch.commit();
+  } catch (e) {
+    console.warn("markAllRead fail:", e.message);
+  }
 }
 
 // ==========================================
-// Notification delete
+// Delete
 // ==========================================
 export async function deleteNotification(id) {
-  await deleteDoc(doc(db, "notifications", id));
+  try {
+    await deleteDoc(doc(db, "notifications", id));
+  } catch (e) {}
 }
