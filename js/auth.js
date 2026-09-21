@@ -1,6 +1,6 @@
 // ==========================================
 // Bondhu - Firebase Auth + Firestore + Google
-// + Email privacy + Username change
+// Robust version with timeout fallback
 // ==========================================
 
 import { auth, db } from "./firebase-config.js";
@@ -53,7 +53,7 @@ export async function login(email, password) {
 }
 
 // ==========================================
-// Google user doc ensure
+// Google doc ensure
 // ==========================================
 async function ensureGoogleUserDoc(user) {
   const userRef = doc(db, "users", user.uid);
@@ -141,7 +141,7 @@ export async function logout() {
 }
 
 // ==========================================
-// Current user cache
+// Cached user
 // ==========================================
 let _cachedUser = null;
 onAuthStateChanged(auth, (user) => { _cachedUser = user; });
@@ -161,14 +161,13 @@ export async function updateUserData(uid, updates) {
 }
 
 // ==========================================
-// 🔒 EMAIL PRIVACY: strip email from public list
+// Public users list (email stripped)
 // ==========================================
 export async function getAllUsersList() {
   const snap = await getDocs(collection(db, "users"));
   const arr = [];
   snap.forEach(d => {
     const data = d.data();
-    // Email strip — onno user er email karo kache jabe na
     const { email, ...publicData } = data;
     arr.push(publicData);
   });
@@ -176,23 +175,20 @@ export async function getAllUsersList() {
 }
 
 // ==========================================
-// 🔥 USERNAME CHANGE — with batch update
+// Username change with batch update
 // ==========================================
 export async function changeUsername(uid, newUsername) {
   const cleaned = String(newUsername || "").trim().toLowerCase().replace("@", "");
 
-  // Validate
   if (!/^[a-z0-9_]{3,20}$/.test(cleaned)) {
     throw new Error("ইউজারনেম ৩-২০ অক্ষর, শুধু a-z, 0-9, _");
   }
 
-  // Uniqueness check
   const q = query(collection(db, "users"), where("username", "==", cleaned));
   const snap = await getDocs(q);
   const exists = snap.docs.some(d => d.id !== uid);
   if (exists) throw new Error("এই ইউজারনেম আগেই নেওয়া হয়েছে");
 
-  // Current user data
   const meSnap = await getDoc(doc(db, "users", uid));
   const meData = meSnap.exists() ? meSnap.data() : {};
   const oldUsername = meData.username;
@@ -201,10 +197,8 @@ export async function changeUsername(uid, newUsername) {
     throw new Error("নতুন ইউজারনেম আগের মতোই");
   }
 
-  // 1️⃣ Update user doc
   await updateDoc(doc(db, "users", uid), { username: cleaned });
 
-  // 2️⃣ Update posts
   try {
     const postsSnap = await getDocs(query(collection(db, "posts"), where("userId", "==", uid)));
     if (postsSnap.size > 0) {
@@ -214,7 +208,6 @@ export async function changeUsername(uid, newUsername) {
     }
   } catch (e) { console.warn("Posts update skip:", e.message); }
 
-  // 3️⃣ Update reels
   try {
     const reelsSnap = await getDocs(query(collection(db, "reels"), where("userId", "==", uid)));
     if (reelsSnap.size > 0) {
@@ -224,7 +217,6 @@ export async function changeUsername(uid, newUsername) {
     }
   } catch (e) { console.warn("Reels update skip:", e.message); }
 
-  // 4️⃣ Update stories
   try {
     const storiesSnap = await getDocs(query(collection(db, "stories"), where("userId", "==", uid)));
     if (storiesSnap.size > 0) {
@@ -234,7 +226,6 @@ export async function changeUsername(uid, newUsername) {
     }
   } catch (e) { console.warn("Stories update skip:", e.message); }
 
-  // 5️⃣ Update chats (memberData)
   try {
     const chatsSnap = await getDocs(collection(db, "chats"));
     const refs = [];
@@ -247,9 +238,7 @@ export async function changeUsername(uid, newUsername) {
     if (refs.length > 0) {
       const b = writeBatch(db);
       refs.forEach(ref => {
-        b.update(ref, {
-          [`memberData.${uid}.username`]: cleaned
-        });
+        b.update(ref, { [`memberData.${uid}.username`]: cleaned });
       });
       await b.commit();
     }
@@ -259,33 +248,88 @@ export async function changeUsername(uid, newUsername) {
 }
 
 // ==========================================
-// requireAuth
+// requireAuth — ROBUST with 8s timeout
 // ==========================================
 export function requireAuth(callback) {
+  let called = false;
+
   onAuthStateChanged(auth, async (user) => {
-    if (!user) {
-      window.location.href = "login.html";
-    } else {
-      let data = await getUserData(user.uid);
-      if (!data) {
-        const fallbackUsername = (user.email || "").split("@")[0]
-          .toLowerCase().replace(/[^a-z0-9_]/g, "").slice(0, 15)
-          || ("user" + Math.floor(Math.random() * 999));
-        await setDoc(doc(db, "users", user.uid), {
-          uid: user.uid,
-          email: user.email,
+    if (called) return;
+    called = true;
+
+    const timeout = setTimeout(() => {
+      console.warn("⚠️ requireAuth timeout — forcing callback");
+      if (user) {
+        callback({
+          ...user,
           name: user.displayName || "ব্যবহারকারী",
-          username: fallbackUsername,
+          username: (user.email || "").split("@")[0] || "user",
           bio: "",
           photoURL: user.photoURL || "",
           followers: [],
-          following: [],
-          provider: "google",
-          createdAt: serverTimestamp()
+          following: []
         });
-        data = await getUserData(user.uid);
       }
+    }, 8000);
+
+    if (!user) {
+      clearTimeout(timeout);
+      window.location.href = "login.html";
+      return;
+    }
+
+    try {
+      let data = await getUserData(user.uid);
+
+      if (!data) {
+        console.warn("⚠️ User doc nei — auto-create korchi");
+        const fallbackUsername = (user.email || "").split("@")[0]
+          .toLowerCase().replace(/[^a-z0-9_]/g, "").slice(0, 15)
+          || ("user" + Math.floor(Math.random() * 999));
+
+        try {
+          await setDoc(doc(db, "users", user.uid), {
+            uid: user.uid,
+            email: user.email,
+            name: user.displayName || "ব্যবহারকারী",
+            username: fallbackUsername,
+            bio: "",
+            photoURL: user.photoURL || "",
+            followers: [],
+            following: [],
+            provider: user.providerData?.[0]?.providerId === "google.com" ? "google" : "password",
+            createdAt: serverTimestamp()
+          });
+          data = await getUserData(user.uid);
+        } catch (createErr) {
+          console.error("❌ Auto-create fail:", createErr.code, createErr.message);
+          data = {
+            uid: user.uid,
+            email: user.email,
+            name: user.displayName || "ব্যবহারকারী",
+            username: fallbackUsername,
+            bio: "",
+            photoURL: user.photoURL || "",
+            followers: [],
+            following: []
+          };
+        }
+      }
+
+      clearTimeout(timeout);
       callback({ ...user, ...data });
+    } catch (e) {
+      console.error("❌ requireAuth error:", e.code, e.message);
+      clearTimeout(timeout);
+      callback({
+        ...user,
+        name: user.displayName || "ব্যবহারকারী",
+        username: (user.email || "").split("@")[0] || "user",
+        bio: "",
+        photoURL: user.photoURL || "",
+        followers: [],
+        following: []
+      });
     }
   });
 }
