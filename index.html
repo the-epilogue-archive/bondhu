@@ -16,7 +16,6 @@
 
 <div class="page">
 
-  <!-- ============ MASTHEAD ============ -->
   <header class="masthead">
     <div class="date-line">
       <span id="todayDate">শুক্রবার</span>
@@ -34,7 +33,6 @@
     <div class="rule-bottom-2"></div>
   </header>
 
-  <!-- ============ TOPBAR ============ -->
   <nav class="topbar" style="border-top:0;padding-top:14px">
     <div class="topbar-brand" style="font-size:15px;letter-spacing:.5px;font-family:'Hind Siliguri',sans-serif;font-weight:600">
       <span id="welcomeName">স্বাগতম</span>
@@ -63,11 +61,9 @@
     </div>
   </nav>
 
-  <!-- ============ STORY BAR ============ -->
   <div class="section-head">আজকের লেখক</div>
   <div class="stories" id="storyBar"></div>
 
-  <!-- ============ FEED ============ -->
   <main class="feed rule-top-divide" id="feed">
     <div class="loading-wrap">
       <div class="spinner"></div>
@@ -77,12 +73,10 @@
 
 </div>
 
-<!-- ============ FAB ============ -->
 <a href="upload.html" class="fab" aria-label="New post">
   <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
 </a>
 
-<!-- ============ BOTTOM NAV ============ -->
 <nav class="bottom-nav">
   <a href="index.html" class="active"><svg viewBox="0 0 24 24"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg></a>
   <a href="search.html"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.35-4.35"/></svg></a>
@@ -91,12 +85,12 @@
   <a href="profile.html"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21v-2a4 4 0 0 1 4-4h8a4 4 0 0 1 4 4v2"/></svg></a>
 </nav>
 
-<!-- ============ SCRIPTS ============ -->
 <script type="module">
   import { requireAuth, logout } from "./js/auth.js";
   import { loadFeed, toggleLike, deletePost, addComment, loadComments } from "./js/feed.js";
   import { loadActiveStories } from "./js/stories.js";
   import { getUnreadCount } from "./js/notifications.js";
+  import { showToast, showConfirm } from "./js/toast.js";
 
   let currentUser = null;
 
@@ -125,6 +119,7 @@
 
   async function loadStories() {
     const bar = document.getElementById("storyBar");
+    if (!bar) return;
     try {
       const groups = await loadActiveStories();
       const myGroup = groups.find(g => g.userId === currentUser.uid);
@@ -162,15 +157,30 @@
       });
       bar.innerHTML = html;
     } catch (e) {
-      console.error(e);
+      console.error("Stories load fail:", e);
       bar.innerHTML = "";
     }
   }
 
   async function loadPosts() {
     const feed = document.getElementById("feed");
+
+    // 10 second timeout — jodi query hang kore
+    const feedTimeout = setTimeout(() => {
+      if (feed.querySelector(".loading-wrap") || feed.querySelector(".spinner")) {
+        console.warn("⚠️ Feed load timeout");
+        feed.innerHTML = `
+          <div class="empty">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            ফিড লোড করতে সমস্যা হচ্ছে<br><br>
+            <button onclick="location.reload()" style="color:var(--accent);font-weight:600;background:var(--accent-soft);padding:10px 20px;border-radius:24px;border:none;cursor:pointer;font-family:inherit;font-size:14px">আবার চেষ্টা করুন</button>
+          </div>`;
+      }
+    }, 10000);
+
     try {
       const posts = await loadFeed();
+      clearTimeout(feedTimeout);
       const me = currentUser;
 
       if (posts.length === 0) {
@@ -288,28 +298,28 @@
             try { await navigator.share({ title: "বন্ধু", url }); } catch (e) {}
           } else {
             navigator.clipboard.writeText(url);
-            alert("লিংক কপি হয়েছে!");
+            showToast("লিংক কপি হয়েছে!", "ok");
           }
         });
       });
 
       feed.querySelectorAll(".delete-btn").forEach(btn => {
         btn.addEventListener("click", async () => {
-const ok = await showConfirm("এই পোস্টটি মুছে ফেলবেন?", {
-  title: "পোস্ট মুছুন",
-  okText: "মুছুন",
-  cancelText: "বাতিল"
-});
-if (!ok) return;
+          const ok = await showConfirm("এই পোস্টটি মুছে ফেলবেন?", {
+            title: "পোস্ট মুছুন", okText: "মুছে ফেলুন", cancelText: "বাতিল"
+          });
+          if (!ok) return;
           try {
             await deletePost(btn.dataset.id);
             btn.closest(".post").remove();
-          } catch (e) { alert("Delete fail: " + e.message); }
+            showToast("পোস্ট মুছে ফেলা হয়েছে", "ok");
+          } catch (e) { showToast("Delete fail: " + e.message, "err"); }
         });
       });
     } catch (e) {
-      feed.innerHTML = `<div class="empty">❌ ${e.message}</div>`;
-      console.error(e);
+      clearTimeout(feedTimeout);
+      console.error("Feed load fail:", e);
+      feed.innerHTML = `<div class="empty">❌ ${e.message}<br><br><button onclick="location.reload()" style="color:var(--accent);font-weight:600;background:var(--accent-soft);padding:10px 20px;border-radius:24px;border:none;cursor:pointer;font-family:inherit;font-size:14px">আবার চেষ্টা করুন</button></div>`;
     }
   }
 
