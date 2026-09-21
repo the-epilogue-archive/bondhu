@@ -86,39 +86,89 @@
 </nav>
 
 <script type="module">
-  import { requireAuth, logout } from "./js/auth.js";
-  import { loadFeed, toggleLike, deletePost, addComment, loadComments } from "./js/feed.js";
-  import { loadActiveStories } from "./js/stories.js";
-  import { getUnreadCount } from "./js/notifications.js";
-  import { showToast, showConfirm } from "./js/toast.js";
+  import { requireAuth } from "./js/auth.js";
+
+  // ==========================================
+  // Optional imports — jodi fail hoy, page break na hoy
+  // ==========================================
+  let loadFeed, toggleLike, deletePost, addComment, loadComments;
+  let loadActiveStories;
+  let getUnreadCount;
+  let showToast, showConfirm;
+
+  try {
+    const feedMod = await import("./js/feed.js");
+    loadFeed = feedMod.loadFeed;
+    toggleLike = feedMod.toggleLike;
+    deletePost = feedMod.deletePost;
+    addComment = feedMod.addComment;
+    loadComments = feedMod.loadComments;
+  } catch (e) { console.warn("feed.js load fail:", e.message); }
+
+  try {
+    const storyMod = await import("./js/stories.js");
+    loadActiveStories = storyMod.loadActiveStories;
+  } catch (e) { console.warn("stories.js load fail:", e.message); }
+
+  try {
+    const notifMod = await import("./js/notifications.js");
+    getUnreadCount = notifMod.getUnreadCount;
+  } catch (e) { console.warn("notifications.js load fail:", e.message); }
+
+  try {
+    const toastMod = await import("./js/toast.js");
+    showToast = toastMod.showToast;
+    showConfirm = toastMod.showConfirm;
+  } catch (e) { console.warn("toast.js load fail:", e.message); }
+
+  // Fallback helpers
+  if (!showToast) window.showToast = (m, t) => console.log(t || "info", m);
+  if (!showConfirm) window.showConfirm = async (m) => window.confirm(m);
+
+  // ==========================================
+  // Safe helpers
+  // ==========================================
+  const $ = (id) => document.getElementById(id);
+  const setText = (id, text) => { const el = $(id); if (el) el.textContent = text; };
+  const setHTML = (id, html) => { const el = $(id); if (el) el.innerHTML = html; };
 
   let currentUser = null;
 
+  // ==========================================
+  // Date
+  // ==========================================
   const bnDays = ["রবিবার","সোমবার","মঙ্গলবার","বুধবার","বৃহস্পতিবার","শুক্রবার","শনিবার"];
-  const d = new Date();
-  document.getElementById("todayDate").textContent = bnDays[d.getDay()];
+  const todayDateEl = $("todayDate");
+  if (todayDateEl) todayDateEl.textContent = bnDays[new Date().getDay()];
 
+  // ==========================================
+  // Start
+  // ==========================================
   requireAuth(async (user) => {
     currentUser = user;
-    document.getElementById("welcomeName").textContent = (user.name || "স্বাগতম");
-    loadStories();
-    loadPosts();
-    loadNotifBadge();
+    setText("welcomeName", user.name || "স্বাগতম");
+
+    if (typeof loadActiveStories === "function") loadStories();
+    if (typeof loadFeed === "function") loadPosts();
+    if (typeof getUnreadCount === "function") loadNotifBadge();
   });
 
   async function loadNotifBadge() {
+    if (typeof getUnreadCount !== "function") return;
     try {
       const count = await getUnreadCount();
       if (count > 0) {
-        const badge = document.getElementById("notifBadge");
-        badge.textContent = count > 9 ? "9+" : count;
-        badge.style.display = "flex";
+        const badge = $("notifBadge");
+        if (badge) {
+          badge.textContent = count > 9 ? "9+" : count;
+          badge.style.display = "flex";
+        }
       }
-    } catch (e) {}
+    } catch (e) { console.warn("badge fail:", e.message); }
   }
 
   async function loadStories() {
-    const bar = document.getElementById("storyBar");
+    const bar = $("storyBar");
     if (!bar) return;
     try {
       const groups = await loadActiveStories();
@@ -157,15 +207,15 @@
       });
       bar.innerHTML = html;
     } catch (e) {
-      console.error("Stories load fail:", e);
+      console.warn("Stories fail:", e.message);
       bar.innerHTML = "";
     }
   }
 
   async function loadPosts() {
-    const feed = document.getElementById("feed");
+    const feed = $("feed");
+    if (!feed) return;
 
-    // 10 second timeout — jodi query hang kore
     const feedTimeout = setTimeout(() => {
       if (feed.querySelector(".loading-wrap") || feed.querySelector(".spinner")) {
         console.warn("⚠️ Feed load timeout");
@@ -183,7 +233,7 @@
       clearTimeout(feedTimeout);
       const me = currentUser;
 
-      if (posts.length === 0) {
+      if (!posts || posts.length === 0) {
         feed.innerHTML = `
           <div class="empty">
             <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
@@ -298,22 +348,22 @@
             try { await navigator.share({ title: "বন্ধু", url }); } catch (e) {}
           } else {
             navigator.clipboard.writeText(url);
-            showToast("লিংক কপি হয়েছে!", "ok");
+            if (window.showToast) window.showToast("লিংক কপি হয়েছে!", "ok");
           }
         });
       });
 
       feed.querySelectorAll(".delete-btn").forEach(btn => {
         btn.addEventListener("click", async () => {
-          const ok = await showConfirm("এই পোস্টটি মুছে ফেলবেন?", {
-            title: "পোস্ট মুছুন", okText: "মুছে ফেলুন", cancelText: "বাতিল"
-          });
+          const ok = window.showConfirm
+            ? await window.showConfirm("এই পোস্টটি মুছে ফেলবেন?", { title: "পোস্ট মুছুন", okText: "মুছে ফেলুন" })
+            : window.confirm("এই পোস্টটি মুছে ফেলবেন?");
           if (!ok) return;
           try {
             await deletePost(btn.dataset.id);
             btn.closest(".post").remove();
-            showToast("পোস্ট মুছে ফেলা হয়েছে", "ok");
-          } catch (e) { showToast("Delete fail: " + e.message, "err"); }
+            if (window.showToast) window.showToast("পোস্ট মুছে ফেলা হয়েছে", "ok");
+          } catch (e) { alert("Delete fail: " + e.message); }
         });
       });
     } catch (e) {
@@ -325,6 +375,7 @@
 
   async function renderComments(postId) {
     const list = document.getElementById("cl-" + postId);
+    if (!list) return;
     try {
       const comments = await loadComments(postId);
       if (comments.length === 0) {
