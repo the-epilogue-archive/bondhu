@@ -6,6 +6,7 @@
 <meta name="theme-color" content="#f5f0e2">
 <title>বন্ধু — ফিড</title>
 <link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" href="assets/icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,500;0,600;0,700;0,800;1,500&display=swap" rel="stylesheet">
@@ -94,7 +95,6 @@
   let loadFeed, toggleLike, deletePost, addComment, loadComments;
   let loadActiveStories;
   let getUnreadCount;
-  let showToast, showConfirm;
 
   try {
     const feedMod = await import("./js/feed.js");
@@ -115,22 +115,11 @@
     getUnreadCount = notifMod.getUnreadCount;
   } catch (e) { console.warn("notifications.js load fail:", e.message); }
 
-  try {
-    const toastMod = await import("./js/toast.js");
-    showToast = toastMod.showToast;
-    showConfirm = toastMod.showConfirm;
-  } catch (e) { console.warn("toast.js load fail:", e.message); }
-
-  // Fallback helpers
-  if (!showToast) window.showToast = (m, t) => console.log(t || "info", m);
-  if (!showConfirm) window.showConfirm = async (m) => window.confirm(m);
-
   // ==========================================
   // Safe helpers
   // ==========================================
   const $ = (id) => document.getElementById(id);
   const setText = (id, text) => { const el = $(id); if (el) el.textContent = text; };
-  const setHTML = (id, html) => { const el = $(id); if (el) el.innerHTML = html; };
 
   let currentUser = null;
 
@@ -153,6 +142,9 @@
     if (typeof getUnreadCount === "function") loadNotifBadge();
   });
 
+  // ==========================================
+  // Notification badge
+  // ==========================================
   async function loadNotifBadge() {
     if (typeof getUnreadCount !== "function") return;
     try {
@@ -167,6 +159,9 @@
     } catch (e) { console.warn("badge fail:", e.message); }
   }
 
+  // ==========================================
+  // Stories
+  // ==========================================
   async function loadStories() {
     const bar = $("storyBar");
     if (!bar) return;
@@ -212,6 +207,9 @@
     }
   }
 
+  // ==========================================
+  // Posts
+  // ==========================================
   async function loadPosts() {
     const feed = $("feed");
     if (!feed) return;
@@ -299,6 +297,7 @@
         feed.appendChild(div);
       });
 
+      // Like
       feed.querySelectorAll(".like-btn").forEach(btn => {
         btn.addEventListener("click", async () => {
           const postId = btn.dataset.id;
@@ -315,6 +314,7 @@
         });
       });
 
+      // Comment toggle
       feed.querySelectorAll(".comment-toggle-btn").forEach(btn => {
         btn.addEventListener("click", async () => {
           const postId = btn.dataset.id;
@@ -325,6 +325,7 @@
         });
       });
 
+      // Comment send
       feed.querySelectorAll(".comment-send").forEach(btn => {
         btn.addEventListener("click", async () => {
           const postId = btn.dataset.id;
@@ -341,6 +342,7 @@
         });
       });
 
+      // Share
       feed.querySelectorAll(".share-btn").forEach(btn => {
         btn.addEventListener("click", async () => {
           const url = btn.dataset.url;
@@ -348,21 +350,18 @@
             try { await navigator.share({ title: "বন্ধু", url }); } catch (e) {}
           } else {
             navigator.clipboard.writeText(url);
-            if (window.showToast) window.showToast("লিংক কপি হয়েছে!", "ok");
+            alert("লিংক কপি হয়েছে!");
           }
         });
       });
 
+      // Delete
       feed.querySelectorAll(".delete-btn").forEach(btn => {
         btn.addEventListener("click", async () => {
-          const ok = window.showConfirm
-            ? await window.showConfirm("এই পোস্টটি মুছে ফেলবেন?", { title: "পোস্ট মুছুন", okText: "মুছে ফেলুন" })
-            : window.confirm("এই পোস্টটি মুছে ফেলবেন?");
-          if (!ok) return;
+          if (!confirm("এই পোস্টটি মুছে ফেলবেন?")) return;
           try {
             await deletePost(btn.dataset.id);
             btn.closest(".post").remove();
-            if (window.showToast) window.showToast("পোস্ট মুছে ফেলা হয়েছে", "ok");
           } catch (e) { alert("Delete fail: " + e.message); }
         });
       });
@@ -407,8 +406,13 @@
 </script>
 
 <script>
+  // Service Worker register
   if ("serviceWorker" in navigator) {
-    window.addEventListener("load", () => navigator.serviceWorker.register("/bondhu/sw.js").catch(() => {}));
+    window.addEventListener("load", () => {
+      navigator.serviceWorker.register("/bondhu/sw.js").catch((e) => {
+        console.warn("SW fail:", e);
+      });
+    });
   }
 </script>
 
