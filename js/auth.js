@@ -1,6 +1,5 @@
 // ==========================================
-// Bondhu - Firebase Auth + Firestore + Google
-// Robust version with timeout fallback
+// Bondhu - Auth v3 (with Ban check)
 // ==========================================
 
 import { auth, db } from "./firebase-config.js";
@@ -20,41 +19,29 @@ import {
   query, where, serverTimestamp, writeBatch
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-// ==========================================
-// Signup
-// ==========================================
 export async function signup(email, password, displayName, username) {
   const cred = await createUserWithEmailAndPassword(auth, email, password);
   const user = cred.user;
   await updateProfile(user, { displayName });
-
   await setDoc(doc(db, "users", user.uid), {
     uid: user.uid,
     email: email.toLowerCase(),
     name: displayName,
     username: username.toLowerCase(),
-    bio: "",
-    photoURL: "",
-    followers: [],
-    following: [],
+    bio: "", photoURL: "",
+    followers: [], following: [],
     provider: "password",
+    banned: false,
     createdAt: serverTimestamp()
   });
-
   return user;
 }
 
-// ==========================================
-// Login
-// ==========================================
 export async function login(email, password) {
   const cred = await signInWithEmailAndPassword(auth, email, password);
   return cred.user;
 }
 
-// ==========================================
-// Google doc ensure
-// ==========================================
 async function ensureGoogleUserDoc(user) {
   const userRef = doc(db, "users", user.uid);
   const snap = await getDoc(userRef);
@@ -62,9 +49,7 @@ async function ensureGoogleUserDoc(user) {
 
   let baseUsername = (user.email || "").split("@")[0]
     .toLowerCase().replace(/[^a-z0-9_]/g, "").slice(0, 15) || "user";
-  if (baseUsername.length < 3) {
-    baseUsername = "user" + Math.floor(Math.random() * 999);
-  }
+  if (baseUsername.length < 3) baseUsername = "user" + Math.floor(Math.random() * 999);
 
   let username = baseUsername;
   let attempt = 0;
@@ -80,19 +65,15 @@ async function ensureGoogleUserDoc(user) {
     uid: user.uid,
     email: (user.email || "").toLowerCase(),
     name: user.displayName || "ব্যবহারকারী",
-    username: username,
-    bio: "",
-    photoURL: user.photoURL || "",
-    followers: [],
-    following: [],
+    username,
+    bio: "", photoURL: user.photoURL || "",
+    followers: [], following: [],
     provider: "google",
+    banned: false,
     createdAt: serverTimestamp()
   });
 }
 
-// ==========================================
-// Google login
-// ==========================================
 export async function loginWithGoogle() {
   const provider = new GoogleAuthProvider();
   provider.setCustomParameters({ prompt: "select_account" });
@@ -133,23 +114,14 @@ export async function handleGoogleRedirect() {
   }
 }
 
-// ==========================================
-// Logout
-// ==========================================
 export async function logout() {
   await signOut(auth);
 }
 
-// ==========================================
-// Cached user
-// ==========================================
 let _cachedUser = null;
 onAuthStateChanged(auth, (user) => { _cachedUser = user; });
 export function getCurrentUser() { return _cachedUser; }
 
-// ==========================================
-// User data
-// ==========================================
 export async function getUserData(uid) {
   const snap = await getDoc(doc(db, "users", uid));
   return snap.exists() ? snap.data() : null;
@@ -160,9 +132,6 @@ export async function updateUserData(uid, updates) {
   return { uid, ...updates };
 }
 
-// ==========================================
-// Public users list (email stripped)
-// ==========================================
 export async function getAllUsersList() {
   const snap = await getDocs(collection(db, "users"));
   const arr = [];
@@ -174,15 +143,9 @@ export async function getAllUsersList() {
   return arr;
 }
 
-// ==========================================
-// Username change with batch update
-// ==========================================
 export async function changeUsername(uid, newUsername) {
   const cleaned = String(newUsername || "").trim().toLowerCase().replace("@", "");
-
-  if (!/^[a-z0-9_]{3,20}$/.test(cleaned)) {
-    throw new Error("ইউজারনেম ৩-২০ অক্ষর, শুধু a-z, 0-9, _");
-  }
+  if (!/^[a-z0-9_]{3,20}$/.test(cleaned)) throw new Error("ইউজারনেম ৩-২০ অক্ষর, শুধু a-z, 0-9, _");
 
   const q = query(collection(db, "users"), where("username", "==", cleaned));
   const snap = await getDocs(q);
@@ -191,64 +154,69 @@ export async function changeUsername(uid, newUsername) {
 
   const meSnap = await getDoc(doc(db, "users", uid));
   const meData = meSnap.exists() ? meSnap.data() : {};
-  const oldUsername = meData.username;
-
-  if (oldUsername === cleaned) {
-    throw new Error("নতুন ইউজারনেম আগের মতোই");
-  }
+  if (meData.username === cleaned) throw new Error("নতুন ইউজারনেম আগের মতোই");
 
   await updateDoc(doc(db, "users", uid), { username: cleaned });
 
-  try {
-    const postsSnap = await getDocs(query(collection(db, "posts"), where("userId", "==", uid)));
-    if (postsSnap.size > 0) {
-      const b = writeBatch(db);
-      postsSnap.forEach(d => b.update(d.ref, { username: cleaned }));
-      await b.commit();
-    }
-  } catch (e) { console.warn("Posts update skip:", e.message); }
-
-  try {
-    const reelsSnap = await getDocs(query(collection(db, "reels"), where("userId", "==", uid)));
-    if (reelsSnap.size > 0) {
-      const b = writeBatch(db);
-      reelsSnap.forEach(d => b.update(d.ref, { username: cleaned }));
-      await b.commit();
-    }
-  } catch (e) { console.warn("Reels update skip:", e.message); }
-
-  try {
-    const storiesSnap = await getDocs(query(collection(db, "stories"), where("userId", "==", uid)));
-    if (storiesSnap.size > 0) {
-      const b = writeBatch(db);
-      storiesSnap.forEach(d => b.update(d.ref, { username: cleaned }));
-      await b.commit();
-    }
-  } catch (e) { console.warn("Stories update skip:", e.message); }
+  const updates = [
+    { coll: "posts",   field: "userId" },
+    { coll: "reels",   field: "userId" },
+    { coll: "stories", field: "userId" }
+  ];
+  for (const u of updates) {
+    try {
+      const s = await getDocs(query(collection(db, u.coll), where(u.field, "==", uid)));
+      if (s.size > 0) {
+        const b = writeBatch(db);
+        s.forEach(d => b.update(d.ref, { username: cleaned }));
+        await b.commit();
+      }
+    } catch (e) { console.warn(u.coll, "skip:", e.message); }
+  }
 
   try {
     const chatsSnap = await getDocs(collection(db, "chats"));
     const refs = [];
     chatsSnap.forEach(d => {
       const data = d.data();
-      if (Array.isArray(data.members) && data.members.includes(uid)) {
-        refs.push(d.ref);
-      }
+      if (Array.isArray(data.members) && data.members.includes(uid)) refs.push(d.ref);
     });
     if (refs.length > 0) {
       const b = writeBatch(db);
-      refs.forEach(ref => {
-        b.update(ref, { [`memberData.${uid}.username`]: cleaned });
-      });
+      refs.forEach(ref => b.update(ref, { [`memberData.${uid}.username`]: cleaned }));
       await b.commit();
     }
-  } catch (e) { console.warn("Chats update skip:", e.message); }
+  } catch (e) { console.warn("chats skip:", e.message); }
 
   return cleaned;
 }
 
 // ==========================================
-// requireAuth — ROBUST with 8s timeout
+// Banned screen
+// ==========================================
+function showBannedScreen(reason = "") {
+  const html = `
+    <div style="position:fixed;inset:0;background:var(--paper,#f5f0e2);z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px;text-align:center;font-family:'Hind Siliguri',sans-serif">
+      <div style="font-size:64px;margin-bottom:20px">🚫</div>
+      <div style="font-family:'Playfair Display',serif;font-size:26px;font-weight:800;color:#c62828;margin-bottom:12px">অ্যাকাউন্ট নিষিদ্ধ</div>
+      <div style="max-width:400px;font-size:14.5px;line-height:1.7;color:#555;margin-bottom:24px">
+        আপনার অ্যাকাউন্টটি আমাদের নীতিমালা লঙ্ঘনের কারণে নিষিদ্ধ করা হয়েছে।
+        ${reason ? `<br><br><b>কারণ:</b> ${reason}` : ""}
+        <br><br>যদি মনে করেন এটি ভুল হয়েছে, আমাদের সাথে যোগাযোগ করুন।
+      </div>
+      <button onclick="location.href='login.html'" style="padding:12px 28px;border-radius:12px;background:#2d5a3d;color:#fff;border:none;font-family:inherit;font-size:14px;font-weight:600;cursor:pointer">
+        লগআউট করুন
+      </button>
+    </div>
+  `;
+  document.body.insertAdjacentHTML("beforeend", html);
+  setTimeout(async () => {
+    try { await signOut(auth); } catch (e) {}
+  }, 3000);
+}
+
+// ==========================================
+// requireAuth with ban check
 // ==========================================
 export function requireAuth(callback) {
   let called = false;
@@ -258,16 +226,14 @@ export function requireAuth(callback) {
     called = true;
 
     const timeout = setTimeout(() => {
-      console.warn("⚠️ requireAuth timeout — forcing callback");
+      console.warn("⚠️ requireAuth timeout");
       if (user) {
         callback({
           ...user,
           name: user.displayName || "ব্যবহারকারী",
           username: (user.email || "").split("@")[0] || "user",
-          bio: "",
-          photoURL: user.photoURL || "",
-          followers: [],
-          following: []
+          bio: "", photoURL: user.photoURL || "",
+          followers: [], following: []
         });
       }
     }, 8000);
@@ -282,7 +248,7 @@ export function requireAuth(callback) {
       let data = await getUserData(user.uid);
 
       if (!data) {
-        console.warn("⚠️ User doc nei — auto-create korchi");
+        console.warn("⚠️ User doc nei — auto-create");
         const fallbackUsername = (user.email || "").split("@")[0]
           .toLowerCase().replace(/[^a-z0-9_]/g, "").slice(0, 15)
           || ("user" + Math.floor(Math.random() * 999));
@@ -293,50 +259,47 @@ export function requireAuth(callback) {
             email: user.email,
             name: user.displayName || "ব্যবহারকারী",
             username: fallbackUsername,
-            bio: "",
-            photoURL: user.photoURL || "",
-            followers: [],
-            following: [],
+            bio: "", photoURL: user.photoURL || "",
+            followers: [], following: [],
             provider: user.providerData?.[0]?.providerId === "google.com" ? "google" : "password",
+            banned: false,
             createdAt: serverTimestamp()
           });
           data = await getUserData(user.uid);
-        } catch (createErr) {
-          console.error("❌ Auto-create fail:", createErr.code, createErr.message);
+        } catch (e) {
           data = {
-            uid: user.uid,
-            email: user.email,
+            uid: user.uid, email: user.email,
             name: user.displayName || "ব্যবহারকারী",
             username: fallbackUsername,
-            bio: "",
-            photoURL: user.photoURL || "",
-            followers: [],
-            following: []
+            bio: "", photoURL: user.photoURL || "",
+            followers: [], following: []
           };
         }
+      }
+
+      // 🚫 BAN CHECK
+      if (data && data.banned) {
+        clearTimeout(timeout);
+        showBannedScreen(data.banReason || "");
+        return;
       }
 
       clearTimeout(timeout);
       callback({ ...user, ...data });
     } catch (e) {
-      console.error("❌ requireAuth error:", e.code, e.message);
+      console.error("requireAuth error:", e.code, e.message);
       clearTimeout(timeout);
       callback({
         ...user,
         name: user.displayName || "ব্যবহারকারী",
         username: (user.email || "").split("@")[0] || "user",
-        bio: "",
-        photoURL: user.photoURL || "",
-        followers: [],
-        following: []
+        bio: "", photoURL: user.photoURL || "",
+        followers: [], following: []
       });
     }
   });
 }
 
-// ==========================================
-// redirectIfLoggedIn
-// ==========================================
 export function redirectIfLoggedIn(to = "index.html") {
   onAuthStateChanged(auth, (user) => {
     if (user) window.location.href = to;
