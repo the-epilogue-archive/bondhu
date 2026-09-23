@@ -1,21 +1,23 @@
 // ==========================================
-// Bondhu - Chat v2
-// Delete for me + Unsend + Polish
+// Bondhu - Chat v3 (1-to-1 + Group)
 // ==========================================
 
 import { db, auth } from "./firebase-config.js";
 import {
   collection, addDoc, doc, getDoc, setDoc, getDocs,
   query, orderBy, serverTimestamp, onSnapshot,
-  updateDoc, deleteDoc, limit, arrayUnion
+  updateDoc, deleteDoc, limit, arrayUnion, arrayRemove
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
+// ==========================================
+// 1-to-1 chat ID
+// ==========================================
 export function getChatId(uid1, uid2) {
   return [uid1, uid2].sort().join("_");
 }
 
 // ==========================================
-// Chat create / get
+// 1-to-1 Chat create / get
 // ==========================================
 export async function getOrCreateChat(otherUser) {
   const me = auth.currentUser;
@@ -30,6 +32,7 @@ export async function getOrCreateChat(otherUser) {
 
   if (!snap.exists()) {
     await setDoc(chatRef, {
+      isGroup: false,
       members: [me.uid, otherUser.uid],
       memberData: {
         [me.uid]: {
@@ -54,15 +57,124 @@ export async function getOrCreateChat(otherUser) {
 }
 
 // ==========================================
-// Text message
+// GROUP Chat create
+// ==========================================
+export async function createGroupChat(name, members, photoURL = "") {
+  const me = auth.currentUser;
+  if (!me) throw new Error("Login koro");
+  if (!name.trim()) throw new Error("গ্রুপের নাম দিন");
+  if (members.length < 2) throw new Error("অন্তত ২ জন সদস্য নির্বাচন করুন");
+
+  // Ensure me is included
+  const allUids = [...new Set([me.uid, ...members])];
+  const memberData = {};
+
+  // Fetch each member's data
+  for (const uid of allUids) {
+    if (uid === me.uid) {
+      const meSnap = await getDoc(doc(db, "users", me.uid));
+      const d = meSnap.exists() ? meSnap.data() : {};
+      memberData[uid] = {
+        name: d.name || "User",
+        username: d.username || "unknown",
+        photoURL: d.photoURL || ""
+      };
+    } else {
+      const uSnap = await getDoc(doc(db, "users", uid));
+      const d = uSnap.exists() ? uSnap.data() : {};
+      memberData[uid] = {
+        name: d.name || "User",
+        username: d.username || "unknown",
+        photoURL: d.photoURL || ""
+      };
+    }
+  }
+
+  const ref = await addDoc(collection(db, "chats"), {
+    isGroup: true,
+    name: name.trim(),
+    photoURL: photoURL,
+    members: allUids,
+    admins: [me.uid],
+    memberData,
+    createdBy: me.uid,
+    lastMessage: "",
+    lastSenderId: "",
+    updatedAt: serverTimestamp(),
+    createdAt: serverTimestamp()
+  });
+
+  return ref.id;
+}
+
+// ==========================================
+// Group update (name/photo)
+// ==========================================
+export async function updateGroupInfo(chatId, updates) {
+  await updateDoc(doc(db, "chats", chatId), updates);
+}
+
+// ==========================================
+// Group — add member
+// ==========================================
+export async function addGroupMember(chatId, uid) {
+  const uSnap = await getDoc(doc(db, "users", uid));
+  const d = uSnap.exists() ? uSnap.data() : {};
+  await updateDoc(doc(db, "chats", chatId), {
+    members: arrayUnion(uid),
+    [`memberData.${uid}`]: {
+      name: d.name || "User",
+      username: d.username || "unknown",
+      photoURL: d.photoURL || ""
+    }
+  });
+}
+
+// ==========================================
+// Group — remove member
+// ==========================================
+export async function removeGroupMember(chatId, uid) {
+  const chatRef = doc(db, "chats", chatId);
+  const snap = await getDoc(chatRef);
+  if (!snap.exists()) return;
+  const data = snap.data();
+  const newMembers = (data.members || []).filter(u => u !== uid);
+  const newAdmins = (data.admins || []).filter(u => u !== uid);
+  const newMemberData = { ...(data.memberData || {}) };
+  delete newMemberData[uid];
+
+  await updateDoc(chatRef, {
+    members: newMembers,
+    admins: newAdmins,
+    memberData: newMemberData
+  });
+}
+
+// ==========================================
+// Group — leave
+// ==========================================
+export async function leaveGroup(chatId) {
+  const me = auth.currentUser;
+  if (!me) throw new Error("Login koro");
+  await removeGroupMember(chatId, me.uid);
+}
+
+// ==========================================
+// Send message (text)
 // ==========================================
 export async function sendMessage(chatId, text, replyTo = null) {
   const me = auth.currentUser;
   if (!me) throw new Error("Login koro");
   if (!text.trim()) return;
 
+  // Get my data for group display
+  const meSnap = await getDoc(doc(db, "users", me.uid));
+  const meData = meSnap.exists() ? meSnap.data() : {};
+
   const msgData = {
     from: me.uid,
+    fromName: meData.name || "User",
+    fromUsername: meData.username || "unknown",
     text: text.trim(),
     type: "text",
     deletedFor: [],
@@ -84,6 +196,7 @@ export async function sendMessage(chatId, text, replyTo = null) {
     lastMessage: text.trim(),
     lastMessageType: "text",
     lastSenderId: me.uid,
+    lastSenderName: meData.name || "User",
     updatedAt: serverTimestamp()
   });
 }
@@ -98,10 +211,15 @@ export async function sendVoiceMessage(chatId, blob, durationSec, onProgress) {
   const me = auth.currentUser;
   if (!me) throw new Error("Login koro");
 
+  const meSnap = await getDoc(doc(db, "users", me.uid));
+  const meData = meSnap.exists() ? meSnap.data() : {};
+
   const audioUrl = await uploadVoiceToCloudinary(blob, onProgress);
 
   await addDoc(collection(db, "chats", chatId, "messages"), {
     from: me.uid,
+    fromName: meData.name || "User",
+    fromUsername: meData.username || "unknown",
     type: "voice",
     audioUrl: audioUrl,
     duration: Math.round(durationSec || 0),
@@ -113,6 +231,7 @@ export async function sendVoiceMessage(chatId, blob, durationSec, onProgress) {
     lastMessage: "🎤 ভয়েস বার্তা",
     lastMessageType: "voice",
     lastSenderId: me.uid,
+    lastSenderName: meData.name || "User",
     updatedAt: serverTimestamp()
   });
 
@@ -157,7 +276,7 @@ function uploadVoiceToCloudinary(blob, onProgress) {
 }
 
 // ==========================================
-// Messages listen — deletedFor filter
+// Messages listen
 // ==========================================
 export function listenMessages(chatId, callback) {
   const q = query(
@@ -170,7 +289,6 @@ export function listenMessages(chatId, callback) {
     const msgs = [];
     snap.forEach(d => {
       const data = d.data();
-      // Filter: jodi current user er jonno delete kora hoy
       if (Array.isArray(data.deletedFor) && me && data.deletedFor.includes(me.uid)) {
         return;
       }
@@ -184,41 +302,37 @@ export function listenMessages(chatId, callback) {
 }
 
 // ==========================================
-// Delete for me (current user er jonno hide)
+// Single chat listen (for group info changes)
+// ==========================================
+export function listenChat(chatId, callback) {
+  return onSnapshot(doc(db, "chats", chatId), (snap) => {
+    if (snap.exists()) callback({ id: snap.id, ...snap.data() });
+    else callback(null);
+  });
+}
+
+// ==========================================
+// Delete for me / Unsend
 // ==========================================
 export async function deleteForMe(chatId, messageId) {
   const me = auth.currentUser;
   if (!me) throw new Error("Login koro");
-  try {
-    await updateDoc(doc(db, "chats", chatId, "messages", messageId), {
-      deletedFor: arrayUnion(me.uid)
-    });
-  } catch (e) {
-    console.error("deleteForMe fail:", e.message);
-    throw new Error("মুছে ফেলা যায়নি: " + e.message);
-  }
+  await updateDoc(doc(db, "chats", chatId, "messages", messageId), {
+    deletedFor: arrayUnion(me.uid)
+  });
 }
 
-// ==========================================
-// Unsend — sob theke muche felo (only own)
-// ==========================================
 export async function unsendMessage(chatId, messageId) {
   const me = auth.currentUser;
   if (!me) throw new Error("Login koro");
-  try {
-    // Verify owner
-    const snap = await getDoc(doc(db, "chats", chatId, "messages", messageId));
-    if (!snap.exists()) throw new Error("বার্তা পাওয়া যায়নি");
-    if (snap.data().from !== me.uid) throw new Error("শুধু নিজের বার্তা unsend করা যায়");
-    await deleteDoc(doc(db, "chats", chatId, "messages", messageId));
-  } catch (e) {
-    console.error("unsend fail:", e.message);
-    throw new Error(e.message);
-  }
+  const snap = await getDoc(doc(db, "chats", chatId, "messages", messageId));
+  if (!snap.exists()) throw new Error("বার্তা পাওয়া যায়নি");
+  if (snap.data().from !== me.uid) throw new Error("শুধু নিজের বার্তা unsend করা যায়");
+  await deleteDoc(doc(db, "chats", chatId, "messages", messageId));
 }
 
 // ==========================================
-// My chats
+// My chats list
 // ==========================================
 export function listenMyChats(uid, callback) {
   if (!uid) { callback([]); return () => {}; }
@@ -243,12 +357,33 @@ export function listenMyChats(uid, callback) {
   });
 }
 
-export function getOtherMember(chat, myUid) {
+// ==========================================
+// Get display info for chat (1-to-1 vs group)
+// ==========================================
+export function getChatDisplay(chat, myUid) {
+  if (chat.isGroup) {
+    return {
+      name: chat.name || "গ্রুপ",
+      photoURL: chat.photoURL || "",
+      username: "",
+      isGroup: true,
+      memberCount: (chat.members || []).length
+    };
+  }
   const otherUid = chat.members.find(u => u !== myUid);
+  const other = chat.memberData?.[otherUid] || { name: "User", username: "unknown", photoURL: "" };
   return {
+    name: other.name,
+    photoURL: other.photoURL,
+    username: other.username,
     uid: otherUid,
-    ...(chat.memberData?.[otherUid] || { name: "User", username: "unknown", photoURL: "" })
+    isGroup: false
   };
+}
+
+// Keep old name for compatibility
+export function getOtherMember(chat, myUid) {
+  return getChatDisplay(chat, myUid);
 }
 
 export async function deleteChat(chatId) {
