@@ -190,7 +190,6 @@
     border-bottom-left-radius:5px;
   }
 
-  /* Reply quote */
   .msg-reply-quote{
     padding:6px 10px;
     margin-bottom:6px;
@@ -212,7 +211,6 @@
     opacity:.85;
   }
 
-  /* Voice bubble */
   .msg-voice{
     display:flex;
     align-items:center;
@@ -265,7 +263,6 @@
     text-align:right;
   }
 
-  /* Time under bubble */
   .msg-time{
     font-size:10px;
     margin-top:4px;
@@ -316,7 +313,6 @@
   .msg-menu button.danger:hover{background:rgba(198,40,40,.1)}
   .msg-menu button svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 
-  /* ============ REPLY PREVIEW (above input) ============ */
   .reply-preview{
     display:none;
     padding:8px 14px;
@@ -615,7 +611,6 @@
   }
   .call-close:hover{background:var(--paper-2);border-color:var(--rule-dark)}
 
-  /* ============ EMPTY ============ */
   .chat-empty{
     display:flex;flex-direction:column;align-items:center;justify-content:center;
     padding:60px 20px;gap:16px;
@@ -627,6 +622,76 @@
   @media (max-width:480px){
     .emoji-picker{width:calc(100vw - 32px);max-height:280px}
     .emoji-grid{grid-template-columns:repeat(7,1fr)}
+  }
+
+  /* ============================================
+     DESKTOP 2-COLUMN LAYOUT (900px+)
+     ============================================ */
+  @media (min-width: 900px) {
+    body { padding-bottom: 0; overflow: hidden; }
+    .bottom-nav { display: none; }
+    .topbar { display: none; }
+
+    .chat-layout {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px 24px;
+      display: grid;
+      grid-template-columns: 340px 1fr;
+      gap: 20px;
+      overflow: hidden;
+      background: var(--paper);
+    }
+
+    .chat-list {
+      display: block !important;
+      background: var(--paper-elev);
+      border: 1px solid var(--rule);
+      border-radius: 16px;
+      padding: 12px;
+      overflow-y: auto;
+      height: 100%;
+    }
+
+    .conversation {
+      display: flex !important;
+      background: var(--paper-elev);
+      border: 1px solid var(--rule);
+      border-radius: 16px;
+      padding: 0 16px 16px;
+      overflow: hidden;
+      height: 100%;
+      position: relative;
+    }
+
+    .conversation:not(.active) .conv-header,
+    .conversation:not(.active) .messages,
+    .conversation:not(.active) .input-wrap {
+      display: none !important;
+    }
+
+    .conversation:not(.active)::before {
+      content: '💬 একটি চ্যাট বেছে নিন';
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      color: var(--ink-mute);
+      font-family: 'Playfair Display', serif;
+      font-style: italic;
+      font-size: 15px;
+      white-space: nowrap;
+    }
+
+    .back-btn { display: none; }
+    .msg-input { font-size: 14.5px; }
+
+    .emoji-picker {
+      width: 360px;
+      max-height: 380px;
+    }
+    .emoji-grid { grid-template-columns: repeat(9, 1fr); }
   }
 </style>
 </head>
@@ -647,7 +712,6 @@
     </div>
   </nav>
 
-  <!-- Chat list -->
   <div class="chat-list" id="chatList">
     <div style="text-align:center;padding:50px 20px;color:var(--ink-mute);font-size:13px">
       <div class="spinner" style="margin-bottom:12px"></div>
@@ -655,7 +719,6 @@
     </div>
   </div>
 
-  <!-- Conversation -->
   <div class="conversation" id="conversation">
     <div class="conv-header">
       <button class="back-btn" id="backBtn">
@@ -675,7 +738,6 @@
     <div class="messages" id="messages"></div>
 
     <div class="input-wrap">
-      <!-- Reply preview -->
       <div class="reply-preview" id="replyPreview">
         <div class="reply-preview-body">
           <div class="reply-preview-name" id="replyName">—</div>
@@ -707,7 +769,6 @@
         </button>
       </div>
 
-      <!-- Recording bar -->
       <div class="input-bar" style="display:none" id="recordingBar">
         <div class="recording-bar show">
           <span class="recording-dot"></span>
@@ -724,10 +785,8 @@
 
 </div>
 
-<!-- Message menu -->
 <div class="msg-menu" id="msgMenu"></div>
 
-<!-- Call modal -->
 <div class="call-modal" id="callModal">
   <div class="call-modal-box">
     <div class="call-avatar" id="callAvatar">?</div>
@@ -791,6 +850,8 @@
   const inputBar = document.getElementById("inputBar");
   const recordingBar = document.getElementById("recordingBar");
   const recordingTime = document.getElementById("recordingTime");
+
+  const isDesktop = () => window.innerWidth >= 900;
 
   // ==========================================
   // EMOJI DATA
@@ -903,7 +964,10 @@
     currentOtherUser = otherUser;
     replyTarget = null;
     replyPreview.classList.remove("show");
-    chatList.style.display = "none";
+
+    if (!isDesktop()) {
+      chatList.style.display = "none";
+    }
     conversation.classList.add("active");
 
     const initial = (otherUser.name || "?")[0].toUpperCase();
@@ -989,7 +1053,6 @@
         </div>`;
     }).join("");
 
-    // Attach voice play handlers
     messages.querySelectorAll(".msg-voice").forEach(el => {
       const audioUrl = el.dataset.audio;
       const btn = el.querySelector(".voice-play");
@@ -1017,7 +1080,6 @@
         }
 
         if (audio.paused) {
-          // Stop any other playing audio
           messages.querySelectorAll("audio").forEach(a => a.pause());
           audio.play();
           btn.querySelector("svg").innerHTML = '<rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/>';
@@ -1042,7 +1104,6 @@
       });
     });
 
-    // Message click → menu
     messages.querySelectorAll(".msg").forEach(el => {
       el.addEventListener("click", (e) => {
         e.stopPropagation();
@@ -1082,7 +1143,6 @@
       ` : ""}
     `;
 
-    // Position
     msgMenu.classList.add("show");
     const rect = msgMenu.getBoundingClientRect();
     const winW = window.innerWidth;
@@ -1126,7 +1186,6 @@
     });
   }
 
-  // Close menu on outside click
   document.addEventListener("click", (e) => {
     if (!msgMenu.contains(e.target)) msgMenu.classList.remove("show");
   });
@@ -1190,7 +1249,6 @@
     if (unsubMessages) { unsubMessages(); unsubMessages = null; }
     conversation.classList.remove("active");
     chatList.style.display = "block";
-    // Stop any audio
     document.querySelectorAll("audio").forEach(a => a.pause());
   });
 
@@ -1323,7 +1381,6 @@
         const s = elapsed % 60;
         recordingTime.textContent = m + ":" + (s < 10 ? "0" : "") + s;
         if (elapsed >= 60) {
-          // Auto stop at 60s
           mediaRecorder.stop();
         }
       }, 250);
