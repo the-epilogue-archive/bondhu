@@ -1,17 +1,17 @@
 // ==========================================
 // Bondhu - Chat (1-to-1 realtime + voice)
-// FIXED: chat list loading issue
+// Full featured version
 // ==========================================
 
 import { db, auth } from "./firebase-config.js";
 import {
   collection, addDoc, doc, getDoc, setDoc, getDocs,
   query, orderBy, serverTimestamp, onSnapshot,
-  updateDoc, limit
+  updateDoc, deleteDoc, limit, arrayUnion, arrayRemove
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 // ==========================================
-// Chat ID (sorted uid join)
+// Chat ID
 // ==========================================
 export function getChatId(uid1, uid2) {
   return [uid1, uid2].sort().join("_");
@@ -59,17 +59,28 @@ export async function getOrCreateChat(otherUser) {
 // ==========================================
 // Text message
 // ==========================================
-export async function sendMessage(chatId, text) {
+export async function sendMessage(chatId, text, replyTo = null) {
   const me = auth.currentUser;
   if (!me) throw new Error("Login koro");
   if (!text.trim()) return;
 
-  await addDoc(collection(db, "chats", chatId, "messages"), {
+  const msgData = {
     from: me.uid,
     text: text.trim(),
     type: "text",
     createdAt: serverTimestamp()
-  });
+  };
+
+  if (replyTo) {
+    msgData.replyTo = {
+      id: replyTo.id,
+      text: replyTo.text,
+      from: replyTo.from,
+      username: replyTo.username || "?"
+    };
+  }
+
+  await addDoc(collection(db, "chats", chatId, "messages"), msgData);
 
   await updateDoc(doc(db, "chats", chatId), {
     lastMessage: text.trim(),
@@ -85,7 +96,7 @@ export async function sendMessage(chatId, text) {
 const CLOUDINARY_CLOUD_NAME = "kmquukhi";
 const CLOUDINARY_VOICE_PRESET = "bondhu_reels";
 
-export async function sendVoiceMessage(chatId, blob, onProgress) {
+export async function sendVoiceMessage(chatId, blob, durationSec, onProgress) {
   const me = auth.currentUser;
   if (!me) throw new Error("Login koro");
 
@@ -95,6 +106,7 @@ export async function sendVoiceMessage(chatId, blob, onProgress) {
     from: me.uid,
     type: "voice",
     audioUrl: audioUrl,
+    duration: Math.round(durationSec || 0),
     createdAt: serverTimestamp()
   });
 
@@ -165,43 +177,44 @@ export function listenMessages(chatId, callback) {
 }
 
 // ==========================================
-// 🔥 FIXED: My chats listen
-// Age: where() + orderBy() use korechilam — index na thakle fail korto
-// Ekhon: sob chat fetch kore client-side filter
+// Delete single message
+// ==========================================
+export async function deleteMessage(chatId, messageId) {
+  await deleteDoc(doc(db, "chats", chatId, "messages", messageId));
+}
+
+// ==========================================
+// My chats listen (index-free)
 // ==========================================
 export function listenMyChats(uid, callback) {
   if (!uid) { callback([]); return () => {}; }
 
-  // Sob chats fetch — kono index/composite dorkar nei
   const q = query(collection(db, "chats"));
 
   return onSnapshot(q, (snap) => {
     const chats = [];
     snap.forEach(d => {
       const data = d.data();
-      // Members array check
       if (Array.isArray(data.members) && data.members.includes(uid)) {
         chats.push({ id: d.id, ...data });
       }
     });
 
-    // Sort: newest first (client-side)
     chats.sort((a, b) => {
       const at = a.updatedAt?.seconds || a.createdAt?.seconds || 0;
       const bt = b.updatedAt?.seconds || b.createdAt?.seconds || 0;
       return bt - at;
     });
 
-    console.log("✅ Chats loaded:", chats.length);
     callback(chats);
   }, (err) => {
-    console.error("❌ Chat list error:", err);
+    console.error("Chat list error:", err);
     callback([]);
   });
 }
 
 // ==========================================
-// Other member data
+// Other member
 // ==========================================
 export function getOtherMember(chat, myUid) {
   const otherUid = chat.members.find(u => u !== myUid);
@@ -211,9 +224,6 @@ export function getOtherMember(chat, myUid) {
   };
 }
 
-// ==========================================
-// Delete chat (soft)
-// ==========================================
 export async function deleteChat(chatId) {
   await updateDoc(doc(db, "chats", chatId), {
     [`deleted_${auth.currentUser.uid}`]: true
