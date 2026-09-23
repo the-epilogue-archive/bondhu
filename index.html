@@ -12,6 +12,12 @@
 <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,500;0,600;0,700;0,800;1,500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/app.css">
 <script src="js/theme.js"></script>
+<style>
+  /* Feed-specific */
+  .post .plate{position:relative;cursor:pointer;user-select:none}
+  .post .plate img{transition:transform .5s cubic-bezier(.22,1,.36,1)}
+  .post-menu-pop svg{pointer-events:none}
+</style>
 </head>
 <body>
 
@@ -35,7 +41,7 @@
   </header>
 
   <nav class="topbar" style="border-top:0;padding-top:14px">
-    <div class="topbar-brand" style="font-size:15px;letter-spacing:.5px;font-family:'Hind Siliguri',sans-serif;font-weight:600">
+    <div class="topbar-brand" style="font-size:15px;font-family:'Hind Siliguri',sans-serif;font-weight:600">
       <span id="welcomeName">স্বাগতম</span>
     </div>
     <div class="topbar-actions">
@@ -65,14 +71,27 @@
   <div class="section-head">আজকের লেখক</div>
   <div class="stories" id="storyBar"></div>
 
-  <main class="feed rule-top-divide" id="feed">
-    <div class="loading-wrap">
-      <div class="spinner"></div>
-      <div>ফিড লোড হচ্ছে...</div>
-    </div>
-  </main>
+  <main class="feed rule-top-divide" id="feed"></main>
 
 </div>
+
+<!-- Pull to Refresh indicator -->
+<div class="ptr-indicator" id="ptrIndicator">
+  <svg viewBox="0 0 24 24"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+</div>
+
+<!-- Post detail modal -->
+<div class="post-detail-modal" id="postDetailModal">
+  <div class="post-detail-box">
+    <button class="post-detail-close" id="postDetailClose">
+      <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+    <div id="postDetailContent"></div>
+  </div>
+</div>
+
+<!-- Post menu pop -->
+<div class="post-menu-pop" id="postMenuPop"></div>
 
 <a href="upload.html" class="fab" aria-label="New post">
   <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
@@ -88,79 +107,94 @@
 
 <script type="module">
   import { requireAuth } from "./js/auth.js";
-
-  // ==========================================
-  // Optional imports — jodi fail hoy, page break na hoy
-  // ==========================================
-  let loadFeed, toggleLike, deletePost, addComment, loadComments;
-  let loadActiveStories;
-  let getUnreadCount;
-
-  try {
-    const feedMod = await import("./js/feed.js");
-    loadFeed = feedMod.loadFeed;
-    toggleLike = feedMod.toggleLike;
-    deletePost = feedMod.deletePost;
-    addComment = feedMod.addComment;
-    loadComments = feedMod.loadComments;
-  } catch (e) { console.warn("feed.js load fail:", e.message); }
-
-  try {
-    const storyMod = await import("./js/stories.js");
-    loadActiveStories = storyMod.loadActiveStories;
-  } catch (e) { console.warn("stories.js load fail:", e.message); }
-
-  try {
-    const notifMod = await import("./js/notifications.js");
-    getUnreadCount = notifMod.getUnreadCount;
-  } catch (e) { console.warn("notifications.js load fail:", e.message); }
-
-  // ==========================================
-  // Safe helpers
-  // ==========================================
-  const $ = (id) => document.getElementById(id);
-  const setText = (id, text) => { const el = $(id); if (el) el.textContent = text; };
+  import { loadFeed, toggleLike, deletePost, addComment, loadComments } from "./js/feed.js";
+  import { loadActiveStories } from "./js/stories.js";
+  import { getUnreadCount } from "./js/notifications.js";
+  import { showToast, showConfirm } from "./js/toast.js";
+  import { openReportModal } from "./js/report.js";
 
   let currentUser = null;
+  let feedPosts = [];
 
-  // ==========================================
-  // Date
-  // ==========================================
+  const $ = (id) => document.getElementById(id);
+  const feed = $("feed");
+
   const bnDays = ["রবিবার","সোমবার","মঙ্গলবার","বুধবার","বৃহস্পতিবার","শুক্রবার","শনিবার"];
-  const todayDateEl = $("todayDate");
-  if (todayDateEl) todayDateEl.textContent = bnDays[new Date().getDay()];
+  if ($("todayDate")) $("todayDate").textContent = bnDays[new Date().getDay()];
 
   // ==========================================
-  // Start
+  // SKELETON
   // ==========================================
-  requireAuth(async (user) => {
-    currentUser = user;
-    setText("welcomeName", user.name || "স্বাগতম");
-
-    if (typeof loadActiveStories === "function") loadStories();
-    if (typeof loadFeed === "function") loadPosts();
-    if (typeof getUnreadCount === "function") loadNotifBadge();
-  });
-
-  // ==========================================
-  // Notification badge
-  // ==========================================
-  async function loadNotifBadge() {
-    if (typeof getUnreadCount !== "function") return;
-    try {
-      const count = await getUnreadCount();
-      if (count > 0) {
-        const badge = $("notifBadge");
-        if (badge) {
-          badge.textContent = count > 9 ? "9+" : count;
-          badge.style.display = "flex";
-        }
-      }
-    } catch (e) { console.warn("badge fail:", e.message); }
+  function renderSkeleton() {
+    feed.innerHTML = Array.from({length: 3}).map(() => `
+      <div class="skeleton-post">
+        <div class="skeleton-author">
+          <div class="skeleton-line skeleton-avatar"></div>
+          <div class="skeleton-author-lines">
+            <div class="skeleton-line skeleton-line-sm"></div>
+            <div class="skeleton-line skeleton-line-xs"></div>
+          </div>
+        </div>
+        <div class="skeleton-line skeleton-image"></div>
+        <div class="skeleton-line skeleton-text"></div>
+        <div class="skeleton-line skeleton-text short"></div>
+      </div>
+    `).join("");
   }
 
   // ==========================================
-  // Stories
+  // EMPTY / ERROR STATE
+  // ============================================
+  function renderEmpty() {
+    feed.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-state-icon">
+          <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        </div>
+        <div class="empty-state-title">এখনো কোনো পোস্ট নেই</div>
+        <div class="empty-state-text">প্রথম পোস্ট আপনিই লিখুন — ছবি ও গল্প শেয়ার করুন</div>
+        <a class="empty-state-action" href="upload.html">+ প্রথম পোস্ট লিখুন</a>
+      </div>
+    `;
+  }
+
+  function renderError(msg) {
+    feed.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-state-icon" style="background:rgba(198,40,40,.1)">
+          <svg viewBox="0 0 24 24" style="stroke:#c62828"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        </div>
+        <div class="empty-state-title">লোড করা যায়নি</div>
+        <div class="empty-state-text">${escapeHtml(msg)}</div>
+        <button class="empty-state-action" onclick="location.reload()">আবার চেষ্টা করুন</button>
+      </div>
+    `;
+  }
+
+  // ==========================================
+  // INIT
+  // ==========================================
+  requireAuth(async (user) => {
+    currentUser = user;
+    if ($("welcomeName")) $("welcomeName").textContent = user.name || "স্বাগতম";
+    loadStories();
+    loadPosts();
+    loadNotifBadge();
+    setupPullToRefresh();
+  });
+
+  async function loadNotifBadge() {
+    try {
+      const count = await getUnreadCount();
+      if (count > 0 && $("notifBadge")) {
+        $("notifBadge").textContent = count > 9 ? "9+" : count;
+        $("notifBadge").style.display = "flex";
+      }
+    } catch (e) {}
+  }
+
+  // ==========================================
+  // STORIES
   // ==========================================
   async function loadStories() {
     const bar = $("storyBar");
@@ -182,9 +216,7 @@
       } else {
         html += `
           <a class="story" href="story-upload.html">
-            <div class="story-ring mine">
-              <div class="story-av plus">+</div>
-            </div>
+            <div class="story-ring mine"><div class="story-av plus">+</div></div>
             <div class="story-name">তোমার</div>
           </a>`;
       }
@@ -201,179 +233,368 @@
           </a>`;
       });
       bar.innerHTML = html;
-    } catch (e) {
-      console.warn("Stories fail:", e.message);
-      bar.innerHTML = "";
-    }
+    } catch (e) { bar.innerHTML = ""; }
   }
 
   // ==========================================
-  // Posts
+  // POSTS
   // ==========================================
   async function loadPosts() {
-    const feed = $("feed");
-    if (!feed) return;
-
-    const feedTimeout = setTimeout(() => {
-      if (feed.querySelector(".loading-wrap") || feed.querySelector(".spinner")) {
-        console.warn("⚠️ Feed load timeout");
-        feed.innerHTML = `
-          <div class="empty">
-            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-            ফিড লোড করতে সমস্যা হচ্ছে<br><br>
-            <button onclick="location.reload()" style="color:var(--accent);font-weight:600;background:var(--accent-soft);padding:10px 20px;border-radius:24px;border:none;cursor:pointer;font-family:inherit;font-size:14px">আবার চেষ্টা করুন</button>
-          </div>`;
-      }
-    }, 10000);
-
+    renderSkeleton();
     try {
-      const posts = await loadFeed();
-      clearTimeout(feedTimeout);
-      const me = currentUser;
-
-      if (!posts || posts.length === 0) {
-        feed.innerHTML = `
-          <div class="empty">
-            <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-            এখনো কোনো পোস্ট নেই<br>
-            <a href="upload.html" style="color:var(--accent);font-weight:600;display:inline-block;margin-top:12px">+ প্রথম পোস্ট লিখুন</a>
-          </div>`;
+      feedPosts = await loadFeed();
+      if (!feedPosts || feedPosts.length === 0) {
+        renderEmpty();
         return;
       }
+      renderFeed();
+    } catch (e) {
+      console.error(e);
+      renderError(e.message);
+    }
+  }
 
-      feed.innerHTML = "";
-      posts.forEach(p => {
-        const isLiked = p.likes?.includes(me.uid);
-        const isMine = p.userId === me.uid;
-        const initial = (p.userName || "?")[0].toUpperCase();
-        const commentCount = p.commentCount || 0;
-        const time = p.createdAt?.seconds ? timeAgo(p.createdAt.seconds * 1000) : "এইমাত্র";
+  function renderFeed() {
+    const me = currentUser;
+    feed.innerHTML = "";
 
-        const div = document.createElement("article");
-        div.className = "post";
-        div.innerHTML = `
-          <div class="post-meta">
-            <span class="cat">পোস্ট</span>
-            <span>${time}</span>
-          </div>
-          <a href="user.html?u=${encodeURIComponent(p.username || "")}" class="author">
+    feedPosts.forEach((p, idx) => {
+      const isLiked = p.likes?.includes(me.uid);
+      const isMine = p.userId === me.uid;
+      const initial = (p.userName || "?")[0].toUpperCase();
+      const commentCount = p.commentCount || 0;
+      const time = p.createdAt?.seconds ? timeAgo(p.createdAt.seconds * 1000) : "এইমাত্র";
+
+      const div = document.createElement("article");
+      div.className = "post";
+      div.style.animationDelay = (idx * 0.05) + "s";
+      div.innerHTML = `
+        <div class="post-meta">
+          <span class="cat">পোস্ট</span>
+          <span>${time}</span>
+        </div>
+        <div class="author" style="display:flex;align-items:center;gap:14px">
+          <a href="user.html?u=${encodeURIComponent(p.username || "")}" style="display:flex;align-items:center;gap:14px;flex:1;text-decoration:none;color:inherit">
             <div class="author-avatar">${p.userPhoto ? `<img src="${p.userPhoto}">` : initial}</div>
             <div class="author-info">
               <div class="author-name">${escapeHtml(p.userName || "?")}</div>
               <div class="author-role">@${escapeHtml(p.username || "?")}</div>
             </div>
           </a>
-          <div class="plate">
-            <img src="${p.imageUrl}" alt="post" loading="lazy">
+          <button class="post-menu-btn" data-id="${p.id}">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg>
+          </button>
+        </div>
+        <div class="plate" data-id="${p.id}">
+          <img src="${p.imageUrl}" alt="post" loading="lazy" draggable="false">
+          <div class="heart-burst" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
           </div>
-          ${p.caption ? `<div class="body-text"><b>${escapeHtml(p.username)} লিখেছেন:</b> ${escapeHtml(p.caption)}</div>` : ""}
-          <div class="acts">
-            <button class="act-btn like-btn ${isLiked ? "liked" : ""}" data-id="${p.id}">
-              <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-              <span class="like-count">${p.likes?.length || 0}</span>
-            </button>
-            <button class="act-btn comment-toggle-btn" data-id="${p.id}">
-              <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-              <span>${commentCount}</span>
-            </button>
-            <button class="act-btn share-btn" data-url="${location.origin}/bondhu/index.html">
-              <svg viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-              <span>শেয়ার</span>
-            </button>
-            ${isMine ? `
-              <button class="act-btn danger delete-btn" data-id="${p.id}" style="margin-left:auto">
-                <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-2 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L5 6"/></svg>
-              </button>
-            ` : ""}
+        </div>
+        ${p.caption ? `<div class="body-text"><b>${escapeHtml(p.username)} লিখেছেন:</b> ${escapeHtml(p.caption)}</div>` : ""}
+        <div class="acts">
+          <button class="act-btn like-btn ${isLiked ? "liked" : ""}" data-id="${p.id}">
+            <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+            <span class="like-count">${p.likes?.length || 0}</span>
+          </button>
+          <button class="act-btn comment-toggle-btn" data-id="${p.id}">
+            <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            <span>${commentCount}</span>
+          </button>
+          <button class="act-btn share-btn" data-url="${location.origin}/bondhu/index.html">
+            <svg viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+            <span>শেয়ার</span>
+          </button>
+        </div>
+        <div class="comments-section" id="cs-${p.id}" style="display:none;padding-top:14px;border-top:1px solid var(--rule);margin-top:14px">
+          <div class="comments-list" id="cl-${p.id}" style="font-size:13px;color:var(--ink-soft);line-height:1.7"></div>
+          <div style="display:flex;gap:8px;margin-top:10px">
+            <input class="input comment-input" placeholder="মন্তব্য লিখুন..." data-id="${p.id}" style="flex:1;padding:9px 14px;font-size:13px">
+            <button class="act-btn comment-send" data-id="${p.id}" style="background:var(--accent);color:var(--accent-text);padding:9px 16px;font-size:12px">পাঠান</button>
           </div>
-          <div class="comments-section" id="cs-${p.id}" style="display:none;padding-top:14px;border-top:1px solid var(--rule);margin-top:14px">
-            <div class="comments-list" id="cl-${p.id}" style="font-size:13px;color:var(--ink-soft);line-height:1.7"></div>
-            <div style="display:flex;gap:8px;margin-top:10px">
-              <input class="input comment-input" placeholder="মন্তব্য লিখুন..." data-id="${p.id}" style="flex:1;padding:9px 14px;font-size:13px">
-              <button class="act-btn comment-send" data-id="${p.id}" style="background:var(--accent);color:var(--accent-text);padding:9px 16px;font-size:12px">পাঠান</button>
-            </div>
-          </div>
-        `;
-        feed.appendChild(div);
-      });
+        </div>
+      `;
+      feed.appendChild(div);
+    });
 
-      // Like
-      feed.querySelectorAll(".like-btn").forEach(btn => {
-        btn.addEventListener("click", async () => {
-          const postId = btn.dataset.id;
-          const post = posts.find(x => x.id === postId);
-          btn.disabled = true;
-          try {
-            const nowLiked = await toggleLike(postId, post.likes || []);
-            btn.classList.toggle("liked", nowLiked);
-            const span = btn.querySelector(".like-count");
-            const prev = post.likes?.length || 0;
-            span.textContent = prev + (nowLiked ? 1 : -1);
-          } catch (e) { console.error(e); }
-          btn.disabled = false;
-        });
-      });
-
-      // Comment toggle
-      feed.querySelectorAll(".comment-toggle-btn").forEach(btn => {
-        btn.addEventListener("click", async () => {
-          const postId = btn.dataset.id;
-          const section = document.getElementById("cs-" + postId);
-          const open = section.style.display === "block";
-          section.style.display = open ? "none" : "block";
-          if (!open) await renderComments(postId);
-        });
-      });
-
-      // Comment send
-      feed.querySelectorAll(".comment-send").forEach(btn => {
-        btn.addEventListener("click", async () => {
-          const postId = btn.dataset.id;
-          const input = document.querySelector(`.comment-input[data-id="${postId}"]`);
-          const text = input.value.trim();
-          if (!text) return;
-          btn.disabled = true;
-          try {
-            await addComment(postId, text);
-            input.value = "";
-            await renderComments(postId);
-          } catch (e) { console.error(e); }
-          btn.disabled = false;
-        });
-      });
-
-      // Share
-      feed.querySelectorAll(".share-btn").forEach(btn => {
-        btn.addEventListener("click", async () => {
-          const url = btn.dataset.url;
-          if (navigator.share) {
-            try { await navigator.share({ title: "বন্ধু", url }); } catch (e) {}
-          } else {
-            navigator.clipboard.writeText(url);
-            alert("লিংক কপি হয়েছে!");
-          }
-        });
-      });
-
-      // Delete
-      feed.querySelectorAll(".delete-btn").forEach(btn => {
-        btn.addEventListener("click", async () => {
-          if (!confirm("এই পোস্টটি মুছে ফেলবেন?")) return;
-          try {
-            await deletePost(btn.dataset.id);
-            btn.closest(".post").remove();
-          } catch (e) { alert("Delete fail: " + e.message); }
-        });
-      });
-    } catch (e) {
-      clearTimeout(feedTimeout);
-      console.error("Feed load fail:", e);
-      feed.innerHTML = `<div class="empty">❌ ${e.message}<br><br><button onclick="location.reload()" style="color:var(--accent);font-weight:600;background:var(--accent-soft);padding:10px 20px;border-radius:24px;border:none;cursor:pointer;font-family:inherit;font-size:14px">আবার চেষ্টা করুন</button></div>`;
-    }
+    attachHandlers();
   }
 
+  // ==========================================
+  // HANDLERS
+  // ==========================================
+  function attachHandlers() {
+    // Like button
+    feed.querySelectorAll(".like-btn").forEach(btn => {
+      btn.addEventListener("click", async (e) => {
+        e.stopPropagation();
+        const id = btn.dataset.id;
+        const p = feedPosts.find(x => x.id === id);
+        btn.disabled = true;
+        try {
+          const nowLiked = await toggleLike(id, p.likes || []);
+          p.likes = nowLiked ? [...(p.likes || []), currentUser.uid] : (p.likes || []).filter(u => u !== currentUser.uid);
+          btn.classList.toggle("liked", nowLiked);
+          btn.querySelector(".like-count").textContent = p.likes.length;
+        } catch (err) { showToast(err.message, "err"); }
+        btn.disabled = false;
+      });
+    });
+
+    // Double-tap on image = like
+    feed.querySelectorAll(".plate").forEach(plate => {
+      let lastTap = 0;
+      const img = plate.querySelector("img");
+      const heart = plate.querySelector(".heart-burst");
+      const id = plate.dataset.id;
+
+      plate.addEventListener("click", async (e) => {
+        // Single click opens modal (with delay to differentiate from double tap)
+        const now = Date.now();
+        if (now - lastTap < 300) {
+          // Double tap
+          e.preventDefault();
+          e.stopPropagation();
+          heart.classList.remove("show");
+          void heart.offsetWidth;
+          heart.classList.add("show");
+
+          const p = feedPosts.find(x => x.id === id);
+          if (!p.likes?.includes(currentUser.uid)) {
+            try {
+              await toggleLike(id, p.likes || []);
+              p.likes = [...(p.likes || []), currentUser.uid];
+              const btn = document.querySelector(`.like-btn[data-id="${id}"]`);
+              if (btn) {
+                btn.classList.add("liked");
+                btn.querySelector(".like-count").textContent = p.likes.length;
+              }
+            } catch (err) {}
+          }
+          lastTap = 0;
+        } else {
+          lastTap = now;
+          setTimeout(() => {
+            if (Date.now() - lastTap >= 300) {
+              // Single tap → open post detail
+              const p = feedPosts.find(x => x.id === id);
+              if (p) openPostDetail(p);
+            }
+          }, 300);
+        }
+      });
+    });
+
+    // Comment toggle
+    feed.querySelectorAll(".comment-toggle-btn").forEach(btn => {
+      btn.addEventListener("click", async () => {
+        const id = btn.dataset.id;
+        const section = $("cs-" + id);
+        const open = section.style.display === "block";
+        section.style.display = open ? "none" : "block";
+        if (!open) await renderComments(id);
+      });
+    });
+
+    // Comment send
+    feed.querySelectorAll(".comment-send").forEach(btn => {
+      btn.addEventListener("click", async () => {
+        const id = btn.dataset.id;
+        const input = document.querySelector(`.comment-input[data-id="${id}"]`);
+        const text = input.value.trim();
+        if (!text) return;
+        btn.disabled = true;
+        try {
+          await addComment(id, text);
+          input.value = "";
+          await renderComments(id);
+          const p = feedPosts.find(x => x.id === id);
+          if (p) p.commentCount = (p.commentCount || 0) + 1;
+        } catch (e) { showToast(e.message, "err"); }
+        btn.disabled = false;
+      });
+    });
+
+    // Share
+    feed.querySelectorAll(".share-btn").forEach(btn => {
+      btn.addEventListener("click", async (e) => {
+        e.stopPropagation();
+        const url = btn.dataset.url;
+        if (navigator.share) {
+          try { await navigator.share({ title: "বন্ধু", url }); } catch (e) {}
+        } else {
+          navigator.clipboard.writeText(url);
+          showToast("লিংক কপি হয়েছে!", "ok");
+        }
+      });
+    });
+
+    // Post menu (3 dot)
+    feed.querySelectorAll(".post-menu-btn").forEach(btn => {
+      btn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const id = btn.dataset.id;
+        const p = feedPosts.find(x => x.id === id);
+        if (p) openPostMenu(e.clientX, e.clientY, p);
+      });
+    });
+  }
+
+  // ==========================================
+  // POST MENU
+  // ==========================================
+  function openPostMenu(x, y, post) {
+    const isMine = post.userId === currentUser.uid;
+    const pop = $("postMenuPop");
+    pop.innerHTML = `
+      ${isMine ? `
+        <button data-act="delete" class="danger">
+          <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-2 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L5 6"/></svg>
+          পোস্ট মুছুন
+        </button>
+      ` : `
+        <button data-act="report" class="danger">
+          <svg viewBox="0 0 24 24"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          রিপোর্ট করুন
+        </button>
+      `}
+      <button data-act="copy">
+        <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        লিংক কপি
+      </button>
+    `;
+
+    pop.classList.add("show");
+    const rect = pop.getBoundingClientRect();
+    let left = x, top = y;
+    if (left + rect.width > window.innerWidth - 10) left = window.innerWidth - rect.width - 10;
+    if (top + rect.height > window.innerHeight - 10) top = window.innerHeight - rect.height - 10;
+    if (left < 10) left = 10;
+    if (top < 10) top = 10;
+    pop.style.left = left + "px";
+    pop.style.top = top + "px";
+
+    pop.querySelectorAll("button").forEach(b => {
+      b.onclick = async () => {
+        const act = b.dataset.act;
+        pop.classList.remove("show");
+
+        if (act === "delete") {
+          const ok = await showConfirm("এই পোস্টটি মুছে ফেলবেন?", { title: "পোস্ট মুছুন", okText: "মুছে ফেলুন" });
+          if (!ok) return;
+          try {
+            await deletePost(post.id);
+            feedPosts = feedPosts.filter(x => x.id !== post.id);
+            const el = document.querySelector(`.plate[data-id="${post.id}"]`);
+            if (el) el.closest(".post").remove();
+            showToast("মুছে ফেলা হয়েছে", "ok");
+          } catch (e) { showToast(e.message, "err"); }
+        } else if (act === "report") {
+          openReportModal({
+            targetType: "post",
+            targetId: post.id,
+            targetUsername: post.username
+          }, () => showToast("✅ রিপোর্ট পাঠানো হয়েছে", "ok"));
+        } else if (act === "copy") {
+          try {
+            await navigator.clipboard.writeText(location.origin + "/bondhu/index.html");
+            showToast("লিংক কপি হয়েছে", "ok");
+          } catch (e) {}
+        }
+      };
+    });
+  }
+
+  document.addEventListener("click", (e) => {
+    if (!$("postMenuPop").contains(e.target)) $("postMenuPop").classList.remove("show");
+  });
+
+  // ==========================================
+  // POST DETAIL MODAL
+  // ==========================================
+  async function openPostDetail(post) {
+    const modal = $("postDetailModal");
+    const content = $("postDetailContent");
+    const initial = (post.userName || "?")[0].toUpperCase();
+    const isLiked = post.likes?.includes(currentUser.uid);
+    const time = post.createdAt?.seconds ? timeAgo(post.createdAt.seconds * 1000) : "";
+
+    let commentsHTML = "";
+    try {
+      const comments = await loadComments(post.id);
+      if (comments.length === 0) {
+        commentsHTML = `<div style="color:var(--ink-mute);font-size:12.5px;font-style:italic;padding:8px 0">এখনো কোনো মন্তব্য নেই</div>`;
+      } else {
+        commentsHTML = comments.slice(0, 8).map(c =>
+          `<div style="font-size:13px;color:var(--ink-soft);line-height:1.6;padding-bottom:8px;margin-bottom:8px;border-bottom:1px solid var(--rule)">
+            <b style="font-family:'Playfair Display',serif;color:var(--ink)">@${escapeHtml(c.username)}</b> ${escapeHtml(c.text)}
+          </div>`
+        ).join("");
+      }
+    } catch (e) {}
+
+    content.innerHTML = `
+      <div class="post-detail-image"><img src="${post.imageUrl}" alt=""></div>
+      <div class="post-detail-body">
+        <div style="display:flex;align-items:center;gap:12px;padding-bottom:14px;border-bottom:1px solid var(--rule);margin-bottom:16px">
+          <div class="author-avatar" style="width:44px;height:44px;font-size:16px">${post.userPhoto ? `<img src="${post.userPhoto}">` : initial}</div>
+          <div style="flex:1;min-width:0">
+            <div class="author-name" style="font-size:15px">${escapeHtml(post.userName)}</div>
+            <div class="author-role">@${escapeHtml(post.username)} · ${time}</div>
+          </div>
+        </div>
+        ${post.caption ? `<div style="font-size:14.5px;line-height:1.7;color:var(--ink-soft);padding-bottom:16px;border-bottom:1px solid var(--rule);margin-bottom:16px"><b style="font-family:'Playfair Display',serif;color:var(--ink)">${escapeHtml(post.username)}:</b> ${escapeHtml(post.caption)}</div>` : ""}
+        <div style="display:flex;gap:22px;margin-bottom:16px;font-size:13.5px;font-weight:600;color:var(--ink-soft)">
+          <span id="modalLikeStat" style="${isLiked ? "color:#e1306c" : ""}">❤️ ${post.likes?.length || 0}</span>
+          <span>💬 ${post.commentCount || 0}</span>
+        </div>
+        <div style="padding-top:14px;border-top:1px solid var(--rule);margin-bottom:16px">
+          <div style="font-size:11px;color:var(--ink-mute);letter-spacing:1.2px;text-transform:uppercase;font-weight:600;margin-bottom:10px">মন্তব্যসমূহ</div>
+          ${commentsHTML}
+        </div>
+        <div style="display:flex;gap:8px">
+          <button id="modalLikeBtn" class="act-btn ${isLiked ? "liked" : ""}" style="flex:1;justify-content:center;padding:12px;border:1px solid var(--rule);background:var(--paper-2);border-radius:10px">
+            <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+            ${isLiked ? "পছন্দ হয়েছে" : "পছন্দ"}
+          </button>
+          <a href="user.html?u=${encodeURIComponent(post.username)}" class="act-btn" style="flex:1;justify-content:center;padding:12px;border:1px solid var(--rule);background:var(--paper-2);border-radius:10px;text-decoration:none;color:var(--ink)">
+            প্রোফাইল দেখুন
+          </a>
+        </div>
+      </div>
+    `;
+
+    modal.classList.add("show");
+
+    $("modalLikeBtn").onclick = async () => {
+      try {
+        const nowLiked = await toggleLike(post.id, post.likes || []);
+        post.likes = nowLiked ? [...(post.likes || []), currentUser.uid] : (post.likes || []).filter(u => u !== currentUser.uid);
+        const btn = $("modalLikeBtn");
+        btn.classList.toggle("liked", nowLiked);
+        btn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg> ${nowLiked ? "পছন্দ হয়েছে" : "পছন্দ"}`;
+        $("modalLikeStat").innerHTML = `❤️ ${post.likes.length}`;
+        $("modalLikeStat").style.color = nowLiked ? "#e1306c" : "";
+        // Update grid
+        const feedBtn = document.querySelector(`.like-btn[data-id="${post.id}"]`);
+        if (feedBtn) {
+          feedBtn.classList.toggle("liked", nowLiked);
+          feedBtn.querySelector(".like-count").textContent = post.likes.length;
+        }
+      } catch (e) { showToast(e.message, "err"); }
+    };
+  }
+
+  $("postDetailClose").addEventListener("click", () => $("postDetailModal").classList.remove("show"));
+  $("postDetailModal").addEventListener("click", (e) => {
+    if (e.target === $("postDetailModal")) $("postDetailModal").classList.remove("show");
+  });
+
+  // ==========================================
+  // COMMENTS
+  // ==========================================
   async function renderComments(postId) {
-    const list = document.getElementById("cl-" + postId);
+    const list = $("cl-" + postId);
     if (!list) return;
     try {
       const comments = await loadComments(postId);
@@ -389,6 +610,52 @@
     }
   }
 
+  // ==========================================
+  // PULL TO REFRESH
+  // ==========================================
+  function setupPullToRefresh() {
+    const indicator = $("ptrIndicator");
+    let startY = 0;
+    let pulling = false;
+    let triggered = false;
+
+    document.addEventListener("touchstart", (e) => {
+      if (window.scrollY > 5) return;
+      startY = e.touches[0].clientY;
+      pulling = true;
+      triggered = false;
+    }, { passive: true });
+
+    document.addEventListener("touchmove", (e) => {
+      if (!pulling) return;
+      const delta = e.touches[0].clientY - startY;
+      if (delta > 60 && window.scrollY <= 0) {
+        indicator.classList.add("active");
+        if (delta > 100 && !triggered) {
+          triggered = true;
+          indicator.classList.add("spinning");
+        }
+      }
+    }, { passive: true });
+
+    document.addEventListener("touchend", async () => {
+      if (!pulling) return;
+      pulling = false;
+      if (triggered) {
+        await loadPosts();
+        await loadStories();
+        setTimeout(() => {
+          indicator.classList.remove("active", "spinning");
+        }, 400);
+      } else {
+        indicator.classList.remove("active", "spinning");
+      }
+    });
+  }
+
+  // ==========================================
+  // HELPERS
+  // ==========================================
   function timeAgo(t) {
     const diff = Math.floor((Date.now() - t) / 1000);
     if (diff < 60) return `${diff} সেকেন্ড আগে`;
@@ -406,13 +673,8 @@
 </script>
 
 <script>
-  // Service Worker register
   if ("serviceWorker" in navigator) {
-    window.addEventListener("load", () => {
-      navigator.serviceWorker.register("/bondhu/sw.js").catch((e) => {
-        console.warn("SW fail:", e);
-      });
-    });
+    window.addEventListener("load", () => navigator.serviceWorker.register("/bondhu/sw.js").catch(() => {}));
   }
 </script>
 
