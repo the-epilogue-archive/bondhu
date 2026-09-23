@@ -1,5 +1,5 @@
 // ==========================================
-// Bondhu - Feed + Posts + Comments + Search + Follow
+// Bondhu - Feed (Ban-aware)
 // ==========================================
 
 import { db, auth } from "./firebase-config.js";
@@ -9,10 +9,18 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import { createNotification } from "./notifications.js";
 
-// Post create
+async function ensureNotBanned() {
+  const me = auth.currentUser;
+  if (!me) throw new Error("লগইন করুন");
+  const snap = await getDoc(doc(db, "users", me.uid));
+  if (snap.exists() && snap.data().banned) {
+    throw new Error("আপনার অ্যাকাউন্ট নিষিদ্ধ");
+  }
+  return me;
+}
+
 export async function createPost(imageUrl, caption) {
-  const user = auth.currentUser;
-  if (!user) throw new Error("Login koro age");
+  const user = await ensureNotBanned();
   const snap = await getDoc(doc(db, "users", user.uid));
   const userData = snap.exists() ? snap.data() : {};
   const ref = await addDoc(collection(db, "posts"), {
@@ -29,7 +37,6 @@ export async function createPost(imageUrl, caption) {
   return ref.id;
 }
 
-// Feed load
 export async function loadFeed() {
   const snap = await getDocs(query(collection(db, "posts"), orderBy("createdAt", "desc")));
   const posts = [];
@@ -37,7 +44,6 @@ export async function loadFeed() {
   return posts;
 }
 
-// User er post
 export async function loadUserPosts(uid) {
   const snap = await getDocs(query(collection(db, "posts"), orderBy("createdAt", "desc")));
   const posts = [];
@@ -48,18 +54,13 @@ export async function loadUserPosts(uid) {
   return posts;
 }
 
-// Like toggle + notification
 export async function toggleLike(postId, currentLikes) {
-  const user = auth.currentUser;
-  if (!user) throw new Error("Login koro");
+  const user = await ensureNotBanned();
   const ref = doc(db, "posts", postId);
   const alreadyLiked = currentLikes.includes(user.uid);
-
   await updateDoc(ref, {
     likes: alreadyLiked ? arrayRemove(user.uid) : arrayUnion(user.uid)
   });
-
-  // Notify post owner (jodi notun like hoy)
   if (!alreadyLiked) {
     try {
       const postSnap = await getDoc(ref);
@@ -67,21 +68,18 @@ export async function toggleLike(postId, currentLikes) {
       if (postData && postData.userId && postData.userId !== user.uid) {
         await createNotification(postData.userId, "like", postId);
       }
-    } catch (e) { console.warn("Like notif fail:", e); }
+    } catch (e) {}
   }
-
   return !alreadyLiked;
 }
 
-// Delete post
 export async function deletePost(postId) {
+  await ensureNotBanned();
   await deleteDoc(doc(db, "posts", postId));
 }
 
-// Comment add + notification
 export async function addComment(postId, text) {
-  const user = auth.currentUser;
-  if (!user) throw new Error("Login koro");
+  const user = await ensureNotBanned();
   const userSnap = await getDoc(doc(db, "users", user.uid));
   const userData = userSnap.exists() ? userSnap.data() : {};
 
@@ -89,7 +87,7 @@ export async function addComment(postId, text) {
     userId: user.uid,
     username: userData.username || "unknown",
     userName: userData.name || "User",
-    text: text,
+    text,
     createdAt: serverTimestamp()
   });
 
@@ -98,8 +96,6 @@ export async function addComment(postId, text) {
   if (postSnap.exists()) {
     const cur = postSnap.data().commentCount || 0;
     await updateDoc(postRef, { commentCount: cur + 1 });
-
-    // Notify post owner
     const postData = postSnap.data();
     if (postData.userId && postData.userId !== user.uid) {
       await createNotification(postData.userId, "comment", postId, text.slice(0, 60));
@@ -107,7 +103,6 @@ export async function addComment(postId, text) {
   }
 }
 
-// Comments load
 export async function loadComments(postId) {
   const snap = await getDocs(query(
     collection(db, "posts", postId, "comments"),
@@ -118,7 +113,6 @@ export async function loadComments(postId) {
   return arr;
 }
 
-// User search
 export async function searchUsers(term) {
   const t = term.toLowerCase().trim();
   if (!t) return [];
@@ -128,7 +122,6 @@ export async function searchUsers(term) {
     const u = d.data();
     if ((u.username || "").toLowerCase().includes(t) ||
         (u.name || "").toLowerCase().includes(t)) {
-      // 🔒 Email strip
       const { email, ...publicData } = u;
       arr.push(publicData);
     }
@@ -136,11 +129,9 @@ export async function searchUsers(term) {
   return arr.slice(0, 20);
 }
 
-// Follow toggle + notification
 export async function toggleFollow(targetUid) {
-  const user = auth.currentUser;
-  if (!user) throw new Error("Login koro");
-  if (user.uid === targetUid) throw new Error("Nijeke follow korte parba na");
+  const user = await ensureNotBanned();
+  if (user.uid === targetUid) throw new Error("নিজেকে অনুসরণ করা যাবে না");
 
   const meRef = doc(db, "users", user.uid);
   const targetRef = doc(db, "users", targetUid);
@@ -154,7 +145,6 @@ export async function toggleFollow(targetUid) {
   } else {
     await updateDoc(meRef, { following: arrayUnion(targetUid) });
     await updateDoc(targetRef, { followers: arrayUnion(user.uid) });
-    // Notify
     await createNotification(targetUid, "follow");
     return true;
   }
