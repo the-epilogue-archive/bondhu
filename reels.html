@@ -15,408 +15,197 @@
 <style>
   *{box-sizing:border-box;margin:0;padding:0}
   html,body{height:100%;overflow:hidden;background:#000}
-
   body{
-    padding-bottom:0;
-    color:#fff;
+    padding-bottom:0;color:#fff;
     font-family:'Hind Siliguri',system-ui,sans-serif;
-    -webkit-user-select:none;
-    user-select:none;
+    -webkit-user-select:none;user-select:none;
     -webkit-tap-highlight-color:transparent;
   }
 
-  /* ============ CONTAINER ============ */
   .reels-container{
-    position:fixed;
-    top:0;left:0;right:0;
+    position:fixed;top:0;left:0;right:0;
     bottom:calc(72px + env(safe-area-inset-bottom));
-    overflow-y:scroll;
-    scroll-snap-type:y mandatory;
-    scrollbar-width:none;
-    background:#000;
+    overflow-y:scroll;scroll-snap-type:y mandatory;
+    scrollbar-width:none;background:#000;
     -webkit-overflow-scrolling:touch;
   }
   .reels-container::-webkit-scrollbar{display:none}
 
   .reel{
-    height:100%;
-    scroll-snap-align:start;
-    position:relative;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    background:#000;
-    overflow:hidden;
+    height:100%;scroll-snap-align:start;
+    position:relative;display:flex;
+    align-items:center;justify-content:center;
+    background:#000;overflow:hidden;
   }
-
   .reel video{
-    width:100%;
-    height:100%;
-    object-fit:contain;
-    background:#000;
-    display:block;
-    pointer-events:none;   /* tap auto handle hobe */
+    width:100%;height:100%;object-fit:contain;
+    background:#000;display:block;pointer-events:none;
   }
 
-  /* ============ TAP ZONES ============ */
   .tap-zone{
-    position:absolute;
-    top:0;bottom:0;
-    width:32%;
-    z-index:3;
-    cursor:pointer;
+    position:absolute;top:0;bottom:0;width:32%;z-index:3;cursor:pointer;
   }
   .tap-zone.left{left:0}
   .tap-zone.right{right:0}
 
-  /* ============ CENTER PLAY/PAUSE INDICATOR ============ */
   .play-indicator{
-    position:absolute;
-    top:50%;left:50%;
+    position:absolute;top:50%;left:50%;
     transform:translate(-50%,-50%) scale(0);
-    width:80px;height:80px;
-    border-radius:50%;
+    width:80px;height:80px;border-radius:50%;
     background:rgba(0,0,0,.55);
-    backdrop-filter:blur(10px);
-    -webkit-backdrop-filter:blur(10px);
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    z-index:5;
-    pointer-events:none;
-    opacity:0;
+    backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+    display:flex;align-items:center;justify-content:center;
+    z-index:5;pointer-events:none;opacity:0;
     transition:opacity .25s, transform .3s cubic-bezier(.34,1.56,.64,1);
   }
-  .play-indicator.show{
-    opacity:1;
-    transform:translate(-50%,-50%) scale(1);
-  }
-  .play-indicator.hide-fast{
-    transition:opacity .2s, transform .2s;
-  }
-  .play-indicator svg{
-    width:36px;height:36px;
-    fill:#fff;
-    stroke:#fff;
-    stroke-width:1;
-  }
+  .play-indicator.show{opacity:1;transform:translate(-50%,-50%) scale(1)}
+  .play-indicator svg{width:36px;height:36px;fill:#fff;stroke:#fff;stroke-width:1}
 
-  /* ============ DOUBLE-TAP SEEK INDICATOR ============ */
   .seek-indicator{
-    position:absolute;
-    top:50%;
-    transform:translateY(-50%) scale(.7);
-    padding:12px 20px;
-    background:rgba(0,0,0,.6);
-    backdrop-filter:blur(10px);
-    -webkit-backdrop-filter:blur(10px);
-    border-radius:30px;
-    color:#fff;
-    font-size:14px;
-    font-weight:600;
-    display:flex;
-    align-items:center;
-    gap:8px;
-    z-index:6;
-    opacity:0;
-    pointer-events:none;
+    position:absolute;top:50%;transform:translateY(-50%) scale(.7);
+    padding:12px 20px;background:rgba(0,0,0,.6);
+    backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+    border-radius:30px;color:#fff;font-size:14px;font-weight:600;
+    display:flex;align-items:center;gap:8px;z-index:6;
+    opacity:0;pointer-events:none;
     transition:opacity .2s, transform .3s cubic-bezier(.34,1.56,.64,1);
   }
-  .seek-indicator.show{
-    opacity:1;
-    transform:translateY(-50%) scale(1);
-  }
+  .seek-indicator.show{opacity:1;transform:translateY(-50%) scale(1)}
   .seek-indicator.left{left:20%}
   .seek-indicator.right{right:20%}
-  .seek-indicator svg{
-    width:18px;height:18px;
-    fill:#fff;stroke:#fff;stroke-width:1;
-  }
-  .seek-indicator .arrows{
-    display:flex;
-    gap:-2px;
-  }
-  .seek-indicator .arrows svg:first-child{opacity:.5}
-  .seek-indicator .arrows svg:last-child{opacity:1}
+  .seek-indicator svg{width:18px;height:18px;fill:#fff;stroke:#fff;stroke-width:1}
 
-  /* ============ OVERLAY (gradient) ============ */
   .reel-overlay{
-    position:absolute;
-    inset:0;
-    pointer-events:none;
-    background:linear-gradient(
-      180deg,
-      rgba(0,0,0,.5) 0%,
-      transparent 20%,
-      transparent 55%,
-      rgba(0,0,0,.75) 100%
-    );
+    position:absolute;inset:0;pointer-events:none;
+    background:linear-gradient(180deg,rgba(0,0,0,.5) 0%,transparent 20%,transparent 55%,rgba(0,0,0,.75) 100%);
     z-index:2;
   }
 
-  /* ============ INFO (bottom-left) ============ */
   .reel-info{
-    position:absolute;
-    bottom:80px;
-    left:16px;
-    right:90px;
-    z-index:4;
-    pointer-events:auto;
+    position:absolute;bottom:80px;left:16px;right:90px;
+    z-index:4;pointer-events:auto;
   }
-  .reel-user{
-    display:flex;
-    align-items:center;
-    gap:10px;
-    margin-bottom:10px;
-  }
+  .reel-user{display:flex;align-items:center;gap:10px;margin-bottom:10px}
   .reel-av{
-    width:40px;height:40px;
-    border-radius:50%;
-    background:var(--accent);
-    color:var(--accent-text);
+    width:40px;height:40px;border-radius:50%;
+    background:var(--accent);color:var(--accent-text);
     display:flex;align-items:center;justify-content:center;
-    font-weight:700;font-size:15px;
-    overflow:hidden;
-    border:2px solid rgba(255,255,255,.4);
-    flex-shrink:0;
+    font-weight:700;font-size:15px;overflow:hidden;
+    border:2px solid rgba(255,255,255,.4);flex-shrink:0;
   }
   .reel-av img{width:100%;height:100%;object-fit:cover}
   .reel-username{
-    font-family:'Playfair Display',serif;
-    font-weight:700;font-size:14px;
-    color:#fff;
-    text-shadow:0 1px 3px rgba(0,0,0,.6);
+    font-family:'Playfair Display',serif;font-weight:700;font-size:14px;
+    color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.6);
   }
   .reel-caption{
-    font-size:13.5px;
-    line-height:1.5;
-    color:#f5f5f5;
-    text-shadow:0 1px 3px rgba(0,0,0,.7);
-    word-break:break-word;
-    max-height:80px;
-    overflow:hidden;
+    font-size:13.5px;line-height:1.5;color:#f5f5f5;
+    text-shadow:0 1px 3px rgba(0,0,0,.7);word-break:break-word;
+    max-height:80px;overflow:hidden;
   }
 
-  /* ============ ACTIONS (right side) ============ */
   .reel-actions{
-    position:absolute;
-    right:12px;
-    bottom:100px;
-    display:flex;
-    flex-direction:column;
-    gap:18px;
-    align-items:center;
-    z-index:4;
-    pointer-events:auto;
+    position:absolute;right:12px;bottom:100px;
+    display:flex;flex-direction:column;gap:18px;
+    align-items:center;z-index:4;pointer-events:auto;
   }
   .reel-btn{
-    background:none;
-    border:none;
-    color:#fff;
-    cursor:pointer;
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    gap:4px;
-    font-size:11px;
-    font-weight:600;
+    background:none;border:none;color:#fff;cursor:pointer;
+    display:flex;flex-direction:column;align-items:center;gap:4px;
+    font-size:11px;font-weight:600;
     transition:transform .3s cubic-bezier(.34,1.56,.64,1);
-    will-change:transform;
-    text-shadow:0 1px 3px rgba(0,0,0,.6);
-    padding:4px;
+    text-shadow:0 1px 3px rgba(0,0,0,.6);padding:4px;
   }
   .reel-btn:hover{transform:scale(1.15)}
   .reel-btn:active{transform:scale(.9);transition-duration:.1s}
   .reel-btn svg{
-    width:30px;height:30px;
-    stroke:#fff;
-    fill:none;
-    stroke-width:1.9;
-    stroke-linecap:round;
-    stroke-linejoin:round;
+    width:30px;height:30px;stroke:#fff;fill:none;stroke-width:1.9;
+    stroke-linecap:round;stroke-linejoin:round;
     filter:drop-shadow(0 2px 6px rgba(0,0,0,.5));
   }
   .reel-btn.liked svg{fill:#e1306c;stroke:#e1306c}
   .reel-btn.liked{color:#ffb3d1}
 
-  /* ============ VIDEO PROGRESS / SEEK BAR ============ */
   .video-progress{
-    position:absolute;
-    left:0;right:0;
-    bottom:56px;
-    height:32px;
-    z-index:7;
-    cursor:pointer;
-    display:flex;
-    align-items:center;
-    padding:0 16px;
-    touch-action:none;
-    pointer-events:auto;
+    position:absolute;left:0;right:0;bottom:56px;height:32px;
+    z-index:7;cursor:pointer;display:flex;align-items:center;
+    padding:0 16px;touch-action:none;pointer-events:auto;
   }
-
   .progress-track{
-    position:relative;
-    width:100%;
-    height:3px;
-    background:rgba(255,255,255,.3);
-    border-radius:3px;
-    overflow:visible;
-    transition:height .2s;
+    position:relative;width:100%;height:3px;
+    background:rgba(255,255,255,.3);border-radius:3px;
+    overflow:visible;transition:height .2s;
   }
-
   .video-progress:hover .progress-track,
-  .video-progress.active .progress-track{
-    height:5px;
-  }
-
+  .video-progress.active .progress-track{height:5px}
   .progress-fill{
-    position:absolute;
-    top:0;left:0;bottom:0;
-    background:#fff;
-    border-radius:3px;
-    width:0%;
-    transition:width .1s linear;
-    pointer-events:none;
+    position:absolute;top:0;left:0;bottom:0;
+    background:#fff;border-radius:3px;width:0%;
+    transition:width .1s linear;pointer-events:none;
   }
-
   .progress-handle{
-    position:absolute;
-    top:50%;
-    left:0%;
+    position:absolute;top:50%;left:0%;
     transform:translate(-50%,-50%) scale(0);
-    width:14px;height:14px;
-    border-radius:50%;
-    background:#fff;
-    box-shadow:0 2px 8px rgba(0,0,0,.5);
-    transition:transform .2s cubic-bezier(.34,1.56,.64,1);
-    pointer-events:none;
+    width:14px;height:14px;border-radius:50%;
+    background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.5);
+    transition:transform .2s cubic-bezier(.34,1.56,.64,1);pointer-events:none;
   }
-
   .video-progress:hover .progress-handle,
-  .video-progress.active .progress-handle{
-    transform:translate(-50%,-50%) scale(1);
-  }
-
-  /* Time display (preview) */
+  .video-progress.active .progress-handle{transform:translate(-50%,-50%) scale(1)}
   .progress-time{
-    position:absolute;
-    top:-28px;
-    transform:translateX(-50%);
-    background:rgba(0,0,0,.75);
-    color:#fff;
-    padding:3px 8px;
-    border-radius:6px;
-    font-size:10.5px;
-    font-weight:600;
-    opacity:0;
-    pointer-events:none;
-    transition:opacity .2s;
-    white-space:nowrap;
+    position:absolute;top:-28px;transform:translateX(-50%);
+    background:rgba(0,0,0,.75);color:#fff;
+    padding:3px 8px;border-radius:6px;
+    font-size:10.5px;font-weight:600;opacity:0;
+    pointer-events:none;transition:opacity .2s;white-space:nowrap;
     font-family:'Playfair Display',serif;
   }
-  .video-progress.active .progress-time{
-    opacity:1;
-  }
+  .video-progress.active .progress-time{opacity:1}
 
-  /* ============ TOP BAR ============ */
   .reels-topbar{
-    position:fixed;
-    top:0;left:0;right:0;
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    padding:14px 16px;
-    z-index:20;
+    position:fixed;top:0;left:0;right:0;
+    display:flex;justify-content:space-between;align-items:center;
+    padding:14px 16px;z-index:20;
     background:linear-gradient(180deg,rgba(0,0,0,.6) 0%,transparent 100%);
     pointer-events:auto;
   }
   .reels-topbar .title{
-    font-family:'Playfair Display',serif;
-    font-size:22px;
-    font-weight:800;
-    color:#fff;
-    letter-spacing:-.5px;
-    text-shadow:0 2px 6px rgba(0,0,0,.5);
+    font-family:'Playfair Display',serif;font-size:22px;font-weight:800;
+    color:#fff;letter-spacing:-.5px;text-shadow:0 2px 6px rgba(0,0,0,.5);
   }
-  .reels-topbar .title em{
-    color:var(--accent-2);
-    font-style:italic;
-    font-weight:500;
-  }
+  .reels-topbar .title em{color:var(--accent-2);font-style:italic;font-weight:500}
   .reels-topbar .actions{display:flex;gap:8px}
-  .reels-topbar .icon-btn{
-    background:rgba(0,0,0,.35);
-    backdrop-filter:blur(10px);
-    -webkit-backdrop-filter:blur(10px);
-  }
+  .reels-topbar .icon-btn{background:rgba(0,0,0,.35);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
   .reels-topbar .icon-btn svg{stroke:#fff}
   .reels-topbar .icon-btn:hover{background:rgba(255,255,255,.2)}
   .reels-topbar .theme-toggle{
-    background:rgba(0,0,0,.35);
-    border-color:transparent;
-    backdrop-filter:blur(10px);
-    -webkit-backdrop-filter:blur(10px);
+    background:rgba(0,0,0,.35);border-color:transparent;
+    backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
   }
   .reels-topbar .theme-toggle svg{stroke:#fff}
 
-  /* ============ EMPTY ============ */
   .reels-empty{
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    justify-content:center;
-    height:100%;
-    gap:16px;
-    color:#999;
-    text-align:center;
-    padding:40px 20px;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    height:100%;gap:16px;color:#999;text-align:center;padding:40px 20px;
   }
-  .reels-empty svg{
-    width:64px;height:64px;
-    stroke:#666;
-    fill:none;
-    stroke-width:1.3;
-    stroke-linecap:round;
-    stroke-linejoin:round;
-  }
+  .reels-empty svg{width:64px;height:64px;stroke:#666;fill:none;stroke-width:1.3;stroke-linecap:round;stroke-linejoin:round}
   .reels-empty a{
-    color:var(--accent-2);
-    font-weight:600;
-    padding:10px 20px;
-    border-radius:24px;
-    background:rgba(124,179,66,.15);
-    border:1px solid rgba(124,179,66,.3);
+    color:var(--accent-2);font-weight:600;padding:10px 20px;
+    border-radius:24px;background:rgba(124,179,66,.15);
+    border:1px solid rgba(124,179,66,.3);text-decoration:none;
     transition:transform .3s cubic-bezier(.34,1.56,.64,1);
-    text-decoration:none;
   }
   .reels-empty a:hover{transform:translateY(-2px)}
 
-  /* ============ GLOBAL TAP HANDLER ============ */
-  .global-tap-layer{
-    position:absolute;
-    inset:0;
-    z-index:3;
-    cursor:pointer;
-  }
+  .global-tap-layer{position:absolute;inset:0;z-index:3;cursor:pointer}
 
-  /* ============ DOUBLE-TAP HEART ANIMATION ============ */
   .heart-burst{
-    position:absolute;
-    top:50%;left:50%;
+    position:absolute;top:50%;left:50%;
     transform:translate(-50%,-50%) scale(0);
-    width:120px;height:120px;
-    pointer-events:none;
-    z-index:8;
-    opacity:0;
+    width:120px;height:120px;pointer-events:none;z-index:8;opacity:0;
   }
-  .heart-burst svg{
-    width:100%;height:100%;
-    fill:#e1306c;
-    filter:drop-shadow(0 4px 12px rgba(225,48,108,.6));
-  }
-  .heart-burst.show{
-    animation:heartPop .8s cubic-bezier(.22,1,.36,1) forwards;
-  }
+  .heart-burst svg{width:100%;height:100%;fill:#e1306c;filter:drop-shadow(0 4px 12px rgba(225,48,108,.6))}
+  .heart-burst.show{animation:heartPop .8s cubic-bezier(.22,1,.36,1) forwards}
   @keyframes heartPop{
     0%{opacity:0;transform:translate(-50%,-50%) scale(0)}
     30%{opacity:1;transform:translate(-50%,-50%) scale(1.2)}
@@ -427,7 +216,6 @@
 </head>
 <body>
 
-<!-- ============ TOP BAR ============ -->
 <div class="reels-topbar">
   <div class="title">রিল<em>.</em></div>
   <div class="actions">
@@ -444,13 +232,14 @@
   </div>
 </div>
 
-<!-- ============ REELS CONTAINER ============ -->
 <div class="reels-container" id="container">
   <div class="reels-empty">
     <div class="spinner" style="border-color:rgba(255,255,255,.2);border-top-color:#7cb342"></div>
     <div>লোড হচ্ছে...</div>
   </div>
 </div>
+
+<div class="menu-pop" id="menuPop" style="position:fixed;background:var(--paper-elev);border:1px solid var(--rule);border-radius:14px;box-shadow:0 12px 40px rgba(0,0,0,.4);padding:6px;z-index:300;display:none;min-width:190px"></div>
 
 <nav class="bottom-nav">
   <a href="index.html"><svg viewBox="0 0 24 24"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg></a>
@@ -463,15 +252,15 @@
 <script type="module">
   import { requireAuth } from "./js/auth.js";
   import { loadReels, toggleReelLike, deleteReel } from "./js/reels.js";
+  import { showToast, showConfirm } from "./js/toast.js";
+  import { openReportModal } from "./js/report.js";
 
   let currentUser = null;
   let currentReels = [];
   const container = document.getElementById("container");
+  const menuPop = document.getElementById("menuPop");
   const observer = new IntersectionObserver(onIntersect, { threshold: 0.6 });
 
-  // ==========================================
-  // Video play/pause helpers
-  // ==========================================
   function formatTime(sec) {
     if (!isFinite(sec)) return "0:00";
     const m = Math.floor(sec / 60);
@@ -479,18 +268,12 @@
     return m + ":" + (s < 10 ? "0" : "") + s;
   }
 
-  // ==========================================
-  // Init
-  // ==========================================
   requireAuth(async (user) => {
     currentUser = user;
     await render();
     setupObserver();
   });
 
-  // ==========================================
-  // Render all reels
-  // ==========================================
   async function render() {
     try {
       const reels = await loadReels();
@@ -515,39 +298,34 @@
             <video src="${r.videoUrl}" loop playsinline preload="metadata" muted webkit-playsinline></video>
 
             <div class="reel-overlay"></div>
-
             <div class="global-tap-layer"></div>
             <div class="tap-zone left"></div>
             <div class="tap-zone right"></div>
 
-            <!-- Play/Pause indicator -->
             <div class="play-indicator">
               <svg class="icon-play" viewBox="0 0 24 24"><polygon points="6 4 20 12 6 20"/></svg>
               <svg class="icon-pause" viewBox="0 0 24 24" style="display:none"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
             </div>
 
-            <!-- Seek indicators -->
             <div class="seek-indicator left">
-              <div class="arrows">
-                <svg viewBox="0 0 24 24"><polyline points="11 17 6 12 11 7"/></svg>
+              <div style="display:flex;gap:-2px">
+                <svg viewBox="0 0 24 24" style="opacity:.5"><polyline points="11 17 6 12 11 7"/></svg>
                 <svg viewBox="0 0 24 24"><polyline points="18 17 13 12 18 7"/></svg>
               </div>
               <span>১০ সেকেন্ড</span>
             </div>
             <div class="seek-indicator right">
               <span>১০ সেকেন্ড</span>
-              <div class="arrows">
+              <div style="display:flex;gap:-2px">
                 <svg viewBox="0 0 24 24"><polyline points="13 17 18 12 13 7"/></svg>
-                <svg viewBox="0 0 24 24"><polyline points="6 17 11 12 6 7"/></svg>
+                <svg viewBox="0 0 24 24" style="opacity:.5"><polyline points="6 17 11 12 6 7"/></svg>
               </div>
             </div>
 
-            <!-- Heart burst -->
             <div class="heart-burst">
               <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
             </div>
 
-            <!-- Info -->
             <div class="reel-info">
               <div class="reel-user">
                 <div class="reel-av">${r.userPhoto ? `<img src="${r.userPhoto}">` : initial}</div>
@@ -556,21 +334,17 @@
               ${r.caption ? `<div class="reel-caption">${escapeHtml(r.caption)}</div>` : ""}
             </div>
 
-            <!-- Actions -->
             <div class="reel-actions">
               <button class="reel-btn like-btn ${isLiked ? "liked" : ""}" data-id="${r.id}">
                 <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
                 <span class="like-count">${r.likes?.length || 0}</span>
               </button>
-              ${isMine ? `
-                <button class="reel-btn delete-btn" data-id="${r.id}">
-                  <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-2 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg>
-                  <span>মুছুন</span>
-                </button>
-              ` : ""}
+              <button class="reel-btn menu-btn" data-id="${r.id}">
+                <svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg>
+                <span>আরও</span>
+              </button>
             </div>
 
-            <!-- VIDEO PROGRESS / SEEK BAR -->
             <div class="video-progress" data-progress>
               <div class="progress-track">
                 <div class="progress-fill"></div>
@@ -588,9 +362,6 @@
     }
   }
 
-  // ==========================================
-  // Attach handlers to every reel
-  // ==========================================
   function attachAllHandlers() {
     container.querySelectorAll(".reel").forEach((reelEl) => {
       const video = reelEl.querySelector("video");
@@ -607,27 +378,20 @@
       const progressHandle = reelEl.querySelector(".progress-handle");
       const progressTime = reelEl.querySelector(".progress-time");
 
-      // ==========================================
-      // TAP LEFT/RIGHT — seek ±10s
-      // ==========================================
-      let lastTapLeft = 0;
-      let lastTapRight = 0;
+      let lastTapLeft = 0, lastTapRight = 0;
+      let lastCenterTap = 0;
 
       tapLeft.addEventListener("click", (e) => {
         e.stopPropagation();
         const now = Date.now();
         if (now - lastTapLeft < 400) {
-          // Double tap
           video.currentTime = Math.max(0, video.currentTime - 10);
           showSeekIndicator(seekLeft);
           lastTapLeft = 0;
         } else {
           lastTapLeft = now;
-          // Single tap on left — previous reel scroll
           setTimeout(() => {
-            if (Date.now() - lastTapLeft >= 400) {
-              scrollPrev();
-            }
+            if (Date.now() - lastTapLeft >= 400) scrollPrev();
           }, 400);
         }
       });
@@ -636,43 +400,31 @@
         e.stopPropagation();
         const now = Date.now();
         if (now - lastTapRight < 400) {
-          // Double tap
           video.currentTime = Math.min(video.duration || 0, video.currentTime + 10);
           showSeekIndicator(seekRight);
           lastTapRight = 0;
         } else {
           lastTapRight = now;
           setTimeout(() => {
-            if (Date.now() - lastTapRight >= 400) {
-              scrollNext();
-            }
+            if (Date.now() - lastTapRight >= 400) scrollNext();
           }, 400);
         }
       });
 
-      // ==========================================
-      // CENTER TAP — play/pause
-      // ==========================================
       const globalTap = reelEl.querySelector(".global-tap-layer");
-      let lastCenterTap = 0;
-
       globalTap.addEventListener("click", (e) => {
-        // Check koro tap zone er baire kina
         const rect = reelEl.getBoundingClientRect();
         const x = e.clientX - rect.left;
         const w = rect.width;
-        // Left 32% or right 32% => skip (handled by tap-zones)
         if (x < w * 0.32 || x > w * 0.68) return;
 
         const now = Date.now();
         if (now - lastCenterTap < 300) {
-          // Double tap center = like
           likeReel(reelEl);
           showHeart(heart);
           lastCenterTap = 0;
         } else {
           lastCenterTap = now;
-          // Single tap — delay e toggle
           setTimeout(() => {
             if (Date.now() - lastCenterTap >= 300) {
               togglePlay(video, iconPlay, iconPause, playIndicator);
@@ -681,98 +433,61 @@
         }
       });
 
-      // ==========================================
-      // LIKE
-      // ==========================================
       const likeBtn = reelEl.querySelector(".like-btn");
       likeBtn.addEventListener("click", (e) => {
         e.stopPropagation();
         likeReel(reelEl);
       });
 
-      // ==========================================
-      // DELETE
-      // ==========================================
-      const delBtn = reelEl.querySelector(".delete-btn");
-      if (delBtn) {
-        delBtn.addEventListener("click", async (e) => {
-          e.stopPropagation();
-          if (!confirm("এই রিলটি মুছে ফেলবেন?")) return;
-          try {
-            await deleteReel(delBtn.dataset.id);
-            reelEl.remove();
-          } catch (err) { alert("Delete fail: " + err.message); }
-        });
-      }
+      const menuBtn = reelEl.querySelector(".menu-btn");
+      menuBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const reel = currentReels.find(r => r.id === reelEl.dataset.id);
+        if (reel) openReelMenu(e, reel);
+      });
 
-      // ==========================================
-      // SEEK BAR — drag kore tene dekha
-      // ==========================================
+      // Progress seek
       let isDragging = false;
-
       function getPercentFromEvent(clientX) {
         const rect = progressWrap.getBoundingClientRect();
         let pct = (clientX - rect.left) / rect.width;
         return Math.max(0, Math.min(1, pct));
       }
-
       function updateProgressUI(pct) {
         progressFill.style.width = (pct * 100) + "%";
         progressHandle.style.left = (pct * 100) + "%";
         progressTime.style.left = (pct * 100) + "%";
-        if (video.duration) {
-          progressTime.textContent = formatTime(pct * video.duration);
-        }
+        if (video.duration) progressTime.textContent = formatTime(pct * video.duration);
       }
-
       function beginDrag(e) {
         isDragging = true;
         progressWrap.classList.add("active");
         const clientX = e.touches ? e.touches[0].clientX : e.clientX;
         const pct = getPercentFromEvent(clientX);
         updateProgressUI(pct);
-        if (video.duration) {
-          video.currentTime = pct * video.duration;
-        }
+        if (video.duration) video.currentTime = pct * video.duration;
       }
-
       function moveDrag(e) {
         if (!isDragging) return;
         e.preventDefault();
         const clientX = e.touches ? e.touches[0].clientX : e.clientX;
         const pct = getPercentFromEvent(clientX);
         updateProgressUI(pct);
-        if (video.duration) {
-          video.currentTime = pct * video.duration;
-        }
+        if (video.duration) video.currentTime = pct * video.duration;
       }
-
       function endDrag() {
         if (!isDragging) return;
         isDragging = false;
         setTimeout(() => progressWrap.classList.remove("active"), 500);
       }
-
-      // Mouse
-      progressWrap.addEventListener("mousedown", (e) => {
-        e.stopPropagation();
-        beginDrag(e);
-      });
+      progressWrap.addEventListener("mousedown", (e) => { e.stopPropagation(); beginDrag(e); });
       window.addEventListener("mousemove", moveDrag);
       window.addEventListener("mouseup", endDrag);
-
-      // Touch
-      progressWrap.addEventListener("touchstart", (e) => {
-        e.stopPropagation();
-        beginDrag(e);
-      }, { passive: true });
+      progressWrap.addEventListener("touchstart", (e) => { e.stopPropagation(); beginDrag(e); }, { passive: true });
       progressWrap.addEventListener("touchmove", moveDrag, { passive: false });
       progressWrap.addEventListener("touchend", endDrag);
       progressWrap.addEventListener("touchcancel", endDrag);
 
-      // ==========================================
-      // Video timeupdate — progress bar update
-      // ==========================================
       video.addEventListener("timeupdate", () => {
         if (isDragging) return;
         if (!video.duration) return;
@@ -780,16 +495,76 @@
         progressFill.style.width = (pct * 100) + "%";
         progressHandle.style.left = (pct * 100) + "%";
       });
-
       video.addEventListener("loadedmetadata", () => {
         progressTime.textContent = formatTime(video.duration);
       });
     });
   }
 
-  // ==========================================
-  // Play/Pause toggle
-  // ==========================================
+  function openReelMenu(e, reel) {
+    const isMine = reel.userId === currentUser.uid;
+    menuPop.innerHTML = `
+      ${isMine ? `
+        <button data-act="delete" class="danger" style="color:#c62828;width:100%;padding:11px 14px;border:none;background:transparent;font-family:inherit;font-size:13px;font-weight:500;display:flex;align-items:center;gap:10px;cursor:pointer;border-radius:9px;text-align:left">
+          <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.8"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-2 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L5 6"/></svg>
+          রিল মুছুন
+        </button>
+      ` : `
+        <button data-act="report" class="danger" style="color:#c62828;width:100%;padding:11px 14px;border:none;background:transparent;font-family:inherit;font-size:13px;font-weight:500;display:flex;align-items:center;gap:10px;cursor:pointer;border-radius:9px;text-align:left">
+          <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.8"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          রিপোর্ট করুন
+        </button>
+      `}
+      <button data-act="copy" style="width:100%;padding:11px 14px;border:none;background:transparent;color:var(--ink);font-family:inherit;font-size:13px;font-weight:500;display:flex;align-items:center;gap:10px;cursor:pointer;border-radius:9px;text-align:left">
+        <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.8"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        লিংক কপি
+      </button>
+    `;
+    menuPop.style.display = "block";
+    const rect = menuPop.getBoundingClientRect();
+    let left = e.clientX - rect.width - 10;
+    let top = e.clientY - 20;
+    if (left < 10) left = 10;
+    if (left + rect.width > window.innerWidth - 10) left = window.innerWidth - rect.width - 10;
+    if (top + rect.height > window.innerHeight - 10) top = window.innerHeight - rect.height - 10;
+    if (top < 10) top = 10;
+    menuPop.style.left = left + "px";
+    menuPop.style.top = top + "px";
+
+    menuPop.querySelectorAll("button").forEach(b => {
+      b.onclick = async () => {
+        const act = b.dataset.act;
+        menuPop.style.display = "none";
+
+        if (act === "delete") {
+          const ok = await showConfirm("এই রিলটি মুছে ফেলবেন?", { title: "রিল মুছুন", okText: "মুছে ফেলুন" });
+          if (!ok) return;
+          try {
+            await deleteReel(reel.id);
+            const el = container.querySelector(`.reel[data-id="${reel.id}"]`);
+            if (el) el.remove();
+            showToast("মুছে ফেলা হয়েছে", "ok");
+          } catch (err) { showToast(err.message, "err"); }
+        } else if (act === "report") {
+          openReportModal({
+            targetType: "reel",
+            targetId: reel.id,
+            targetUsername: reel.username
+          }, () => showToast("✅ রিপোর্ট পাঠানো হয়েছে", "ok"));
+        } else if (act === "copy") {
+          try {
+            await navigator.clipboard.writeText(location.origin + "/bondhu/reels.html");
+            showToast("লিংক কপি হয়েছে", "ok");
+          } catch (err) { showToast("কপি ব্যর্থ", "err"); }
+        }
+      };
+    });
+  }
+
+  document.addEventListener("click", (e) => {
+    if (!menuPop.contains(e.target)) menuPop.style.display = "none";
+  });
+
   function togglePlay(video, iconPlay, iconPause, indicator) {
     if (video.paused) {
       video.play().catch(() => {});
@@ -809,22 +584,17 @@
     clearTimeout(el._timer);
     el._timer = setTimeout(() => el.classList.remove("show"), 600);
   }
-
   function showSeekIndicator(el) {
     el.classList.add("show");
     clearTimeout(el._timer);
     el._timer = setTimeout(() => el.classList.remove("show"), 500);
   }
-
   function showHeart(el) {
     el.classList.remove("show");
     void el.offsetWidth;
     el.classList.add("show");
   }
 
-  // ==========================================
-  // Like reel
-  // ==========================================
   async function likeReel(reelEl) {
     const btn = reelEl.querySelector(".like-btn");
     const reel = currentReels.find(r => r.id === reelEl.dataset.id);
@@ -835,30 +605,27 @@
       const span = btn.querySelector(".like-count");
       const prev = reel.likes?.length || 0;
       span.textContent = prev + (nowLiked ? 1 : -1);
+      reel.likes = nowLiked ? [...(reel.likes || []), currentUser.uid] : (reel.likes || []).filter(u => u !== currentUser.uid);
     } catch (e) { console.error(e); }
   }
 
-  // ==========================================
-  // Scroll next/prev
-  // ==========================================
   function scrollNext() {
     const reels = [...container.querySelectorAll(".reel")];
-    const cur = reels.findIndex(r => r.getBoundingClientRect().top >= -10 && r.getBoundingClientRect().top < window.innerHeight / 2);
-    if (cur >= 0 && cur < reels.length - 1) {
-      reels[cur + 1].scrollIntoView({ behavior: "smooth" });
-    }
+    const cur = reels.findIndex(r => {
+      const rect = r.getBoundingClientRect();
+      return rect.top >= -10 && rect.top < window.innerHeight / 2;
+    });
+    if (cur >= 0 && cur < reels.length - 1) reels[cur + 1].scrollIntoView({ behavior: "smooth" });
   }
   function scrollPrev() {
     const reels = [...container.querySelectorAll(".reel")];
-    const cur = reels.findIndex(r => r.getBoundingClientRect().top >= -10 && r.getBoundingClientRect().top < window.innerHeight / 2);
-    if (cur > 0) {
-      reels[cur - 1].scrollIntoView({ behavior: "smooth" });
-    }
+    const cur = reels.findIndex(r => {
+      const rect = r.getBoundingClientRect();
+      return rect.top >= -10 && rect.top < window.innerHeight / 2;
+    });
+    if (cur > 0) reels[cur - 1].scrollIntoView({ behavior: "smooth" });
   }
 
-  // ==========================================
-  // Intersection observer — autoplay on scroll
-  // ==========================================
   function setupObserver() {
     container.querySelectorAll(".reel").forEach(r => observer.observe(r));
   }
@@ -869,10 +636,7 @@
       if (!video) return;
       if (entry.isIntersecting) {
         video.muted = false;
-        video.play().catch(() => {
-          video.muted = true;
-          video.play().catch(() => {});
-        });
+        video.play().catch(() => { video.muted = true; video.play().catch(() => {}); });
       } else {
         video.pause();
         video.currentTime = 0;
