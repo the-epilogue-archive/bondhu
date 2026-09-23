@@ -1,18 +1,15 @@
 // ==========================================
-// Bondhu - Chat (1-to-1 realtime + voice)
-// Full featured version
+// Bondhu - Chat v2
+// Delete for me + Unsend + Polish
 // ==========================================
 
 import { db, auth } from "./firebase-config.js";
 import {
   collection, addDoc, doc, getDoc, setDoc, getDocs,
   query, orderBy, serverTimestamp, onSnapshot,
-  updateDoc, deleteDoc, limit, arrayUnion, arrayRemove
+  updateDoc, deleteDoc, limit, arrayUnion
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-// ==========================================
-// Chat ID
-// ==========================================
 export function getChatId(uid1, uid2) {
   return [uid1, uid2].sort().join("_");
 }
@@ -68,6 +65,7 @@ export async function sendMessage(chatId, text, replyTo = null) {
     from: me.uid,
     text: text.trim(),
     type: "text",
+    deletedFor: [],
     createdAt: serverTimestamp()
   };
 
@@ -91,9 +89,9 @@ export async function sendMessage(chatId, text, replyTo = null) {
 }
 
 // ==========================================
-// Voice message — Cloudinary
+// Voice message
 // ==========================================
-const CLOUDINARY_CLOUD_NAME = "kmquukhi";
+const CLOUDINARY_CLOUD_NAME = "TOMAR_CLOUD_NAME";
 const CLOUDINARY_VOICE_PRESET = "bondhu_reels";
 
 export async function sendVoiceMessage(chatId, blob, durationSec, onProgress) {
@@ -107,6 +105,7 @@ export async function sendVoiceMessage(chatId, blob, durationSec, onProgress) {
     type: "voice",
     audioUrl: audioUrl,
     duration: Math.round(durationSec || 0),
+    deletedFor: [],
     createdAt: serverTimestamp()
   });
 
@@ -158,7 +157,7 @@ function uploadVoiceToCloudinary(blob, onProgress) {
 }
 
 // ==========================================
-// Messages listen
+// Messages listen — deletedFor filter
 // ==========================================
 export function listenMessages(chatId, callback) {
   const q = query(
@@ -167,8 +166,16 @@ export function listenMessages(chatId, callback) {
     limit(200)
   );
   return onSnapshot(q, (snap) => {
+    const me = auth.currentUser;
     const msgs = [];
-    snap.forEach(d => msgs.push({ id: d.id, ...d.data() }));
+    snap.forEach(d => {
+      const data = d.data();
+      // Filter: jodi current user er jonno delete kora hoy
+      if (Array.isArray(data.deletedFor) && me && data.deletedFor.includes(me.uid)) {
+        return;
+      }
+      msgs.push({ id: d.id, ...data });
+    });
     callback(msgs);
   }, (err) => {
     console.error("Messages listen error:", err);
@@ -177,20 +184,45 @@ export function listenMessages(chatId, callback) {
 }
 
 // ==========================================
-// Delete single message
+// Delete for me (current user er jonno hide)
 // ==========================================
-export async function deleteMessage(chatId, messageId) {
-  await deleteDoc(doc(db, "chats", chatId, "messages", messageId));
+export async function deleteForMe(chatId, messageId) {
+  const me = auth.currentUser;
+  if (!me) throw new Error("Login koro");
+  try {
+    await updateDoc(doc(db, "chats", chatId, "messages", messageId), {
+      deletedFor: arrayUnion(me.uid)
+    });
+  } catch (e) {
+    console.error("deleteForMe fail:", e.message);
+    throw new Error("মুছে ফেলা যায়নি: " + e.message);
+  }
 }
 
 // ==========================================
-// My chats listen (index-free)
+// Unsend — sob theke muche felo (only own)
+// ==========================================
+export async function unsendMessage(chatId, messageId) {
+  const me = auth.currentUser;
+  if (!me) throw new Error("Login koro");
+  try {
+    // Verify owner
+    const snap = await getDoc(doc(db, "chats", chatId, "messages", messageId));
+    if (!snap.exists()) throw new Error("বার্তা পাওয়া যায়নি");
+    if (snap.data().from !== me.uid) throw new Error("শুধু নিজের বার্তা unsend করা যায়");
+    await deleteDoc(doc(db, "chats", chatId, "messages", messageId));
+  } catch (e) {
+    console.error("unsend fail:", e.message);
+    throw new Error(e.message);
+  }
+}
+
+// ==========================================
+// My chats
 // ==========================================
 export function listenMyChats(uid, callback) {
   if (!uid) { callback([]); return () => {}; }
-
   const q = query(collection(db, "chats"));
-
   return onSnapshot(q, (snap) => {
     const chats = [];
     snap.forEach(d => {
@@ -199,13 +231,11 @@ export function listenMyChats(uid, callback) {
         chats.push({ id: d.id, ...data });
       }
     });
-
     chats.sort((a, b) => {
       const at = a.updatedAt?.seconds || a.createdAt?.seconds || 0;
       const bt = b.updatedAt?.seconds || b.createdAt?.seconds || 0;
       return bt - at;
     });
-
     callback(chats);
   }, (err) => {
     console.error("Chat list error:", err);
@@ -213,9 +243,6 @@ export function listenMyChats(uid, callback) {
   });
 }
 
-// ==========================================
-// Other member
-// ==========================================
 export function getOtherMember(chat, myUid) {
   const otherUid = chat.members.find(u => u !== myUid);
   return {
