@@ -1,9 +1,7 @@
 // ==========================================
-// Bondhu - Service Worker
-// Network-first for JS/CSS (always fresh)
+// Bondhu Service Worker v4
 // ==========================================
-
-const CACHE_NAME = "bondhu-v3";
+const CACHE_NAME = "bondhu-v4";
 const STATIC_ASSETS = [
   "/bondhu/",
   "/bondhu/index.html",
@@ -11,62 +9,42 @@ const STATIC_ASSETS = [
   "/bondhu/assets/icon-512.png"
 ];
 
-// Install
 self.addEventListener("install", (e) => {
   e.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(STATIC_ASSETS).catch((err) => {
-        console.warn("Some assets fail:", err);
-      });
+      return cache.addAll(STATIC_ASSETS).catch((err) => console.warn(err));
     })
   );
   self.skipWaiting();
 });
 
-// Activate — purono cache delete
 self.addEventListener("activate", (e) => {
   e.waitUntil(
-    caches.keys().then((keys) => {
-      return Promise.all(
-        keys.map((k) => {
-          if (k !== CACHE_NAME) return caches.delete(k);
-        })
-      );
-    })
+    caches.keys().then((keys) => Promise.all(
+      keys.map((k) => { if (k !== CACHE_NAME) return caches.delete(k); })
+    ))
   );
   self.clients.claim();
 });
 
-// Fetch — network-first for JS/CSS/HTML
 self.addEventListener("fetch", (e) => {
   const url = e.request.url;
-
-  // Firebase / Cloudinary / GitHub / Google — network only
   if (
-    url.includes("firebase") ||
-    url.includes("cloudinary") ||
-    url.includes("api.github.com") ||
-    url.includes("gstatic.com") ||
+    url.includes("firebase") || url.includes("cloudinary") ||
+    url.includes("api.github.com") || url.includes("gstatic.com") ||
     url.includes("googleapis.com")
-  ) {
-    return;
-  }
+  ) return;
 
-  // JS / CSS / HTML — ALWAYS network first (notun code)
   if (
-    url.endsWith(".js") ||
-    url.endsWith(".css") ||
-    url.endsWith(".html") ||
-    e.request.mode === "navigate"
+    url.endsWith(".js") || url.endsWith(".css") ||
+    url.endsWith(".html") || e.request.mode === "navigate"
   ) {
     e.respondWith(
       fetch(e.request)
         .then((res) => {
           if (res && res.status === 200) {
             const clone = res.clone();
-            caches.open(CACHE_NAME).then((cache) => {
-              cache.put(e.request, clone).catch(() => {});
-            });
+            caches.open(CACHE_NAME).then((cache) => cache.put(e.request, clone).catch(() => {}));
           }
           return res;
         })
@@ -75,16 +53,13 @@ self.addEventListener("fetch", (e) => {
     return;
   }
 
-  // Images etc — cache first, network fallback
   e.respondWith(
     caches.match(e.request).then((cached) => {
       if (cached) return cached;
       return fetch(e.request).then((res) => {
         if (res && res.status === 200 && e.request.method === "GET") {
           const clone = res.clone();
-          caches.open(CACHE_NAME).then((cache) => {
-            cache.put(e.request, clone).catch(() => {});
-          });
+          caches.open(CACHE_NAME).then((cache) => cache.put(e.request, clone).catch(() => {}));
         }
         return res;
       });
@@ -92,9 +67,6 @@ self.addEventListener("fetch", (e) => {
   );
 });
 
-// Message handler
 self.addEventListener("message", (e) => {
-  if (e.data === "SKIP_WAITING") {
-    self.skipWaiting();
-  }
+  if (e.data === "SKIP_WAITING") self.skipWaiting();
 });
