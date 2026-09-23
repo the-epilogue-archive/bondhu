@@ -13,7 +13,6 @@
 <link rel="stylesheet" href="css/app.css">
 <script src="js/theme.js"></script>
 <style>
-  /* Feed-specific */
   .post .plate{position:relative;cursor:pointer;user-select:none}
   .post .plate img{transition:transform .5s cubic-bezier(.22,1,.36,1)}
   .post-menu-pop svg{pointer-events:none}
@@ -75,12 +74,10 @@
 
 </div>
 
-<!-- Pull to Refresh indicator -->
 <div class="ptr-indicator" id="ptrIndicator">
   <svg viewBox="0 0 24 24"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
 </div>
 
-<!-- Post detail modal -->
 <div class="post-detail-modal" id="postDetailModal">
   <div class="post-detail-box">
     <button class="post-detail-close" id="postDetailClose">
@@ -90,7 +87,6 @@
   </div>
 </div>
 
-<!-- Post menu pop -->
 <div class="post-menu-pop" id="postMenuPop"></div>
 
 <a href="upload.html" class="fab" aria-label="New post">
@@ -112,6 +108,7 @@
   import { getUnreadCount } from "./js/notifications.js";
   import { showToast, showConfirm } from "./js/toast.js";
   import { openReportModal } from "./js/report.js";
+  import { startNotifications, enableAudioOnFirstInteraction } from "./js/notify.js";
 
   let currentUser = null;
   let feedPosts = [];
@@ -142,9 +139,6 @@
     `).join("");
   }
 
-  // ==========================================
-  // EMPTY / ERROR STATE
-  // ============================================
   function renderEmpty() {
     feed.innerHTML = `
       <div class="empty-state">
@@ -174,6 +168,8 @@
   // ==========================================
   // INIT
   // ==========================================
+  enableAudioOnFirstInteraction();
+
   requireAuth(async (user) => {
     currentUser = user;
     if ($("welcomeName")) $("welcomeName").textContent = user.name || "স্বাগতম";
@@ -181,6 +177,7 @@
     loadPosts();
     loadNotifBadge();
     setupPullToRefresh();
+    startNotifications(user);
   });
 
   async function loadNotifBadge() {
@@ -320,11 +317,8 @@
     attachHandlers();
   }
 
-  // ==========================================
-  // HANDLERS
-  // ==========================================
   function attachHandlers() {
-    // Like button
+    // Like
     feed.querySelectorAll(".like-btn").forEach(btn => {
       btn.addEventListener("click", async (e) => {
         e.stopPropagation();
@@ -341,18 +335,15 @@
       });
     });
 
-    // Double-tap on image = like
+    // Double-tap
     feed.querySelectorAll(".plate").forEach(plate => {
       let lastTap = 0;
-      const img = plate.querySelector("img");
       const heart = plate.querySelector(".heart-burst");
       const id = plate.dataset.id;
 
       plate.addEventListener("click", async (e) => {
-        // Single click opens modal (with delay to differentiate from double tap)
         const now = Date.now();
         if (now - lastTap < 300) {
-          // Double tap
           e.preventDefault();
           e.stopPropagation();
           heart.classList.remove("show");
@@ -376,7 +367,6 @@
           lastTap = now;
           setTimeout(() => {
             if (Date.now() - lastTap >= 300) {
-              // Single tap → open post detail
               const p = feedPosts.find(x => x.id === id);
               if (p) openPostDetail(p);
             }
@@ -429,12 +419,11 @@
       });
     });
 
-    // Post menu (3 dot)
+    // Post menu
     feed.querySelectorAll(".post-menu-btn").forEach(btn => {
       btn.addEventListener("click", (e) => {
         e.stopPropagation();
-        const id = btn.dataset.id;
-        const p = feedPosts.find(x => x.id === id);
+        const p = feedPosts.find(x => x.id === btn.dataset.id);
         if (p) openPostMenu(e.clientX, e.clientY, p);
       });
     });
@@ -510,7 +499,7 @@
   });
 
   // ==========================================
-  // POST DETAIL MODAL
+  // POST DETAIL
   // ==========================================
   async function openPostDetail(post) {
     const modal = $("postDetailModal");
@@ -575,7 +564,6 @@
         btn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg> ${nowLiked ? "পছন্দ হয়েছে" : "পছন্দ"}`;
         $("modalLikeStat").innerHTML = `❤️ ${post.likes.length}`;
         $("modalLikeStat").style.color = nowLiked ? "#e1306c" : "";
-        // Update grid
         const feedBtn = document.querySelector(`.like-btn[data-id="${post.id}"]`);
         if (feedBtn) {
           feedBtn.classList.toggle("liked", nowLiked);
