@@ -56,10 +56,8 @@
     transition:all .3s cubic-bezier(.34,1.56,.64,1);
   }
   .new-btn:hover{
-    background:var(--accent-soft);
-    border-color:var(--accent-border);
-    color:var(--accent);
-    transform:translateY(-2px);
+    background:var(--accent-soft);border-color:var(--accent-border);
+    color:var(--accent);transform:translateY(-2px);
   }
   .new-btn svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
 
@@ -103,9 +101,7 @@
     position:relative;
   }
   .chat-avatar img{width:100%;height:100%;object-fit:cover}
-  .chat-avatar.group{
-    background:linear-gradient(135deg,var(--accent),var(--accent-2));
-  }
+  .chat-avatar.group{background:linear-gradient(135deg,var(--accent),var(--accent-2))}
   .chat-info{flex:1;min-width:0}
   .chat-name{
     font-family:'Playfair Display',serif;
@@ -117,12 +113,10 @@
   .group-tag{
     display:inline-flex;align-items:center;
     padding:1px 6px;border-radius:8px;
-    background:var(--accent-soft);
-    color:var(--accent);
+    background:var(--accent-soft);color:var(--accent);
     font-size:9.5px;font-weight:700;
     font-family:'Hind Siliguri',sans-serif;
-    letter-spacing:.3px;
-    flex-shrink:0;
+    letter-spacing:.3px;flex-shrink:0;
   }
   .chat-preview{
     font-size:12.5px;color:var(--ink-mute);
@@ -155,8 +149,7 @@
     flex-shrink:0;
   }
   .back-btn:hover{
-    background:var(--accent-soft);
-    border-color:var(--accent-border);
+    background:var(--accent-soft);border-color:var(--accent-border);
     color:var(--accent);transform:translateX(-3px);
   }
   .back-btn svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
@@ -221,14 +214,10 @@
   .msg-row.me .msg-wrap{align-items:flex-end}
   .msg-row.them .msg-wrap{align-items:flex-start}
 
-  /* Sender name for group */
   .msg-sender{
-    font-size:11px;
-    font-weight:700;
-    color:var(--accent);
+    font-size:11px;font-weight:700;color:var(--accent);
     font-family:'Playfair Display',serif;
-    padding:2px 8px 2px;
-    letter-spacing:.2px;
+    padding:2px 8px 2px;letter-spacing:.2px;
   }
 
   .msg{
@@ -265,8 +254,7 @@
     font-size:11.5px;line-height:1.4;
   }
   .msg.them .msg-reply-quote{
-    border-left-color:var(--accent);
-    background:rgba(0,0,0,.04);
+    border-left-color:var(--accent);background:rgba(0,0,0,.04);
   }
   .msg-reply-quote .name{
     font-weight:700;font-family:'Playfair Display',serif;
@@ -310,13 +298,10 @@
   .msg-menu-backdrop.show{display:block}
 
   .msg-menu{
-    position:fixed;
-    background:var(--paper-elev);
-    border:1px solid var(--rule);
-    border-radius:14px;
+    position:fixed;background:var(--paper-elev);
+    border:1px solid var(--rule);border-radius:14px;
     box-shadow:0 12px 40px rgba(0,0,0,.28);
-    padding:6px;z-index:100;
-    display:none;min-width:210px;
+    padding:6px;z-index:100;display:none;min-width:210px;
     animation:menuIn .18s cubic-bezier(.34,1.56,.64,1);
   }
   @keyframes menuIn{
@@ -325,14 +310,12 @@
   }
   .msg-menu.show{display:block}
   .msg-menu button{
-    width:100%;padding:11px 14px;
-    border:none;background:transparent;
+    width:100%;padding:11px 14px;border:none;background:transparent;
     color:var(--ink);font-family:'Hind Siliguri',sans-serif;
     font-size:13px;font-weight:500;
     display:flex;align-items:center;gap:11px;
-    cursor:pointer;border-radius:9px;
+    cursor:pointer;border-radius:9px;text-align:left;
     transition:background .15s,color .15s;
-    text-align:left;
   }
   .msg-menu button:hover{background:var(--accent-soft);color:var(--accent)}
   .msg-menu button.danger{color:#c62828}
@@ -341,11 +324,9 @@
 
   .reply-preview{
     display:none;padding:8px 14px;
-    background:var(--paper-2);
-    border:1px solid var(--rule);
-    border-left:3px solid var(--accent);
-    border-radius:10px;margin-bottom:8px;
-    align-items:center;gap:10px;
+    background:var(--paper-2);border:1px solid var(--rule);
+    border-left:3px solid var(--accent);border-radius:10px;
+    margin-bottom:8px;align-items:center;gap:10px;
   }
   .reply-preview.show{display:flex}
   .reply-preview-body{flex:1;min-width:0}
@@ -360,9 +341,8 @@
   }
   .reply-preview-close{
     width:26px;height:26px;border-radius:50%;
-    border:none;background:transparent;
-    color:var(--ink-mute);cursor:pointer;
-    display:flex;align-items:center;justify-content:center;flex-shrink:0;
+    border:none;background:transparent;color:var(--ink-mute);
+    cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;
   }
   .reply-preview-close:hover{background:rgba(198,40,40,.1);color:#c62828}
   .reply-preview-close svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round}
@@ -370,21 +350,19 @@
   /* ============ INPUT ============ */
   .input-wrap{
     flex-shrink:0;padding:10px 0 12px;
-    border-top:1px solid var(--rule);
-    background:var(--paper);
+    border-top:1px solid var(--rule);background:var(--paper);
   }
   .input-bar{display:flex;gap:6px;align-items:center;position:relative}
   .msg-input{
     flex:1;padding:11px 16px;
-    border:1px solid var(--rule);
-    border-radius:24px;background:var(--paper-elev);
-    color:var(--ink);font-size:14px;font-family:inherit;
+    border:1px solid var(--rule);border-radius:24px;
+    background:var(--paper-elev);color:var(--ink);
+    font-size:14px;font-family:inherit;
     outline:none;min-width:0;
     transition:border-color .25s,box-shadow .25s;
   }
   .msg-input:focus{
-    border-color:var(--accent);
-    box-shadow:0 0 0 3px var(--accent-soft);
+    border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft);
   }
   .send-btn{
     width:42px;height:42px;border-radius:50%;
@@ -398,12 +376,10 @@
   .send-btn:disabled{opacity:.4;cursor:not-allowed;transform:none;box-shadow:none}
   .send-btn svg{width:19px;height:19px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 
-  /* Emoji */
   .emoji-picker{
     position:absolute;bottom:calc(100% + 8px);left:0;
-    background:var(--paper-elev);
-    border:1px solid var(--rule);border-radius:16px;
-    box-shadow:0 12px 40px rgba(0,0,0,.25);
+    background:var(--paper-elev);border:1px solid var(--rule);
+    border-radius:16px;box-shadow:0 12px 40px rgba(0,0,0,.25);
     width:320px;max-width:calc(100vw - 32px);
     max-height:320px;display:none;flex-direction:column;
     z-index:80;overflow:hidden;
@@ -433,13 +409,11 @@
   }
   .emoji-grid button:hover{background:var(--accent-soft);transform:scale(1.2)}
 
-  /* Recording */
   .recording-bar{
     display:none;align-items:center;gap:12px;flex:1;
-    padding:11px 16px;
-    border:1px solid #c62828;border-radius:24px;
-    background:rgba(198,40,40,.08);
-    color:#c62828;font-size:13px;font-weight:600;
+    padding:11px 16px;border:1px solid #c62828;border-radius:24px;
+    background:rgba(198,40,40,.08);color:#c62828;
+    font-size:13px;font-weight:600;
   }
   .recording-bar.show{display:flex}
   .recording-dot{
@@ -458,11 +432,9 @@
     cursor:pointer;font-family:inherit;
   }
 
-  /* Empty */
   .chat-empty{
     display:flex;flex-direction:column;align-items:center;justify-content:center;
-    padding:60px 20px;gap:16px;
-    color:var(--ink-mute);text-align:center;
+    padding:60px 20px;gap:16px;color:var(--ink-mute);text-align:center;
   }
   .chat-empty svg{width:56px;height:56px;stroke:var(--rule-dark);fill:none;stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round}
   .chat-empty a{color:var(--accent);font-weight:600;padding:10px 20px;border-radius:24px;background:var(--accent-soft);text-decoration:none}
@@ -472,48 +444,188 @@
     .emoji-grid{grid-template-columns:repeat(7,1fr)}
   }
 
-  /* ============ DESKTOP 2-COLUMN ============ */
+  /* ============================================
+     CALL UI
+     ============================================ */
+  .call-overlay{
+    position:fixed;inset:0;z-index:500;
+    background:linear-gradient(180deg,#0a1628 0%,#0f1e30 100%);
+    display:none;
+    flex-direction:column;
+    color:#fff;
+    font-family:'Hind Siliguri',sans-serif;
+    opacity:0;
+    transition:opacity .3s;
+  }
+  .call-overlay.show{display:flex;opacity:1}
+
+  /* Incoming */
+  .call-incoming{
+    flex:1;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;
+    padding:40px 24px;text-align:center;
+  }
+  .call-incoming-avatar{
+    width:120px;height:120px;border-radius:50%;
+    background:linear-gradient(135deg,var(--accent),var(--accent-2));
+    display:flex;align-items:center;justify-content:center;
+    font-family:'Playfair Display',serif;
+    font-size:48px;font-weight:700;
+    margin-bottom:24px;
+    overflow:hidden;
+    box-shadow:0 20px 60px rgba(124,179,66,.4);
+    animation:callPulse 1.8s infinite;
+    position:relative;
+  }
+  @keyframes callPulse{
+    0%,100%{box-shadow:0 20px 60px rgba(124,179,66,.4),0 0 0 0 rgba(124,179,66,.6)}
+    50%{box-shadow:0 20px 60px rgba(124,179,66,.4),0 0 0 20px rgba(124,179,66,0)}
+  }
+  .call-incoming-avatar img{width:100%;height:100%;object-fit:cover}
+  .call-incoming-name{
+    font-family:'Playfair Display',serif;
+    font-size:26px;font-weight:700;margin-bottom:8px;
+  }
+  .call-incoming-type{
+    font-size:14px;opacity:.7;margin-bottom:40px;
+    letter-spacing:.5px;
+  }
+  .call-incoming-actions{display:flex;gap:40px}
+  .call-btn-circle{
+    width:70px;height:70px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    border:none;cursor:pointer;
+    transition:all .3s cubic-bezier(.34,1.56,.64,1);
+  }
+  .call-btn-circle:hover{transform:scale(1.08)}
+  .call-btn-circle:active{transform:scale(.94)}
+  .call-btn-circle svg{width:28px;height:28px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+  .call-btn-reject{background:#dc2626;color:#fff}
+  .call-btn-accept{background:#22c55e;color:#fff;animation:callPulse 1.8s infinite}
+
+  /* Active call */
+  .call-active{
+    flex:1;position:relative;display:flex;flex-direction:column;
+    background:#000;overflow:hidden;
+  }
+  .call-video-container{
+    flex:1;position:relative;background:#000;
+    display:flex;align-items:center;justify-content:center;
+    overflow:hidden;
+  }
+  .call-remote-video{
+    width:100%;height:100%;object-fit:cover;
+    background:#000;
+  }
+  .call-local-video{
+    position:absolute;top:80px;right:16px;
+    width:110px;height:150px;
+    border-radius:14px;object-fit:cover;
+    background:#111;border:2px solid rgba(255,255,255,.2);
+    z-index:5;
+    box-shadow:0 8px 24px rgba(0,0,0,.5);
+    transform:scaleX(-1);
+  }
+  .call-audio-only{
+    flex:1;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;
+    padding:40px;
+    background:linear-gradient(180deg,#0a1628 0%,#0f1e30 100%);
+  }
+  .call-audio-avatar{
+    width:140px;height:140px;border-radius:50%;
+    background:linear-gradient(135deg,var(--accent),var(--accent-2));
+    display:flex;align-items:center;justify-content:center;
+    font-family:'Playfair Display',serif;
+    font-size:56px;font-weight:700;
+    overflow:hidden;
+    margin-bottom:24px;
+    box-shadow:0 20px 60px rgba(124,179,66,.3);
+  }
+  .call-audio-avatar img{width:100%;height:100%;object-fit:cover}
+  .call-audio-name{
+    font-family:'Playfair Display',serif;
+    font-size:24px;font-weight:700;margin-bottom:10px;
+  }
+  .call-status{
+    font-size:14px;opacity:.75;letter-spacing:.3px;
+  }
+  .call-status .dot{
+    display:inline-block;
+    animation:dotBlink 1.4s infinite;
+  }
+  .call-status .dot:nth-child(2){animation-delay:.2s}
+  .call-status .dot:nth-child(3){animation-delay:.4s}
+  @keyframes dotBlink{0%,60%,100%{opacity:.3}30%{opacity:1}}
+  .call-timer{
+    font-family:'Playfair Display',serif;
+    font-size:16px;font-weight:600;
+    letter-spacing:1px;margin-top:8px;
+  }
+
+  .call-top-bar{
+    position:absolute;top:0;left:0;right:0;
+    padding:20px 20px 40px;
+    background:linear-gradient(180deg,rgba(0,0,0,.7),transparent);
+    z-index:4;
+    display:flex;justify-content:space-between;align-items:flex-start;
+  }
+  .call-top-info{color:#fff}
+  .call-top-name{
+    font-family:'Playfair Display',serif;
+    font-size:18px;font-weight:700;
+  }
+  .call-top-type{font-size:12px;opacity:.7;margin-top:2px}
+
+  .call-controls{
+    position:absolute;bottom:0;left:0;right:0;
+    padding:30px 20px 50px;
+    background:linear-gradient(0deg,rgba(0,0,0,.85),transparent);
+    z-index:4;
+    display:flex;justify-content:center;gap:20px;
+  }
+  .call-ctrl{
+    width:60px;height:60px;border-radius:50%;
+    background:rgba(255,255,255,.15);
+    backdrop-filter:blur(20px);
+    -webkit-backdrop-filter:blur(20px);
+    border:1px solid rgba(255,255,255,.2);
+    display:flex;align-items:center;justify-content:center;
+    color:#fff;cursor:pointer;
+    transition:all .3s cubic-bezier(.34,1.56,.64,1);
+  }
+  .call-ctrl:hover{transform:scale(1.1);background:rgba(255,255,255,.25)}
+  .call-ctrl:active{transform:scale(.94)}
+  .call-ctrl.off{background:#fff;color:#000}
+  .call-ctrl.end{background:#dc2626;border-color:#dc2626}
+  .call-ctrl.end:hover{background:#b91c1c}
+  .call-ctrl svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+  /* Desktop 2-col */
   @media (min-width: 900px) {
     body { padding-bottom: 0; overflow: hidden; }
     .bottom-nav { display: none; }
-
     .chat-layout {
-      position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 20px 24px;
-      display: grid;
-      grid-template-columns: 340px 1fr;
-      grid-template-rows: auto 1fr;
-      gap: 0 20px;
-      overflow: hidden;
-      background: var(--paper);
+      position: fixed;top:0;left:0;right:0;bottom:0;
+      max-width: 1200px;margin: 0 auto;padding: 20px 24px;
+      display: grid;grid-template-columns: 340px 1fr;
+      grid-template-rows: auto 1fr;gap: 0 20px;
+      overflow: hidden;background: var(--paper);
     }
     .chat-topbar {
-      grid-column: 1 / -1;
-      padding: 0 4px 14px;
-      border-bottom: 1px solid var(--rule);
-      margin-bottom: 20px;
+      grid-column: 1 / -1;padding: 0 4px 14px;
+      border-bottom: 1px solid var(--rule);margin-bottom: 20px;
     }
     .chat-list {
       display: block !important;
-      background: var(--paper-elev);
-      border: 1px solid var(--rule);
-      border-radius: 16px;
-      padding: 12px;
-      overflow-y: auto;
-      height: 100%;
+      background: var(--paper-elev);border: 1px solid var(--rule);
+      border-radius: 16px;padding: 12px;overflow-y: auto;height: 100%;
     }
     .conversation {
       display: flex !important;
-      background: var(--paper-elev);
-      border: 1px solid var(--rule);
-      border-radius: 16px;
-      padding: 0 16px 14px;
-      overflow: hidden;
-      height: 100%;
-      position: relative;
+      background: var(--paper-elev);border: 1px solid var(--rule);
+      border-radius: 16px;padding: 0 16px 14px;
+      overflow: hidden;height: 100%;position: relative;
     }
     .conversation:not(.active) .conv-header,
     .conversation:not(.active) .messages,
@@ -522,14 +634,11 @@
     }
     .conversation:not(.active)::before {
       content: '💬 একটি চ্যাট বেছে নিন';
-      position: absolute;
-      top: 50%; left: 50%;
+      position: absolute;top: 50%;left: 50%;
       transform: translate(-50%, -50%);
       color: var(--ink-mute);
       font-family: 'Playfair Display', serif;
-      font-style: italic;
-      font-size: 15px;
-      white-space: nowrap;
+      font-style: italic;font-size: 15px;white-space: nowrap;
     }
     .emoji-picker { width: 360px; max-height: 360px; }
     .emoji-grid { grid-template-columns: repeat(9, 1fr); }
@@ -570,7 +679,7 @@
 
   <div class="conversation" id="conversation">
     <div class="conv-header">
-      <button class="back-btn" id="backBtn" title="তালিকায় ফিরুন">
+      <button class="back-btn" id="backBtn">
         <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
         ফিরে যান
       </button>
@@ -583,6 +692,9 @@
       </div>
       <button class="icon-action" id="voiceCallBtn" title="ভয়েস কল">
         <svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+      </button>
+      <button class="icon-action" id="videoCallBtn" title="ভিডিও কল">
+        <svg viewBox="0 0 24 24"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
       </button>
     </div>
 
@@ -639,23 +751,60 @@
 <div class="msg-menu-backdrop" id="msgMenuBackdrop"></div>
 <div class="msg-menu" id="msgMenu"></div>
 
-<div class="call-modal" id="callModal" style="position:fixed;inset:0;background:rgba(0,0,0,.5);backdrop-filter:blur(6px);z-index:200;display:none;align-items:center;justify-content:center;padding:20px">
-  <div style="background:var(--paper-elev);border:1px solid var(--rule);border-radius:20px;padding:28px 24px;max-width:380px;width:100%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.3)">
-    <div id="callAvatar" style="width:80px;height:80px;border-radius:50%;background:var(--accent);color:var(--accent-text);display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-weight:700;font-size:28px;margin:0 auto 16px;overflow:hidden;border:3px solid var(--paper-2)">?</div>
-    <div id="callName" style="font-family:'Playfair Display',serif;font-size:20px;font-weight:700;color:var(--ink);margin-bottom:6px">—</div>
-    <div style="font-size:13px;color:var(--ink-mute);font-style:italic;font-family:'Playfair Display',serif;margin-bottom:24px">কল শুরু করুন</div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">
-      <button id="callVoice" style="padding:18px 12px;border-radius:14px;border:1px solid var(--rule);background:var(--paper);cursor:pointer;font-family:inherit;display:flex;flex-direction:column;align-items:center;gap:8px">
-        <svg viewBox="0 0 24 24" style="width:28px;height:28px;stroke:var(--accent);fill:none;stroke-width:1.8"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-        <span style="font-size:12.5px;font-weight:600;color:var(--ink)">ভয়েস কল</span>
+<!-- ============ CALL OVERLAY ============ -->
+<div class="call-overlay" id="callOverlay">
+
+  <!-- INCOMING -->
+  <div class="call-incoming" id="callIncoming" style="display:none">
+    <div class="call-incoming-avatar" id="incomingAvatar">?</div>
+    <div class="call-incoming-name" id="incomingName">—</div>
+    <div class="call-incoming-type" id="incomingType">ইনকামিং কল...</div>
+    <div class="call-incoming-actions">
+      <button class="call-btn-circle call-btn-reject" id="rejectBtn" title="প্রত্যাখ্যান">
+        <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
-      <button id="callVideo" style="padding:18px 12px;border-radius:14px;border:1px solid var(--rule);background:var(--paper);cursor:pointer;font-family:inherit;display:flex;flex-direction:column;align-items:center;gap:8px">
-        <svg viewBox="0 0 24 24" style="width:28px;height:28px;stroke:var(--accent);fill:none;stroke-width:1.8"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
-        <span style="font-size:12.5px;font-weight:600;color:var(--ink)">ভিডিও কল</span>
+      <button class="call-btn-circle call-btn-accept" id="acceptBtn" title="গ্রহণ">
+        <svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
       </button>
     </div>
-    <button id="callClose" style="width:100%;padding:12px;border-radius:12px;border:1px solid var(--rule);background:transparent;color:var(--ink-soft);font-family:inherit;font-size:13.5px;font-weight:600;cursor:pointer">বাতিল</button>
   </div>
+
+  <!-- ACTIVE -->
+  <div class="call-active" id="callActive" style="display:none">
+    <div class="call-video-container" id="callVideoContainer">
+      <video class="call-remote-video" id="remoteVideo" autoplay playsinline></video>
+      <video class="call-local-video" id="localVideo" autoplay playsinline muted></video>
+    </div>
+
+    <div class="call-audio-only" id="callAudioOnly" style="display:none">
+      <div class="call-audio-avatar" id="activeAudioAvatar">?</div>
+      <div class="call-audio-name" id="activeAudioName">—</div>
+      <div class="call-status" id="callStatus">
+        <span class="dot">●</span> <span class="dot">●</span> <span class="dot">●</span>
+      </div>
+      <div class="call-timer" id="callTimer" style="display:none">00:00</div>
+    </div>
+
+    <div class="call-top-bar">
+      <div class="call-top-info">
+        <div class="call-top-name" id="activeCallName">—</div>
+        <div class="call-top-type" id="activeCallType">—</div>
+      </div>
+    </div>
+
+    <div class="call-controls">
+      <button class="call-ctrl" id="muteBtn" title="মিউট">
+        <svg viewBox="0 0 24 24"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+      </button>
+      <button class="call-ctrl" id="videoToggleBtn" title="ভিডিও">
+        <svg viewBox="0 0 24 24"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
+      </button>
+      <button class="call-ctrl end" id="endCallBtn" title="কল শেষ">
+        <svg viewBox="0 0 24 24" style="transform:rotate(135deg)"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+      </button>
+    </div>
+  </div>
+
 </div>
 
 <nav class="bottom-nav">
@@ -674,43 +823,29 @@
     sendVoiceMessage, deleteForMe, unsendMessage,
     leaveGroup, removeGroupMember
   } from "./js/chat.js";
+  import {
+    startCall, listenIncomingCalls, acceptCall, rejectCall, endCall,
+    toggleMute, toggleVideo, cleanupCall, getLocalStream
+  } from "./js/call.js";
   import { showToast, showConfirm } from "./js/toast.js";
-  import { openReportModal } from "./js/report.js";
 
   let currentUser = null;
   let activeChatId = null;
   let unsubMessages = null;
   let unsubChat = null;
+  let unsubIncoming = null;
   let currentChats = [];
   let currentChat = null;
   let currentDisplay = null;
   let allMessages = [];
   let replyTarget = null;
 
+  let isMuted = false;
+  let isVideoOff = false;
+  let callTimerInterval = null;
+  let callStartTime = 0;
+
   const $ = (id) => document.getElementById(id);
-  const chatList = $("chatList");
-  const conversation = $("conversation");
-  const messages = $("messages");
-  const msgInput = $("msgInput");
-  const sendBtn = $("sendBtn");
-  const convAvatar = $("convAvatar");
-  const convName = $("convName");
-  const convSub = $("convSub");
-  const emojiBtn = $("emojiBtn");
-  const emojiPicker = $("emojiPicker");
-  const emojiTabs = $("emojiTabs");
-  const emojiGrid = $("emojiGrid");
-  const voiceBtn = $("voiceBtn");
-  const msgMenu = $("msgMenu");
-  const msgMenuBackdrop = $("msgMenuBackdrop");
-  const callModal = $("callModal");
-  const replyPreview = $("replyPreview");
-  const replyName = $("replyName");
-  const replyText = $("replyText");
-  const inputBar = $("inputBar");
-  const recordingBar = $("recordingBar");
-  const recordingTime = $("recordingTime");
-  const chatCountBadge = $("chatCountBadge");
 
   const isDesktop = () => window.innerWidth >= 900;
 
@@ -724,13 +859,13 @@
   };
 
   function renderEmojiTabs() {
-    emojiTabs.innerHTML = Object.keys(EMOJI_DATA).map((cat, i) =>
+    $("emojiTabs").innerHTML = Object.keys(EMOJI_DATA).map((cat, i) =>
       `<button class="emoji-tab ${i === 0 ? "active" : ""}" data-cat="${cat}">${cat}</button>`
     ).join("");
-    emojiTabs.querySelectorAll(".emoji-tab").forEach(tab => {
+    $("emojiTabs").querySelectorAll(".emoji-tab").forEach(tab => {
       tab.addEventListener("click", (e) => {
         e.stopPropagation();
-        emojiTabs.querySelectorAll(".emoji-tab").forEach(t => t.classList.remove("active"));
+        $("emojiTabs").querySelectorAll(".emoji-tab").forEach(t => t.classList.remove("active"));
         tab.classList.add("active");
         renderEmojiGrid(tab.dataset.cat);
       });
@@ -738,24 +873,24 @@
   }
   function renderEmojiGrid(cat) {
     const emojis = EMOJI_DATA[cat] || [];
-    emojiGrid.innerHTML = emojis.map(e => `<button type="button" data-emoji="${e}">${e}</button>`).join("");
-    emojiGrid.querySelectorAll("button").forEach(btn => {
+    $("emojiGrid").innerHTML = emojis.map(e => `<button type="button" data-emoji="${e}">${e}</button>`).join("");
+    $("emojiGrid").querySelectorAll("button").forEach(btn => {
       btn.addEventListener("click", () => {
-        msgInput.value += btn.dataset.emoji;
-        msgInput.focus();
+        $("msgInput").value += btn.dataset.emoji;
+        $("msgInput").focus();
       });
     });
   }
   renderEmojiTabs();
   renderEmojiGrid(Object.keys(EMOJI_DATA)[0]);
 
-  emojiBtn.addEventListener("click", (e) => {
+  $("emojiBtn").addEventListener("click", (e) => {
     e.stopPropagation();
-    emojiPicker.classList.toggle("show");
+    $("emojiPicker").classList.toggle("show");
   });
   document.addEventListener("click", (e) => {
-    if (!emojiPicker.contains(e.target) && e.target !== emojiBtn && !emojiBtn.contains(e.target)) {
-      emojiPicker.classList.remove("show");
+    if (!$("emojiPicker").contains(e.target) && e.target !== $("emojiBtn") && !$("emojiBtn").contains(e.target)) {
+      $("emojiPicker").classList.remove("show");
     }
   });
 
@@ -770,17 +905,20 @@
       renderChatList(chats);
     });
 
+    // Listen for incoming calls
+    unsubIncoming = listenIncomingCalls(user.uid, (callId, call) => {
+      if (document.getElementById("callOverlay").classList.contains("show")) return;
+      showIncomingCall(callId, call);
+    });
+
     if (toUsername) await openChatWithUsername(toUsername);
     else if (groupId) openChatById(groupId);
   });
 
-  // ==========================================
-  // Chat list
-  // ==========================================
   function renderChatList(chats) {
     if (!chats || chats.length === 0) {
-      chatCountBadge.style.display = "none";
-      chatList.innerHTML = `
+      $("chatCountBadge").style.display = "none";
+      $("chatList").innerHTML = `
         <div class="chat-empty">
           <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
           <div style="line-height:1.6">এখনো কোনো বার্তা নেই<br>কথা শুরু করুন</div>
@@ -788,22 +926,19 @@
         </div>`;
       return;
     }
-    chatCountBadge.textContent = chats.length;
-    chatCountBadge.style.display = "inline-flex";
+    $("chatCountBadge").textContent = chats.length;
+    $("chatCountBadge").style.display = "inline-flex";
 
-    chatList.innerHTML = chats.map(chat => {
+    $("chatList").innerHTML = chats.map(chat => {
       const display = getChatDisplay(chat, currentUser.uid);
       const initial = (display.name || "?")[0].toUpperCase();
       const time = chat.updatedAt?.seconds ? timeAgo(chat.updatedAt.seconds * 1000)
                  : (chat.createdAt?.seconds ? timeAgo(chat.createdAt.seconds * 1000) : "");
       const isActive = chat.id === activeChatId;
-
-      // For group, prepend sender name to preview
       let preview = chat.lastMessage || "কথা শুরু করুন";
       if (chat.isGroup && chat.lastSenderName && chat.lastMessage) {
         preview = `${chat.lastSenderName}: ${chat.lastMessage}`;
       }
-
       return `
         <div class="chat-item ${isActive ? "active-chat" : ""}" data-chat-id="${chat.id}">
           <div class="chat-avatar ${display.isGroup ? "group" : ""}">${display.photoURL ? `<img src="${display.photoURL}">` : initial}</div>
@@ -818,30 +953,26 @@
         </div>`;
     }).join("");
 
-    chatList.querySelectorAll(".chat-item").forEach(item => {
-      item.addEventListener("click", () => {
-        openChatById(item.dataset.chatId);
-      });
+    $("chatList").querySelectorAll(".chat-item").forEach(item => {
+      item.addEventListener("click", () => openChatById(item.dataset.chatId));
     });
   }
 
   function openChatById(chatId) {
     activeChatId = chatId;
     replyTarget = null;
-    replyPreview.classList.remove("show");
-    if (!isDesktop()) chatList.style.display = "none";
-    conversation.classList.add("active");
+    $("replyPreview").classList.remove("show");
+    if (!isDesktop()) $("chatList").style.display = "none";
+    $("conversation").classList.add("active");
 
     if (unsubMessages) unsubMessages();
     if (unsubChat) unsubChat();
 
-    // Listen to messages
     unsubMessages = listenMessages(chatId, (msgs) => {
       allMessages = msgs;
       renderMessages(msgs);
     });
 
-    // Listen to chat itself (for group info updates)
     unsubChat = listenChat(chatId, (chat) => {
       if (!chat) return;
       currentChat = chat;
@@ -849,29 +980,34 @@
       renderConvHeader(chat, currentDisplay);
     });
 
-    setTimeout(() => msgInput.focus(), 150);
+    setTimeout(() => $("msgInput").focus(), 150);
   }
 
   function renderConvHeader(chat, display) {
     const initial = (display.name || "?")[0].toUpperCase();
-    convAvatar.className = "conv-avatar" + (display.isGroup ? " group" : "");
-    convAvatar.innerHTML = display.photoURL ? `<img src="${display.photoURL}">` : initial;
-    convName.textContent = display.name;
+    $("convAvatar").className = "conv-avatar" + (display.isGroup ? " group" : "");
+    $("convAvatar").innerHTML = display.photoURL ? `<img src="${display.photoURL}">` : initial;
+    $("convName").textContent = display.name;
+    $("convSub").textContent = display.isGroup
+      ? `${bnNum(display.memberCount)} জন সদস্য · ট্যাপ করুন বিস্তারিত`
+      : "@" + (display.username || "");
+    $("conversation").dataset.chatId = chat.id;
+    $("conversation").dataset.isGroup = display.isGroup ? "1" : "0";
+
+    // Hide call buttons for group
     if (display.isGroup) {
-      convSub.textContent = `${bnNum(display.memberCount)} জন সদস্য · ট্যাপ করুন বিস্তারিত`;
+      $("voiceCallBtn").style.display = "none";
+      $("videoCallBtn").style.display = "none";
     } else {
-      convSub.textContent = "@" + (display.username || "");
+      $("voiceCallBtn").style.display = "flex";
+      $("videoCallBtn").style.display = "flex";
     }
-    conversation.dataset.chatId = chat.id;
-    conversation.dataset.isGroup = display.isGroup ? "1" : "0";
   }
 
-  // Chat header click → open info (for group) or user profile (for 1-to-1)
   $("convUserBtn").addEventListener("click", () => {
-    const isGroup = conversation.dataset.isGroup === "1";
-    if (isGroup) {
-      showGroupInfo();
-    } else {
+    const isGroup = $("conversation").dataset.isGroup === "1";
+    if (isGroup) showGroupInfo();
+    else {
       const u = currentDisplay?.username;
       if (u) window.location.href = `user.html?u=${encodeURIComponent(u)}`;
     }
@@ -887,19 +1023,14 @@
     } catch (e) { showToast("চ্যাট খোলা যায়নি: " + e.message, "err"); }
   }
 
-  // ==========================================
-  // Messages render
-  // ==========================================
   function renderMessages(msgs) {
     if (msgs.length === 0) {
-      messages.innerHTML = `<div style="text-align:center;color:var(--ink-mute);font-size:13px;padding:30px 20px;font-style:italic">
-        কথা শুরু করুন 👋
-      </div>`;
+      $("messages").innerHTML = `<div style="text-align:center;color:var(--ink-mute);font-size:13px;padding:30px 20px;font-style:italic">কথা শুরু করুন 👋</div>`;
       return;
     }
     const isGroup = currentChat?.isGroup;
 
-    messages.innerHTML = msgs.map((m, idx) => {
+    $("messages").innerHTML = msgs.map((m, idx) => {
       const isMe = m.from === currentUser.uid;
       const time = m.createdAt?.seconds ? shortTime(m.createdAt.seconds * 1000) : "";
       const prev = msgs[idx - 1];
@@ -936,8 +1067,7 @@
         </div>`;
     }).join("");
 
-    // Voice playback
-    messages.querySelectorAll(".msg-voice").forEach(el => {
+    $("messages").querySelectorAll(".msg-voice").forEach(el => {
       const audioUrl = el.dataset.audio;
       const btn = el.querySelector(".voice-play");
       const bars = el.querySelectorAll(".voice-bar");
@@ -977,8 +1107,7 @@
       });
     });
 
-    // Message menu
-    messages.querySelectorAll(".msg").forEach(el => {
+    $("messages").querySelectorAll(".msg").forEach(el => {
       el.addEventListener("click", (e) => {
         e.stopPropagation();
         const msg = allMessages.find(m => m.id === el.dataset.id);
@@ -986,69 +1115,52 @@
       });
     });
 
-    messages.scrollTop = messages.scrollHeight;
+    $("messages").scrollTop = $("messages").scrollHeight;
   }
 
-  // ==========================================
-  // Message menu
-  // ==========================================
   function openMsgMenu(x, y, msg) {
     const isMe = msg.from === currentUser.uid;
     const isVoice = msg.type === "voice";
-
-    msgMenu.innerHTML = `
+    $("msgMenu").innerHTML = `
       <button data-action="reply">
         <svg viewBox="0 0 24 24"><polyline points="9 17 4 12 9 7"/><path d="M20 18v-2a4 4 0 0 0-4-4H4"/></svg>
         উত্তর দিন
       </button>
-      ${!isVoice ? `
-        <button data-action="copy">
-          <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-          কপি করুন
-        </button>
-      ` : ""}
+      ${!isVoice ? `<button data-action="copy"><svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> কপি করুন</button>` : ""}
       <button data-action="delete-me" class="danger">
         <svg viewBox="0 0 24 24"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><line x1="10" y1="11" x2="10" y2="17"/></svg>
         শুধু আমার জন্য মুছুন
       </button>
-      ${isMe ? `
-        <button data-action="unsend" class="danger">
-          <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-2 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L5 6"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
-          সবার থেকে মুছুন (Unsend)
-        </button>
-      ` : ""}
+      ${isMe ? `<button data-action="unsend" class="danger"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-2 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L5 6"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg> সবার থেকে মুছুন (Unsend)</button>` : ""}
     `;
-
-    msgMenuBackdrop.classList.add("show");
-    msgMenu.classList.add("show");
-
-    const rect = msgMenu.getBoundingClientRect();
+    $("msgMenuBackdrop").classList.add("show");
+    $("msgMenu").classList.add("show");
+    const rect = $("msgMenu").getBoundingClientRect();
     let left = x, top = y;
     if (left + rect.width > window.innerWidth - 10) left = window.innerWidth - rect.width - 10;
     if (top + rect.height > window.innerHeight - 10) top = window.innerHeight - rect.height - 10;
     if (left < 10) left = 10;
     if (top < 10) top = 10;
-    msgMenu.style.left = left + "px";
-    msgMenu.style.top = top + "px";
+    $("msgMenu").style.left = left + "px";
+    $("msgMenu").style.top = top + "px";
 
-    msgMenu.querySelectorAll("button").forEach(btn => {
+    $("msgMenu").querySelectorAll("button").forEach(btn => {
       btn.onclick = async () => {
         const action = btn.dataset.action;
         closeMsgMenu();
-
         if (action === "reply") setReplyTarget(msg);
         else if (action === "copy") {
           try { await navigator.clipboard.writeText(msg.text || ""); showToast("কপি হয়েছে", "ok"); }
           catch (e) { showToast("কপি ব্যর্থ", "err"); }
         } else if (action === "delete-me") {
-          const ok = await showConfirm("শুধু আপনার কাছ থেকে এই বার্তাটি মুছে যাবে। অন্য কারো কাছে থাকবে।",
-            { title: "শুধু আমার জন্য মুছুন", okText: "মুছে ফেলুন" });
+          const ok = await showConfirm("শুধু আপনার কাছ থেকে এই বার্তাটি মুছে যাবে।",
+            { title: "শুধু আমার জন্য", okText: "মুছে ফেলুন" });
           if (!ok) return;
           try { await deleteForMe(activeChatId, msg.id); showToast("✅ মুছে ফেলা হয়েছে", "ok"); }
           catch (e) { showToast("❌ " + e.message, "err"); }
         } else if (action === "unsend") {
-          const ok = await showConfirm("সবার কাছ থেকে এই বার্তাটি মুছে যাবে। এই কাজ ফিরিয়ে আনা যাবে না।",
-            { title: "সবার থেকে মুছুন", okText: "Unsend করুন" });
+          const ok = await showConfirm("সবার কাছ থেকে এই বার্তাটি মুছে যাবে।",
+            { title: "সবার থেকে মুছুন", okText: "Unsend" });
           if (!ok) return;
           try { await unsendMessage(activeChatId, msg.id); showToast("✅ সবাই থেকে মুছে ফেলা হয়েছে", "ok"); }
           catch (e) { showToast("❌ " + e.message, "err"); }
@@ -1058,77 +1170,65 @@
   }
 
   function closeMsgMenu() {
-    msgMenu.classList.remove("show");
-    msgMenuBackdrop.classList.remove("show");
+    $("msgMenu").classList.remove("show");
+    $("msgMenuBackdrop").classList.remove("show");
   }
-  msgMenuBackdrop.addEventListener("click", closeMsgMenu);
+  $("msgMenuBackdrop").addEventListener("click", closeMsgMenu);
   document.addEventListener("click", (e) => {
-    if (!msgMenu.contains(e.target) && !msgMenuBackdrop.contains(e.target)) closeMsgMenu();
+    if (!$("msgMenu").contains(e.target) && !$("msgMenuBackdrop").contains(e.target)) closeMsgMenu();
   });
-  messages.addEventListener("scroll", closeMsgMenu);
+  $("messages").addEventListener("scroll", closeMsgMenu);
 
-  // ==========================================
-  // Reply
-  // ==========================================
   function setReplyTarget(msg) {
     replyTarget = {
       id: msg.id,
       text: msg.type === "voice" ? "🎤 ভয়েস বার্তা" : (msg.text || ""),
       from: msg.from,
-      username: msg.from === currentUser.uid
-        ? (currentUser.username || "আমি")
-        : (msg.fromUsername || "?")
+      username: msg.from === currentUser.uid ? (currentUser.username || "আমি") : (msg.fromUsername || "?")
     };
-    replyName.textContent = "@" + replyTarget.username;
-    replyText.textContent = replyTarget.text;
-    replyPreview.classList.add("show");
-    msgInput.focus();
+    $("replyName").textContent = "@" + replyTarget.username;
+    $("replyText").textContent = replyTarget.text;
+    $("replyPreview").classList.add("show");
+    $("msgInput").focus();
   }
   $("replyClose").addEventListener("click", () => {
     replyTarget = null;
-    replyPreview.classList.remove("show");
+    $("replyPreview").classList.remove("show");
   });
 
-  // ==========================================
-  // Send
-  // ==========================================
   async function doSend() {
-    const text = msgInput.value.trim();
+    const text = $("msgInput").value.trim();
     if (!text || !activeChatId) return;
-    sendBtn.disabled = true;
-    msgInput.value = "";
+    $("sendBtn").disabled = true;
+    $("msgInput").value = "";
     const reply = replyTarget;
     replyTarget = null;
-    replyPreview.classList.remove("show");
+    $("replyPreview").classList.remove("show");
     try { await sendMessage(activeChatId, text, reply); }
-    catch (e) { msgInput.value = text; showToast("পাঠানো যায়নি: " + e.message, "err"); }
-    sendBtn.disabled = false;
-    msgInput.focus();
+    catch (e) { $("msgInput").value = text; showToast("পাঠানো যায়নি: " + e.message, "err"); }
+    $("sendBtn").disabled = false;
+    $("msgInput").focus();
   }
-  sendBtn.addEventListener("click", doSend);
-  msgInput.addEventListener("keydown", e => { if (e.key === "Enter") doSend(); });
+  $("sendBtn").addEventListener("click", doSend);
+  $("msgInput").addEventListener("keydown", e => { if (e.key === "Enter") doSend(); });
 
-  // ==========================================
-  // Back
-  // ==========================================
   $("backBtn").addEventListener("click", () => {
     activeChatId = null;
     currentChat = null;
     currentDisplay = null;
     replyTarget = null;
-    replyPreview.classList.remove("show");
+    $("replyPreview").classList.remove("show");
     if (unsubMessages) { unsubMessages(); unsubMessages = null; }
     if (unsubChat) { unsubChat(); unsubChat = null; }
-    conversation.classList.remove("active");
-    chatList.style.display = "block";
-    // Remove URL param
+    $("conversation").classList.remove("active");
+    $("chatList").style.display = "block";
     if (window.history && window.history.replaceState) {
       window.history.replaceState({}, "", "chat.html");
     }
   });
 
   // ==========================================
-  // Group info
+  // GROUP INFO
   // ==========================================
   function showGroupInfo() {
     if (!currentChat) return;
@@ -1137,7 +1237,6 @@
     const myUid = currentUser.uid;
 
     const modal = document.createElement("div");
-    modal.className = "msg-menu-backdrop show";
     modal.style.cssText = "position:fixed;inset:0;background:rgba(0,0,0,.5);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;padding:20px;z-index:200";
 
     const memberRows = members.map(uid => {
@@ -1151,14 +1250,12 @@
             ${d.photoURL ? `<img src="${d.photoURL}" style="width:100%;height:100%;object-fit:cover">` : initial}
           </div>
           <div style="flex:1;min-width:0">
-            <div style="font-weight:600;font-size:13.5px;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
+            <div style="font-weight:600;font-size:13.5px;color:var(--ink)">
               ${escapeHtml(d.name)} ${isMe ? "<span style='color:var(--accent);font-size:11px'>(আপনি)</span>" : ""}
             </div>
             <div style="font-size:11.5px;color:var(--ink-mute);font-style:italic">@${escapeHtml(d.username)}${isThisAdmin ? " · <span style='color:var(--accent);font-weight:700'>Admin</span>" : ""}</div>
           </div>
-          ${isAdmin && !isMe ? `
-            <button data-remove="${uid}" style="padding:5px 10px;border-radius:14px;background:rgba(198,40,40,.1);color:#c62828;border:none;font-family:inherit;font-size:11px;font-weight:700;cursor:pointer">সরান</button>
-          ` : ""}
+          ${isAdmin && !isMe ? `<button data-remove="${uid}" style="padding:5px 10px;border-radius:14px;background:rgba(198,40,40,.1);color:#c62828;border:none;font-family:inherit;font-size:11px;font-weight:700;cursor:pointer">সরান</button>` : ""}
         </div>`;
     }).join("");
 
@@ -1168,7 +1265,6 @@
           <div style="font-family:'Playfair Display',serif;font-size:20px;font-weight:700;color:var(--ink)">গ্রুপ তথ্য</div>
           <button id="closeGroupInfo" style="width:32px;height:32px;border-radius:50%;border:none;background:transparent;color:var(--ink-mute);cursor:pointer;font-size:18px">✕</button>
         </div>
-
         <div style="text-align:center;margin-bottom:20px">
           <div style="width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent-2));color:var(--accent-text);display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-weight:700;font-size:28px;margin:0 auto 12px;overflow:hidden">
             ${currentChat.photoURL ? `<img src="${currentChat.photoURL}" style="width:100%;height:100%;object-fit:cover">` : (currentChat.name || "?")[0].toUpperCase()}
@@ -1176,10 +1272,8 @@
           <div style="font-family:'Playfair Display',serif;font-size:18px;font-weight:700;color:var(--ink)">${escapeHtml(currentChat.name)}</div>
           <div style="font-size:12.5px;color:var(--ink-mute);margin-top:4px">${bnNum(members.length)} জন সদস্য</div>
         </div>
-
         <div style="font-size:11px;color:var(--ink-mute);letter-spacing:1.2px;text-transform:uppercase;font-weight:600;margin-bottom:8px">সদস্যবৃন্দ</div>
         ${memberRows}
-
         <div style="display:flex;gap:8px;margin-top:20px">
           <button id="leaveGroupBtn" style="flex:1;padding:12px;border-radius:10px;background:rgba(198,40,40,.1);border:1px solid rgba(198,40,40,.2);color:#c62828;font-family:inherit;font-size:13.5px;font-weight:600;cursor:pointer">গ্রুপ ছাড়ুন</button>
         </div>
@@ -1187,68 +1281,227 @@
     `;
 
     document.body.appendChild(modal);
-
     modal.querySelector("#closeGroupInfo").onclick = () => modal.remove();
-    modal.addEventListener("click", (e) => {
-      if (e.target === modal) modal.remove();
-    });
+    modal.addEventListener("click", (e) => { if (e.target === modal) modal.remove(); });
 
     modal.querySelector("#leaveGroupBtn").onclick = async () => {
-      const ok = await showConfirm("এই গ্রুপ থেকে বেরিয়ে যাবেন?", {
-        title: "গ্রুপ ছাড়ুন", okText: "ছাড়ুন", cancelText: "বাতিল"
-      });
+      const ok = await showConfirm("এই গ্রুপ থেকে বেরিয়ে যাবেন?", { title: "গ্রুপ ছাড়ুন", okText: "ছাড়ুন" });
       if (!ok) return;
       try {
         await leaveGroup(activeChatId);
         modal.remove();
         showToast("গ্রুপ থেকে বেরিয়ে গেছেন", "ok");
         $("backBtn").click();
-      } catch (e) {
-        showToast("❌ " + e.message, "err");
-      }
+      } catch (e) { showToast("❌ " + e.message, "err"); }
     };
 
     modal.querySelectorAll("[data-remove]").forEach(b => {
       b.onclick = async () => {
         const uid = b.dataset.remove;
         const d = currentChat.memberData?.[uid] || {};
-        const ok = await showConfirm(`${d.name || "সদস্য"} কে গ্রুপ থেকে সরাবেন?`, {
-          title: "সদস্য সরান", okText: "সরান", cancelText: "বাতিল"
-        });
+        const ok = await showConfirm(`${d.name || "সদস্য"} কে গ্রুপ থেকে সরাবেন?`, { title: "সদস্য সরান", okText: "সরান" });
         if (!ok) return;
         try {
           await removeGroupMember(activeChatId, uid);
           modal.remove();
           showToast("✅ সদস্য সরানো হয়েছে", "ok");
-        } catch (e) {
-          showToast("❌ " + e.message, "err");
-        }
+        } catch (e) { showToast("❌ " + e.message, "err"); }
       };
     });
   }
 
   // ==========================================
-  // Call modal
+  // CALL SYSTEM
   // ==========================================
-  $("voiceCallBtn").addEventListener("click", () => {
-    if (!currentDisplay) return;
-    if (currentDisplay.isGroup) {
+  function showCallOverlay() {
+    $("callOverlay").classList.add("show");
+  }
+  function hideCallOverlay() {
+    $("callOverlay").classList.remove("show");
+    $("callIncoming").style.display = "none";
+    $("callActive").style.display = "none";
+    if (callTimerInterval) clearInterval(callTimerInterval);
+    callTimerInterval = null;
+  }
+
+  // Start call (from chat header buttons)
+  async function initiateCall(type) {
+    if (!currentDisplay || currentDisplay.isGroup) {
       showToast("গ্রুপ কল শীঘ্রই আসছে", "info");
       return;
     }
-    const initial = (currentDisplay.name || "?")[0].toUpperCase();
-    $("callAvatar").innerHTML = currentDisplay.photoURL ? `<img src="${currentDisplay.photoURL}" style="width:100%;height:100%;object-fit:cover">` : initial;
-    $("callName").textContent = currentDisplay.name;
-    callModal.style.display = "flex";
-  });
-  $("callClose").addEventListener("click", () => { callModal.style.display = "none"; });
-  callModal.addEventListener("click", (e) => { if (e.target === callModal) callModal.style.display = "none"; });
-  $("callVoice").addEventListener("click", () => { callModal.style.display = "none"; showToast("🎤 ভয়েস কল শীঘ্রই আসছে", "info"); });
-  $("callVideo").addEventListener("click", () => { callModal.style.display = "none"; showToast("📹 ভিডিও কল শীঘ্রই আসছে", "info"); });
+    if (!currentDisplay.uid) {
+      showToast("ইউজার আইডি পাওয়া যায়নি", "err");
+      return;
+    }
 
-  // ==========================================
-  // Voice recording
-  // ==========================================
+    showCallOverlay();
+    $("callIncoming").style.display = "none";
+    $("callActive").style.display = "flex";
+    showActiveCallUI(currentDisplay, type, "কল যাচ্ছে...");
+
+    try {
+      await startCall(currentDisplay.uid, type, {
+        onRemoteStream: (stream) => {
+          const remoteVideo = $("remoteVideo");
+          remoteVideo.srcObject = stream;
+          remoteVideo.play().catch(() => {});
+          if (type === "voice") {
+            $("callStatus").innerHTML = "সংযুক্ত";
+            if (!callTimerInterval) startCallTimer();
+          } else {
+            if (!callTimerInterval) startCallTimer();
+          }
+        },
+        onICEConnectionChange: (state) => {
+          if (state === "connected") {
+            $("callStatus").innerHTML = "সংযুক্ত";
+          }
+        },
+        onEnded: () => {
+          showToast("কল শেষ হয়েছে", "info");
+          hideCallOverlay();
+        },
+        onError: (e) => {
+          showToast("কল ব্যর্থ: " + e.message, "err");
+          hideCallOverlay();
+        }
+      });
+
+      // Local video
+      const localStream = getLocalStream();
+      if (localStream) {
+        $("localVideo").srcObject = localStream;
+        $("localVideo").play().catch(() => {});
+        if (type === "voice") {
+          $("localVideo").style.display = "none";
+        }
+      }
+    } catch (e) {
+      showToast("কল শুরু করা যায়নি: " + e.message, "err");
+      hideCallOverlay();
+    }
+  }
+
+  function showActiveCallUI(display, type, statusText) {
+    const initial = (display.name || "?")[0].toUpperCase();
+    $("activeCallName").textContent = display.name;
+    $("activeCallType").textContent = type === "video" ? "ভিডিও কল" : "ভয়েস কল";
+
+    $("activeAudioAvatar").innerHTML = display.photoURL ? `<img src="${display.photoURL}">` : initial;
+    $("activeAudioName").textContent = display.name;
+    $("callStatus").innerHTML = statusText === "সংযুক্ত" ? "সংযুক্ত" : `<span class="dot">●</span> <span class="dot">●</span> <span class="dot">●</span>`;
+
+    if (type === "video") {
+      $("callVideoContainer").style.display = "flex";
+      $("callAudioOnly").style.display = "none";
+      $("videoToggleBtn").style.display = "flex";
+    } else {
+      $("callVideoContainer").style.display = "none";
+      $("callAudioOnly").style.display = "flex";
+      $("videoToggleBtn").style.display = "none";
+    }
+  }
+
+  function startCallTimer() {
+    callStartTime = Date.now();
+    $("callTimer").style.display = "block";
+    callTimerInterval = setInterval(() => {
+      const elapsed = Math.floor((Date.now() - callStartTime) / 1000);
+      const m = Math.floor(elapsed / 60);
+      const s = elapsed % 60;
+      $("callTimer").textContent = `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+    }, 1000);
+  }
+
+  // Listen for incoming
+  function showIncomingCall(callId, call) {
+    showCallOverlay();
+    $("callIncoming").style.display = "flex";
+    $("callActive").style.display = "none";
+
+    const initial = (call.callerName || "?")[0].toUpperCase();
+    $("incomingAvatar").innerHTML = initial;
+    $("incomingName").textContent = call.callerName || "Unknown";
+    $("incomingType").textContent = call.type === "video" ? "ভিডিও কল আসছে..." : "ভয়েস কল আসছে...";
+
+    // Accept
+    $("acceptBtn").onclick = async () => {
+      try {
+        $("callIncoming").style.display = "none";
+        $("callActive").style.display = "flex";
+
+        const display = { name: call.callerName || "Unknown", photoURL: "", uid: call.callerId };
+        showActiveCallUI(display, call.type, "সংযুক্ত হচ্ছে...");
+
+        await acceptCall(callId, {
+          onRemoteStream: (stream) => {
+            $("remoteVideo").srcObject = stream;
+            $("remoteVideo").play().catch(() => {});
+            $("callStatus").innerHTML = "সংযুক্ত";
+            if (!callTimerInterval) startCallTimer();
+          },
+          onICEConnectionChange: (state) => {
+            if (state === "connected") $("callStatus").innerHTML = "সংযুক্ত";
+          },
+          onEnded: () => {
+            showToast("কল শেষ হয়েছে", "info");
+            hideCallOverlay();
+          },
+          onError: (e) => {
+            showToast("কল ব্যর্থ: " + e.message, "err");
+            hideCallOverlay();
+          }
+        });
+
+        const localStream = getLocalStream();
+        if (localStream) {
+          $("localVideo").srcObject = localStream;
+          $("localVideo").play().catch(() => {});
+          if (call.type === "voice") $("localVideo").style.display = "none";
+        }
+      } catch (e) {
+        showToast("কল গ্রহণ ব্যর্থ: " + e.message, "err");
+        hideCallOverlay();
+      }
+    };
+
+    // Reject
+    $("rejectBtn").onclick = async () => {
+      await rejectCall(callId);
+      hideCallOverlay();
+    };
+  }
+
+  // Control buttons
+  $("muteBtn").addEventListener("click", () => {
+    isMuted = toggleMute();
+    $("muteBtn").classList.toggle("off", isMuted);
+    showToast(isMuted ? "🔇 মিউট" : "🔊 আনমিউট", "info");
+  });
+
+  $("videoToggleBtn").addEventListener("click", () => {
+    isVideoOff = toggleVideo();
+    $("videoToggleBtn").classList.toggle("off", isVideoOff);
+    $("localVideo").style.opacity = isVideoOff ? "0.3" : "1";
+    showToast(isVideoOff ? "📹 ভিডিও বন্ধ" : "📹 ভিডিও চালু", "info");
+  });
+
+  $("endCallBtn").addEventListener("click", async () => {
+    await endCall();
+    hideCallOverlay();
+  });
+
+  $("voiceCallBtn").addEventListener("click", () => initiateCall("voice"));
+  $("videoCallBtn").addEventListener("click", () => initiateCall("video"));
+
+  // Cleanup on page leave
+  window.addEventListener("beforeunload", () => {
+    cleanupCall();
+    if (unsubIncoming) unsubIncoming();
+  });
+
+  // Voice message recording
   let mediaRecorder = null;
   let audioChunks = [];
   let isRecording = false;
@@ -1256,7 +1509,7 @@
   let recordTimerInterval = null;
   let recordedDuration = 0;
 
-  voiceBtn.addEventListener("click", async () => {
+  $("voiceBtn").addEventListener("click", async () => {
     if (!activeChatId) { showToast("প্রথমে একটি চ্যাট খুলুন", "err"); return; }
     if (isRecording) return;
     await startRecording();
@@ -1268,8 +1521,8 @@
       mediaRecorder.stop();
       mediaRecorder.stream?.getTracks().forEach(t => t.stop());
       isRecording = false;
-      inputBar.style.display = "flex";
-      recordingBar.style.display = "none";
+      $("inputBar").style.display = "flex";
+      $("recordingBar").style.display = "none";
       clearInterval(recordTimerInterval);
       showToast("রেকর্ডিং বাতিল", "info");
     }
@@ -1284,8 +1537,8 @@
       mediaRecorder.addEventListener("stop", async () => {
         stream.getTracks().forEach(t => t.stop());
         isRecording = false;
-        inputBar.style.display = "flex";
-        recordingBar.style.display = "none";
+        $("inputBar").style.display = "flex";
+        $("recordingBar").style.display = "none";
         clearInterval(recordTimerInterval);
         if (audioChunks.length === 0) return;
         const blob = new Blob(audioChunks, { type: "audio/webm" });
@@ -1301,8 +1554,8 @@
             <div class="voice-duration">আপলোড...</div>
           </div>
         </div></div>`;
-        messages.appendChild(tempDiv);
-        messages.scrollTop = messages.scrollHeight;
+        $("messages").appendChild(tempDiv);
+        $("messages").scrollTop = $("messages").scrollHeight;
         try {
           await sendVoiceMessage(activeChatId, blob, recordedDuration, (pct) => {
             const el = tempDiv.querySelector(".voice-duration");
@@ -1315,23 +1568,20 @@
       isRecording = true;
       recordStartTime = Date.now();
       recordedDuration = 0;
-      inputBar.style.display = "none";
-      recordingBar.style.display = "flex";
-      recordingTime.textContent = "0:00";
+      $("inputBar").style.display = "none";
+      $("recordingBar").style.display = "flex";
+      $("recordingTime").textContent = "0:00";
       recordTimerInterval = setInterval(() => {
         const elapsed = Math.floor((Date.now() - recordStartTime) / 1000);
         recordedDuration = elapsed;
         const m = Math.floor(elapsed / 60);
         const s = elapsed % 60;
-        recordingTime.textContent = m + ":" + (s < 10 ? "0" : "") + s;
+        $("recordingTime").textContent = m + ":" + (s < 10 ? "0" : "") + s;
         if (elapsed >= 60) mediaRecorder.stop();
       }, 250);
     } catch (e) { showToast("মাইক্রোফোন অ্যাক্সেস পাওয়া যায়নি", "err"); }
   }
 
-  // ==========================================
-  // Helpers
-  // ==========================================
   function formatDuration(sec) {
     sec = Math.max(0, Math.round(sec || 0));
     const m = Math.floor(sec / 60);
