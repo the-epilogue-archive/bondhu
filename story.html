@@ -6,6 +6,7 @@
 <meta name="theme-color" content="#000000">
 <title>বন্ধু — স্টোরি</title>
 <link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" href="assets/icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,500;0,600;0,700;0,800;1,500&display=swap" rel="stylesheet">
@@ -14,36 +15,19 @@
 <style>
   *{box-sizing:border-box;margin:0;padding:0}
   body{
-    background:#000;color:#fff;
-    overflow:hidden;
-    height:100vh;
-    padding-bottom:0;
-    font-family:'Hind Siliguri',system-ui,sans-serif;
+    background:#000;color:#fff;overflow:hidden;height:100vh;
+    padding-bottom:0;font-family:'Hind Siliguri',system-ui,sans-serif;
   }
 
-  .story-wrap{
-    position:fixed;inset:0;
-    display:flex;align-items:center;justify-content:center;
-  }
-
+  .story-wrap{position:fixed;inset:0;display:flex;align-items:center;justify-content:center}
   .story-stage{
-    position:relative;
-    width:100%;height:100%;
-    max-width:520px;
-    margin:0 auto;
-    background:#000;
-    overflow:hidden;
+    position:relative;width:100%;height:100%;max-width:520px;
+    margin:0 auto;background:#000;overflow:hidden;
   }
 
-  .story-img{
-    position:absolute;inset:0;
-    width:100%;height:100%;
-    object-fit:contain;
-  }
-
+  .story-img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain}
   .story-gradient{
-    position:absolute;inset:0;
-    pointer-events:none;
+    position:absolute;inset:0;pointer-events:none;
     background:linear-gradient(180deg,rgba(0,0,0,.65) 0%,transparent 22%,transparent 65%,rgba(0,0,0,.75) 100%);
   }
 
@@ -52,103 +36,110 @@
     display:flex;gap:4px;z-index:5;
   }
   .progress-seg{
-    flex:1;height:3px;
-    background:rgba(255,255,255,.3);
+    flex:1;height:3px;background:rgba(255,255,255,.3);
     border-radius:2px;overflow:hidden;
   }
-  .progress-fill{
-    height:100%;background:#fff;width:0%;
-  }
+  .progress-fill{height:100%;background:#fff;width:0%}
   .progress-fill.done{width:100%}
   .progress-fill.active{animation:fill 5s linear forwards}
   @keyframes fill{from{width:0%}to{width:100%}}
 
   .story-header{
     position:absolute;top:26px;left:0;right:0;
-    padding:8px 16px;
-    display:flex;align-items:center;gap:12px;
-    z-index:5;
+    padding:8px 16px;display:flex;align-items:center;gap:12px;z-index:5;
   }
   .story-av{
     width:40px;height:40px;border-radius:50%;
-    background:var(--accent);
-    display:flex;align-items:center;justify-content:center;
-    font-weight:700;font-size:15px;
-    overflow:hidden;
-    border:2px solid rgba(255,255,255,.4);
-    flex-shrink:0;
+    background:var(--accent);display:flex;align-items:center;justify-content:center;
+    font-weight:700;font-size:15px;overflow:hidden;
+    border:2px solid rgba(255,255,255,.4);flex-shrink:0;
   }
   .story-av img{width:100%;height:100%;object-fit:cover}
   .story-user{flex:1;min-width:0}
   .story-name{
-    font-family:'Playfair Display',serif;
-    font-size:14px;font-weight:700;
+    font-family:'Playfair Display',serif;font-size:14px;font-weight:700;
     text-shadow:0 1px 3px rgba(0,0,0,.5);
   }
-  .story-time{
-    font-size:11px;opacity:.75;
-    font-style:italic;
-    font-family:'Playfair Display',serif;
-  }
+  .story-time{font-size:11px;opacity:.75;font-style:italic;font-family:'Playfair Display',serif}
   .close-btn{
-    background:rgba(0,0,0,.35);
-    border:none;
-    width:36px;height:36px;
-    border-radius:50%;
-    display:flex;align-items:center;justify-content:center;
-    cursor:pointer;
-    transition:transform .3s cubic-bezier(.34,1.56,.64,1),background .3s;
-    color:#fff;
-    backdrop-filter:blur(8px);
-    -webkit-backdrop-filter:blur(8px);
+    background:rgba(0,0,0,.35);border:none;width:36px;height:36px;
+    border-radius:50%;display:flex;align-items:center;justify-content:center;
+    cursor:pointer;color:#fff;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+    transition:all .3s cubic-bezier(.34,1.56,.64,1);
   }
   .close-btn:hover{background:rgba(255,255,255,.2);transform:scale(1.1) rotate(90deg)}
-  .close-btn svg{
-    width:18px;height:18px;
-    stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;
+  .close-btn svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round}
+  .menu-btn{
+    background:rgba(0,0,0,.35);border:none;width:36px;height:36px;
+    border-radius:50%;display:flex;align-items:center;justify-content:center;
+    cursor:pointer;color:#fff;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+    transition:all .3s cubic-bezier(.34,1.56,.64,1);
   }
+  .menu-btn:hover{background:rgba(255,255,255,.2);transform:scale(1.1)}
+  .menu-btn svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 
   .story-caption{
-    position:absolute;
-    bottom:40px;left:20px;right:20px;
-    text-align:center;
-    font-size:15px;
-    line-height:1.5;
+    position:absolute;bottom:90px;left:20px;right:20px;
+    text-align:center;font-size:15px;line-height:1.5;
     text-shadow:0 2px 8px rgba(0,0,0,.8);
-    padding:10px 16px;
-    background:rgba(0,0,0,.4);
-    backdrop-filter:blur(6px);
-    -webkit-backdrop-filter:blur(6px);
-    border-radius:20px;
-    word-break:break-word;
-    z-index:4;
+    padding:10px 16px;background:rgba(0,0,0,.4);
+    backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+    border-radius:20px;word-break:break-word;z-index:4;
   }
 
-  .tap-zone{
-    position:absolute;top:0;bottom:0;
-    width:32%;z-index:3;cursor:pointer;
+  .reply-bar{
+    position:absolute;bottom:20px;left:16px;right:16px;
+    display:flex;gap:8px;align-items:center;z-index:6;
   }
+  .reply-input{
+    flex:1;padding:12px 18px;
+    background:rgba(255,255,255,.15);
+    backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+    border:1px solid rgba(255,255,255,.25);
+    border-radius:24px;color:#fff;font-family:inherit;font-size:14px;
+    outline:none;
+  }
+  .reply-input::placeholder{color:rgba(255,255,255,.7)}
+  .reply-input:focus{background:rgba(255,255,255,.25);border-color:rgba(255,255,255,.5)}
+  .reply-send{
+    width:46px;height:46px;border-radius:50%;
+    background:var(--accent);color:var(--accent-text);
+    display:flex;align-items:center;justify-content:center;
+    border:none;cursor:pointer;flex-shrink:0;
+    transition:transform .3s cubic-bezier(.34,1.56,.64,1);
+  }
+  .reply-send:hover{transform:scale(1.08)}
+  .reply-send:active{transform:scale(.94)}
+  .reply-send svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+  .tap-zone{position:absolute;top:0;bottom:0;width:32%;z-index:3;cursor:pointer}
   .tap-zone.left{left:0}
   .tap-zone.right{right:0}
 
   .story-empty{
-    position:absolute;inset:0;
-    display:flex;flex-direction:column;
+    position:absolute;inset:0;display:flex;flex-direction:column;
     align-items:center;justify-content:center;
     color:#999;gap:14px;text-align:center;padding:30px;
   }
-  .story-empty svg{
-    width:56px;height:56px;
-    stroke:#666;fill:none;stroke-width:1.4;
-    stroke-linecap:round;stroke-linejoin:round;
+  .story-empty svg{width:56px;height:56px;stroke:#666;fill:none;stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round}
+  .story-empty a{color:var(--accent-2);padding:10px 20px;border-radius:24px;background:rgba(124,179,66,.15);border:1px solid rgba(124,179,66,.3);text-decoration:none;font-weight:600}
+
+  .menu-pop{
+    position:fixed;background:var(--paper-elev);
+    border:1px solid var(--rule);border-radius:14px;
+    box-shadow:0 12px 40px rgba(0,0,0,.5);
+    padding:6px;z-index:300;display:none;min-width:190px;
   }
-  .story-empty a{
-    color:var(--accent-2);
-    padding:10px 20px;border-radius:24px;
-    background:rgba(124,179,66,.15);
-    border:1px solid rgba(124,179,66,.3);
-    text-decoration:none;font-weight:600;
+  .menu-pop button{
+    width:100%;padding:11px 14px;border:none;background:transparent;
+    color:var(--ink);font-family:inherit;font-size:13px;font-weight:500;
+    display:flex;align-items:center;gap:10px;
+    cursor:pointer;border-radius:9px;text-align:left;
   }
+  .menu-pop button:hover{background:var(--accent-soft);color:var(--accent)}
+  .menu-pop button.danger{color:#c62828}
+  .menu-pop button.danger:hover{background:rgba(198,40,40,.1)}
+  .menu-pop button svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.8;flex-shrink:0}
 </style>
 </head>
 <body>
@@ -162,20 +153,29 @@
   </div>
 </div>
 
+<div class="menu-pop" id="menuPop"></div>
+
 <script type="module">
   import { requireAuth } from "./js/auth.js";
-  import { loadActiveStories, markStoryViewed } from "./js/stories.js";
+  import { loadActiveStories, markStoryViewed, deleteStory } from "./js/stories.js";
+  import { showToast, showConfirm } from "./js/toast.js";
+  import { openReportModal } from "./js/report.js";
+  import { getOrCreateChat, sendMessage } from "./js/chat.js";
 
+  let currentUser = null;
   let allGroups = [];
   let groupIdx = 0;
   let storyIdx = 0;
   let timer = null;
+  let currentStory = null;
 
   const params = new URLSearchParams(window.location.search);
   const startUsername = params.get("u");
   const stage = document.getElementById("stage");
+  const menuPop = document.getElementById("menuPop");
 
-  requireAuth(async () => {
+  requireAuth(async (user) => {
+    currentUser = user;
     try {
       allGroups = await loadActiveStories();
       if (allGroups.length === 0) {
@@ -207,6 +207,9 @@
 
     const group = allGroups[groupIdx];
     const story = group.stories[storyIdx];
+    currentStory = { group, story };
+
+    const isMine = group.userId === currentUser.uid;
 
     stage.innerHTML = `
       <img class="story-img" src="${story.imageUrl}" alt="story">
@@ -226,12 +229,24 @@
           <div class="story-name">${escapeHtml(group.userName)}</div>
           <div class="story-time">${timeAgo(story.createdAt?.seconds ? story.createdAt.seconds * 1000 : Date.now())}</div>
         </div>
+        <button class="menu-btn" id="menuBtn">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg>
+        </button>
         <button class="close-btn" id="closeBtn">
           <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         </button>
       </div>
 
       ${story.caption ? `<div class="story-caption">${escapeHtml(story.caption)}</div>` : ""}
+
+      ${!isMine ? `
+        <div class="reply-bar">
+          <input class="reply-input" type="text" id="replyInput" placeholder="উত্তর দিন..." autocomplete="off">
+          <button class="reply-send" id="replySend">
+            <svg viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          </button>
+        </div>
+      ` : ""}
 
       <div class="tap-zone left" id="tapLeft"></div>
       <div class="tap-zone right" id="tapRight"></div>
@@ -244,9 +259,120 @@
     document.getElementById("closeBtn").addEventListener("click", () => {
       window.location.href = "index.html";
     });
+    document.getElementById("menuBtn").addEventListener("click", (e) => {
+      e.stopPropagation();
+      openStoryMenu(e, group, story);
+    });
+
+    const replySend = document.getElementById("replySend");
+    const replyInput = document.getElementById("replyInput");
+    if (replySend && replyInput) {
+      replySend.addEventListener("click", () => sendReply(group, story, replyInput));
+      replyInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") sendReply(group, story, replyInput);
+      });
+    }
 
     timer = setTimeout(nextStory, 5000);
   }
+
+  async function sendReply(group, story, inputEl) {
+    const text = inputEl.value.trim();
+    if (!text) return;
+    inputEl.disabled = true;
+    try {
+      // Create/get chat with story owner
+      const chatId = await getOrCreateChat({
+        uid: group.userId,
+        name: group.userName,
+        username: group.username,
+        photoURL: group.userPhoto || ""
+      });
+      await sendMessage(chatId, `📸 স্টোরি回复: ${text}`);
+      showToast("✅ উত্তর পাঠানো হয়েছে", "ok");
+      inputEl.value = "";
+      // Open chat
+      setTimeout(() => {
+        window.location.href = `chat.html?to=${encodeURIComponent(group.username)}`;
+      }, 700);
+    } catch (e) {
+      showToast("উত্তর পাঠানো যায়নি: " + e.message, "err");
+      inputEl.disabled = false;
+    }
+  }
+
+  function openStoryMenu(e, group, story) {
+    e.stopPropagation();
+    if (timer) clearTimeout(timer);
+    const isMine = group.userId === currentUser.uid;
+
+    menuPop.innerHTML = `
+      ${isMine ? `
+        <button data-act="delete" class="danger">
+          <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-2 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L5 6"/></svg>
+          স্টোরি মুছুন
+        </button>
+      ` : `
+        <button data-act="report" class="danger">
+          <svg viewBox="0 0 24 24"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          রিপোর্ট করুন
+        </button>
+      `}
+      <button data-act="copy">
+        <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        প্রোফাইল লিংক কপি
+      </button>
+      <button data-act="profile">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21v-2a4 4 0 0 1 4-4h8a4 4 0 0 1 4 4v2"/></svg>
+        প্রোফাইল দেখুন
+      </button>
+    `;
+    menuPop.style.display = "block";
+    const rect = menuPop.getBoundingClientRect();
+    let left = e.clientX - rect.width + 10;
+    let top = e.clientY + 10;
+    if (left < 10) left = 10;
+    if (left + rect.width > window.innerWidth - 10) left = window.innerWidth - rect.width - 10;
+    if (top + rect.height > window.innerHeight - 10) top = window.innerHeight - rect.height - 10;
+    menuPop.style.left = left + "px";
+    menuPop.style.top = top + "px";
+
+    menuPop.querySelectorAll("button").forEach(b => {
+      b.onclick = async () => {
+        const act = b.dataset.act;
+        menuPop.style.display = "none";
+
+        if (act === "delete") {
+          const ok = await showConfirm("এই স্টোরিটি মুছে ফেলবেন?", { title: "স্টোরি মুছুন", okText: "মুছে ফেলুন" });
+          if (!ok) { if (timer) timer = setTimeout(nextStory, 3000); return; }
+          try {
+            await deleteStory(story.id);
+            showToast("মুছে ফেলা হয়েছে", "ok");
+            setTimeout(nextStory, 300);
+          } catch (err) { showToast(err.message, "err"); }
+        } else if (act === "report") {
+          openReportModal({
+            targetType: "user",
+            targetId: group.userId,
+            targetUsername: group.username
+          }, () => showToast("✅ রিপোর্ট পাঠানো হয়েছে", "ok"));
+          if (timer) timer = setTimeout(nextStory, 5000);
+        } else if (act === "copy") {
+          try {
+            await navigator.clipboard.writeText(location.origin + "/bondhu/user.html?u=" + group.username);
+            showToast("লিংক কপি হয়েছে", "ok");
+          } catch (err) {}
+          if (timer) timer = setTimeout(nextStory, 3000);
+        } else if (act === "profile") {
+          window.location.href = `user.html?u=${encodeURIComponent(group.username)}`;
+        }
+      };
+    });
+  }
+
+  document.addEventListener("click", (e) => {
+    if (!menuPop.contains(e.target)) menuPop.style.display = "none";
+  });
 
   function nextStory() {
     const group = allGroups[groupIdx];
