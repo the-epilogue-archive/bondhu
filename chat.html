@@ -40,78 +40,49 @@
     flex-shrink:0;
   }
   .chat-topbar-title{
-    display:flex;
-    align-items:center;
-    gap:8px;
+    display:flex;align-items:center;gap:8px;
     font-family:'Playfair Display',serif;
-    font-size:20px;
-    font-weight:800;
-    color:var(--ink);
-    letter-spacing:-.5px;
+    font-size:20px;font-weight:800;
+    color:var(--ink);letter-spacing:-.5px;
   }
   .count-badge{
-    display:inline-flex;
-    align-items:center;
-    justify-content:center;
-    min-width:22px;
-    height:22px;
-    padding:0 7px;
-    background:var(--accent);
-    color:var(--accent-text);
-    border-radius:20px;
-    font-family:'Hind Siliguri',sans-serif;
-    font-size:11px;
-    font-weight:700;
-    letter-spacing:0;
+    display:inline-flex;align-items:center;justify-content:center;
+    min-width:22px;height:22px;padding:0 7px;
+    background:var(--accent);color:var(--accent-text);
+    border-radius:20px;font-family:'Hind Siliguri',sans-serif;
+    font-size:11px;font-weight:700;
   }
   .chat-topbar-actions{display:flex;gap:6px;align-items:center}
 
   .home-btn{
-    display:inline-flex;
-    align-items:center;
-    gap:6px;
-    padding:8px 14px;
-    border-radius:20px;
-    background:var(--accent);
-    color:var(--accent-text);
+    display:inline-flex;align-items:center;gap:6px;
+    padding:8px 14px;border-radius:20px;
+    background:var(--accent);color:var(--accent-text);
     font-family:'Hind Siliguri',sans-serif;
-    font-size:12.5px;
-    font-weight:600;
-    text-decoration:none;
+    font-size:12.5px;font-weight:600;text-decoration:none;
     transition:all .3s cubic-bezier(.34,1.56,.64,1);
-    border:none;
-    cursor:pointer;
+    border:none;cursor:pointer;
   }
   .home-btn:hover{transform:translateY(-2px);box-shadow:0 6px 16px var(--accent-glow)}
   .home-btn:active{transform:translateY(0) scale(.96)}
-  .home-btn svg{
-    width:15px;height:15px;
-    stroke:currentColor;fill:none;stroke-width:2;
-    stroke-linecap:round;stroke-linejoin:round;
-  }
+  .home-btn svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 
   /* ============ CHAT LIST ============ */
   .chat-list{
-    flex:1;
-    overflow-y:auto;
-    padding:8px 0 20px;
-    scrollbar-width:thin;
+    flex:1;overflow-y:auto;
+    padding:8px 0 20px;scrollbar-width:thin;
   }
   .chat-list::-webkit-scrollbar{width:4px}
   .chat-list::-webkit-scrollbar-thumb{background:var(--rule);border-radius:2px}
 
   .chat-item{
     display:flex;align-items:center;gap:12px;
-    padding:12px;
-    border-radius:14px;
+    padding:12px;border-radius:14px;
     cursor:pointer;
     transition:all .3s cubic-bezier(.34,1.56,.64,1);
     border-bottom:1px solid var(--rule);
   }
-  .chat-item:hover{
-    background:var(--accent-soft);
-    transform:translateX(3px);
-  }
+  .chat-item:hover{background:var(--accent-soft);transform:translateX(3px)}
   .chat-item:last-child{border-bottom:none}
   .chat-item.active-chat{background:var(--accent-soft)}
 
@@ -119,12 +90,10 @@
     width:48px;height:48px;border-radius:50%;
     background:var(--ink);color:var(--paper);
     display:flex;align-items:center;justify-content:center;
-    font-weight:600;font-size:17px;
-    flex-shrink:0;overflow:hidden;
+    font-weight:600;font-size:17px;flex-shrink:0;overflow:hidden;
     background-image:linear-gradient(135deg,rgba(255,255,255,.08),transparent 60%);
   }
   .chat-avatar img{width:100%;height:100%;object-fit:cover}
-
   .chat-info{flex:1;min-width:0}
   .chat-name{
     font-family:'Playfair Display',serif;
@@ -137,10 +106,8 @@
     white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
   }
   .chat-time{
-    font-size:10px;color:var(--ink-mute);
-    font-style:italic;
-    font-family:'Playfair Display',serif;
-    flex-shrink:0;
+    font-size:10px;color:var(--ink-mute);font-style:italic;
+    font-family:'Playfair Display',serif;flex-shrink:0;
   }
 
   /* ============ CONVERSATION ============ */
@@ -151,47 +118,29 @@
   .conversation.active{display:flex}
 
   .conv-header{
-    display:flex;align-items:center;gap:10px;
-    padding:10px 4px;
-    border-bottom:1px solid var(--rule);
+    display:flex;align-items:center;gap:8px;
+    padding:10px 4px;border-bottom:1px solid var(--rule);
     flex-shrink:0;
   }
-
-  /* Prominent back button */
   .back-btn{
-    display:inline-flex;
-    align-items:center;
-    gap:6px;
-    padding:8px 14px 8px 10px;
-    border-radius:22px;
-    background:var(--paper-2);
-    border:1px solid var(--rule);
-    color:var(--ink-soft);
-    font-family:'Hind Siliguri',sans-serif;
-    font-size:13px;
-    font-weight:600;
-    cursor:pointer;
+    display:inline-flex;align-items:center;gap:5px;
+    padding:7px 12px 7px 9px;border-radius:22px;
+    background:var(--paper-2);border:1px solid var(--rule);
+    color:var(--ink-soft);font-family:'Hind Siliguri',sans-serif;
+    font-size:12.5px;font-weight:600;cursor:pointer;
     transition:all .3s cubic-bezier(.34,1.56,.64,1);
     flex-shrink:0;
   }
   .back-btn:hover{
     background:var(--accent-soft);
     border-color:var(--accent-border);
-    color:var(--accent);
-    transform:translateX(-3px);
+    color:var(--accent);transform:translateX(-3px);
   }
-  .back-btn svg{
-    width:16px;height:16px;
-    stroke:currentColor;fill:none;stroke-width:2.2;
-    stroke-linecap:round;stroke-linejoin:round;
-  }
+  .back-btn svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
 
   .conv-user{
-    display:flex;align-items:center;gap:10px;
-    flex:1;min-width:0;
-    cursor:pointer;
-    padding:4px 6px;
-    border-radius:10px;
+    display:flex;align-items:center;gap:10px;flex:1;min-width:0;
+    cursor:pointer;padding:4px 6px;border-radius:10px;
     transition:background .2s;
   }
   .conv-user:hover{background:var(--accent-soft)}
@@ -209,112 +158,96 @@
   }
 
   .icon-action{
-    width:38px;height:38px;flex-shrink:0;
-    border-radius:50%;
+    width:38px;height:38px;flex-shrink:0;border-radius:50%;
     display:flex;align-items:center;justify-content:center;
     transition:all .3s cubic-bezier(.34,1.56,.64,1);
-    color:var(--ink-mute);
-    border:none;background:transparent;cursor:pointer;
+    color:var(--ink-mute);border:none;background:transparent;cursor:pointer;
   }
   .icon-action:hover{background:var(--accent-soft);color:var(--accent);transform:translateY(-2px)}
   .icon-action svg{width:19px;height:19px;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
 
-  /* ============ MESSAGES (FIXED) ============ */
+  /* ============ MESSAGES ============ */
   .messages{
-    flex:1;
-    overflow-y:auto;
+    flex:1;overflow-y:auto;
     padding:16px 4px;
-    display:flex;
-    flex-direction:column;
-    gap:2px;
-    scrollbar-width:thin;
+    display:flex;flex-direction:column;
+    gap:3px;scrollbar-width:thin;
   }
   .messages::-webkit-scrollbar{width:4px}
   .messages::-webkit-scrollbar-thumb{background:var(--rule);border-radius:2px}
 
   .msg-row{
-    display:flex;
-    width:100%;
-    padding:2px 0;
-    animation:msgIn .25s ease forwards;
-    opacity:0;
+    display:flex;width:100%;padding:1px 0;
+    animation:msgIn .25s ease forwards;opacity:0;
   }
   @keyframes msgIn{to{opacity:1}}
   .msg-row.me{justify-content:flex-end}
   .msg-row.them{justify-content:flex-start}
 
+  .msg-bubble-wrap{
+    display:flex;flex-direction:column;
+    max-width:78%;
+    gap:3px;
+  }
+  .msg-row.me .msg-bubble-wrap{align-items:flex-end}
+  .msg-row.them .msg-bubble-wrap{align-items:flex-start}
+
   .msg{
-    display:inline-block;
-    max-width:75%;
-    padding:9px 14px;
-    border-radius:18px;
-    font-size:14px;
-    line-height:1.45;
+    padding:9px 14px;border-radius:18px;
+    font-size:14px;line-height:1.5;
     font-family:'Hind Siliguri',sans-serif;
-    word-wrap:break-word;
-    overflow-wrap:break-word;
-    white-space:pre-wrap;
-    cursor:pointer;
-    transition:transform .15s;
+    word-wrap:break-word;overflow-wrap:break-word;
+    white-space:pre-wrap;cursor:pointer;
+    transition:transform .15s,box-shadow .2s;
+    position:relative;
+    max-width:100%;
     box-sizing:border-box;
   }
-  .msg:active{transform:scale(.98)}
+  .msg:active{transform:scale(.97)}
+  .msg:hover{box-shadow:0 2px 8px rgba(0,0,0,.08)}
 
   .msg.me{
-    background:var(--accent);
-    color:var(--accent-text);
+    background:var(--accent);color:var(--accent-text);
     border-bottom-right-radius:5px;
   }
   .msg.them{
-    background:var(--paper-2);
-    color:var(--ink);
-    border:1px solid var(--rule);
-    border-bottom-left-radius:5px;
+    background:var(--paper-2);color:var(--ink);
+    border:1px solid var(--rule);border-bottom-left-radius:5px;
   }
 
-  /* Time below */
-  .msg-time{
-    font-size:10px;
-    color:var(--ink-mute);
-    font-style:italic;
-    font-family:'Playfair Display',serif;
-    padding:3px 6px 0;
-    align-self:flex-end;
+  .msg-meta{
+    display:flex;align-items:center;gap:5px;
+    font-size:10px;color:var(--ink-mute);
+    font-style:italic;font-family:'Playfair Display',serif;
+    padding:0 6px;
+  }
+  .msg-meta .checkmark{
+    font-style:normal;font-size:11px;
   }
 
   /* Reply quote */
   .msg-reply-quote{
-    padding:6px 10px;
-    margin-bottom:6px;
+    padding:6px 10px;margin-bottom:6px;
     border-left:3px solid rgba(255,255,255,.5);
-    background:rgba(0,0,0,.08);
-    border-radius:6px;
-    font-size:11.5px;
-    line-height:1.4;
+    background:rgba(0,0,0,.08);border-radius:6px;
+    font-size:11.5px;line-height:1.4;
   }
   .msg.them .msg-reply-quote{
     border-left-color:var(--accent);
     background:rgba(0,0,0,.04);
   }
   .msg-reply-quote .name{
-    font-weight:700;
-    font-family:'Playfair Display',serif;
-    display:block;
-    margin-bottom:2px;
-    opacity:.85;
+    font-weight:700;font-family:'Playfair Display',serif;
+    display:block;margin-bottom:2px;opacity:.85;
   }
 
   /* Voice bubble */
   .msg-voice{
-    display:flex;
-    align-items:center;
-    gap:10px;
-    min-width:200px;
-    padding:2px 0;
+    display:flex;align-items:center;gap:10px;
+    min-width:200px;padding:2px 0;
   }
   .voice-play{
-    width:34px;height:34px;
-    border-radius:50%;
+    width:34px;height:34px;border-radius:50%;
     background:rgba(255,255,255,.25);
     display:flex;align-items:center;justify-content:center;
     flex-shrink:0;cursor:pointer;transition:all .2s;
@@ -339,40 +272,49 @@
   }
 
   /* ============ MESSAGE MENU ============ */
+  .msg-menu-backdrop{
+    position:fixed;inset:0;background:transparent;
+    z-index:99;display:none;
+  }
+  .msg-menu-backdrop.show{display:block}
+
   .msg-menu{
     position:fixed;
     background:var(--paper-elev);
     border:1px solid var(--rule);
-    border-radius:12px;
-    box-shadow:0 12px 32px rgba(0,0,0,.25);
+    border-radius:14px;
+    box-shadow:0 12px 40px rgba(0,0,0,.28);
     padding:6px;z-index:100;
-    display:none;min-width:170px;
+    display:none;min-width:200px;
+    animation:menuIn .18s cubic-bezier(.34,1.56,.64,1);
+  }
+  @keyframes menuIn{
+    from{opacity:0;transform:scale(.9) translateY(-4px)}
+    to{opacity:1;transform:scale(1) translateY(0)}
   }
   .msg-menu.show{display:block}
   .msg-menu button{
-    width:100%;padding:10px 14px;
+    width:100%;padding:11px 14px;
     border:none;background:transparent;
-    color:var(--ink);font-family:inherit;
+    color:var(--ink);font-family:'Hind Siliguri',sans-serif;
     font-size:13px;font-weight:500;
-    display:flex;align-items:center;gap:10px;
-    cursor:pointer;border-radius:8px;
-    transition:background .2s,color .2s;
+    display:flex;align-items:center;gap:11px;
+    cursor:pointer;border-radius:9px;
+    transition:background .15s,color .15s;
     text-align:left;
   }
   .msg-menu button:hover{background:var(--accent-soft);color:var(--accent)}
   .msg-menu button.danger{color:#c62828}
   .msg-menu button.danger:hover{background:rgba(198,40,40,.1)}
-  .msg-menu button svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+  .msg-menu button svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
 
   /* Reply preview */
   .reply-preview{
-    display:none;
-    padding:8px 14px;
+    display:none;padding:8px 14px;
     background:var(--paper-2);
     border:1px solid var(--rule);
     border-left:3px solid var(--accent);
-    border-radius:10px;
-    margin-bottom:8px;
+    border-radius:10px;margin-bottom:8px;
     align-items:center;gap:10px;
   }
   .reply-preview.show{display:flex}
@@ -390,16 +332,14 @@
     width:26px;height:26px;border-radius:50%;
     border:none;background:transparent;
     color:var(--ink-mute);cursor:pointer;
-    display:flex;align-items:center;justify-content:center;
-    flex-shrink:0;
+    display:flex;align-items:center;justify-content:center;flex-shrink:0;
   }
   .reply-preview-close:hover{background:rgba(198,40,40,.1);color:#c62828}
   .reply-preview-close svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round}
 
   /* Input */
   .input-wrap{
-    flex-shrink:0;
-    padding:10px 0 12px;
+    flex-shrink:0;padding:10px 0 12px;
     border-top:1px solid var(--rule);
     background:var(--paper);
   }
@@ -407,10 +347,8 @@
   .msg-input{
     flex:1;padding:11px 16px;
     border:1px solid var(--rule);
-    border-radius:24px;
-    background:var(--paper-elev);
-    color:var(--ink);
-    font-size:14px;font-family:inherit;
+    border-radius:24px;background:var(--paper-elev);
+    color:var(--ink);font-size:14px;font-family:inherit;
     outline:none;min-width:0;
     transition:border-color .25s,box-shadow .25s;
   }
@@ -434,12 +372,10 @@
   .emoji-picker{
     position:absolute;bottom:calc(100% + 8px);left:0;
     background:var(--paper-elev);
-    border:1px solid var(--rule);
-    border-radius:16px;
+    border:1px solid var(--rule);border-radius:16px;
     box-shadow:0 12px 40px rgba(0,0,0,.25);
     width:320px;max-width:calc(100vw - 32px);
-    max-height:320px;
-    display:none;flex-direction:column;
+    max-height:320px;display:none;flex-direction:column;
     z-index:80;overflow:hidden;
   }
   .emoji-picker.show{display:flex}
@@ -506,9 +442,7 @@
     .emoji-grid{grid-template-columns:repeat(7,1fr)}
   }
 
-  /* ============================================
-     DESKTOP 2-COLUMN (900px+)
-     ============================================ */
+  /* ============ DESKTOP 2-COLUMN ============ */
   @media (min-width: 900px) {
     body { padding-bottom: 0; overflow: hidden; }
     .bottom-nav { display: none; }
@@ -525,7 +459,6 @@
       gap: 0 20px;
       overflow: hidden;
       background: var(--paper);
-      max-width: 1200px;
     }
     .chat-topbar {
       grid-column: 1 / -1;
@@ -533,7 +466,6 @@
       border-bottom: 1px solid var(--rule);
       margin-bottom: 20px;
     }
-
     .chat-list {
       display: block !important;
       background: var(--paper-elev);
@@ -543,7 +475,6 @@
       overflow-y: auto;
       height: 100%;
     }
-
     .conversation {
       display: flex !important;
       background: var(--paper-elev);
@@ -554,13 +485,11 @@
       height: 100%;
       position: relative;
     }
-
     .conversation:not(.active) .conv-header,
     .conversation:not(.active) .messages,
     .conversation:not(.active) .input-wrap {
       display: none !important;
     }
-
     .conversation:not(.active)::before {
       content: '💬 একটি চ্যাট বেছে নিন';
       position: absolute;
@@ -572,9 +501,6 @@
       font-size: 15px;
       white-space: nowrap;
     }
-
-    /* Back button on desktop — just hides chat */
-    .back-btn { display: inline-flex; }
     .emoji-picker { width: 360px; max-height: 360px; }
     .emoji-grid { grid-template-columns: repeat(9, 1fr); }
   }
@@ -673,6 +599,7 @@
 
 </div>
 
+<div class="msg-menu-backdrop" id="msgMenuBackdrop"></div>
 <div class="msg-menu" id="msgMenu"></div>
 
 <div class="call-modal" id="callModal" style="position:fixed;inset:0;background:rgba(0,0,0,.5);backdrop-filter:blur(6px);z-index:200;display:none;align-items:center;justify-content:center;padding:20px">
@@ -681,11 +608,11 @@
     <div class="call-name" id="callName" style="font-family:'Playfair Display',serif;font-size:20px;font-weight:700;color:var(--ink);margin-bottom:6px">—</div>
     <div style="font-size:13px;color:var(--ink-mute);font-style:italic;font-family:'Playfair Display',serif;margin-bottom:24px">কল শুরু করুন</div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">
-      <button class="call-opt" id="callVoice" style="padding:18px 12px;border-radius:14px;border:1px solid var(--rule);background:var(--paper);cursor:pointer;font-family:inherit;display:flex;flex-direction:column;align-items:center;gap:8px">
+      <button id="callVoice" style="padding:18px 12px;border-radius:14px;border:1px solid var(--rule);background:var(--paper);cursor:pointer;font-family:inherit;display:flex;flex-direction:column;align-items:center;gap:8px">
         <svg viewBox="0 0 24 24" style="width:28px;height:28px;stroke:var(--accent);fill:none;stroke-width:1.8"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
         <span style="font-size:12.5px;font-weight:600;color:var(--ink)">ভয়েস কল</span>
       </button>
-      <button class="call-opt" id="callVideo" style="padding:18px 12px;border-radius:14px;border:1px solid var(--rule);background:var(--paper);cursor:pointer;font-family:inherit;display:flex;flex-direction:column;align-items:center;gap:8px">
+      <button id="callVideo" style="padding:18px 12px;border-radius:14px;border:1px solid var(--rule);background:var(--paper);cursor:pointer;font-family:inherit;display:flex;flex-direction:column;align-items:center;gap:8px">
         <svg viewBox="0 0 24 24" style="width:28px;height:28px;stroke:var(--accent);fill:none;stroke-width:1.8"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
         <span style="font-size:12.5px;font-weight:600;color:var(--ink)">ভিডিও কল</span>
       </button>
@@ -706,7 +633,8 @@
   import { requireAuth } from "./js/auth.js";
   import {
     getOrCreateChat, sendMessage, listenMessages,
-    listenMyChats, getOtherMember, sendVoiceMessage, deleteMessage
+    listenMyChats, getOtherMember, sendVoiceMessage,
+    deleteForMe, unsendMessage
   } from "./js/chat.js";
   import { showToast, showConfirm } from "./js/toast.js";
 
@@ -731,6 +659,7 @@
   const emojiGrid = document.getElementById("emojiGrid");
   const voiceBtn = document.getElementById("voiceBtn");
   const msgMenu = document.getElementById("msgMenu");
+  const msgMenuBackdrop = document.getElementById("msgMenuBackdrop");
   const callModal = document.getElementById("callModal");
   const replyPreview = document.getElementById("replyPreview");
   const replyName = document.getElementById("replyName");
@@ -878,9 +807,12 @@
       </div>`;
       return;
     }
-    messages.innerHTML = msgs.map(m => {
+    messages.innerHTML = msgs.map((m, idx) => {
       const isMe = m.from === currentUser.uid;
       const time = m.createdAt?.seconds ? shortTime(m.createdAt.seconds * 1000) : "";
+      const prevMsg = msgs[idx - 1];
+      const showTime = !prevMsg || (m.createdAt?.seconds && prevMsg.createdAt?.seconds &&
+                       (m.createdAt.seconds - prevMsg.createdAt.seconds) > 300); // 5 min gap
 
       let inner = "";
       if (m.replyTo) {
@@ -902,8 +834,11 @@
       }
 
       return `
+        ${showTime ? `<div style="text-align:center;font-size:10.5px;color:var(--ink-mute);font-style:italic;font-family:'Playfair Display',serif;padding:6px 0">${time}</div>` : ""}
         <div class="msg-row ${isMe ? "me" : "them"}">
-          <div class="msg ${isMe ? "me" : "them"}" data-id="${m.id}">${inner}</div>
+          <div class="msg-bubble-wrap">
+            <div class="msg ${isMe ? "me" : "them"}" data-id="${m.id}">${inner}</div>
+          </div>
         </div>`;
     }).join("");
 
@@ -957,15 +892,40 @@
     messages.scrollTop = messages.scrollHeight;
   }
 
+  // ==========================================
+  // Message menu — Delete for me + Unsend
+  // ==========================================
   function openMsgMenu(x, y, msg) {
     const isMe = msg.from === currentUser.uid;
     const isVoice = msg.type === "voice";
+
     msgMenu.innerHTML = `
-      <button data-action="reply"><svg viewBox="0 0 24 24"><polyline points="9 17 4 12 9 7"/><path d="M20 18v-2a4 4 0 0 0-4-4H4"/></svg> উত্তর দিন</button>
-      ${!isVoice ? `<button data-action="copy"><svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> কপি করুন</button>` : ""}
-      ${isMe ? `<button data-action="delete" class="danger"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-2 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L5 6"/></svg> মুছে ফেলুন</button>` : ""}
+      <button data-action="reply">
+        <svg viewBox="0 0 24 24"><polyline points="9 17 4 12 9 7"/><path d="M20 18v-2a4 4 0 0 0-4-4H4"/></svg>
+        উত্তর দিন
+      </button>
+      ${!isVoice ? `
+        <button data-action="copy">
+          <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          কপি করুন
+        </button>
+      ` : ""}
+      <button data-action="delete-me" class="danger">
+        <svg viewBox="0 0 24 24"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><line x1="10" y1="11" x2="10" y2="17"/></svg>
+        শুধু আমার জন্য মুছুন
+      </button>
+      ${isMe ? `
+        <button data-action="unsend" class="danger">
+          <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-2 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L5 6"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+          সবার থেকে মুছুন (Unsend)
+        </button>
+      ` : ""}
     `;
+
+    msgMenuBackdrop.classList.add("show");
     msgMenu.classList.add("show");
+
+    // Position
     const rect = msgMenu.getBoundingClientRect();
     let left = x, top = y;
     if (left + rect.width > window.innerWidth - 10) left = window.innerWidth - rect.width - 10;
@@ -974,26 +934,59 @@
     if (top < 10) top = 10;
     msgMenu.style.left = left + "px";
     msgMenu.style.top = top + "px";
+
     msgMenu.querySelectorAll("button").forEach(btn => {
       btn.onclick = async () => {
         const action = btn.dataset.action;
-        msgMenu.classList.remove("show");
-        if (action === "reply") setReplyTarget(msg);
-        else if (action === "copy") {
-          try { await navigator.clipboard.writeText(msg.text || ""); showToast("কপি হয়েছে", "ok"); }
-          catch (e) { showToast("কপি ব্যর্থ", "err"); }
-        } else if (action === "delete") {
-          const ok = await showConfirm("এই বার্তাটি মুছে ফেলবেন?", { title: "বার্তা মুছুন", okText: "মুছে ফেলুন" });
+        closeMsgMenu();
+
+        if (action === "reply") {
+          setReplyTarget(msg);
+        } else if (action === "copy") {
+          try {
+            await navigator.clipboard.writeText(msg.text || "");
+            showToast("কপি হয়েছে", "ok");
+          } catch (e) { showToast("কপি ব্যর্থ", "err"); }
+        } else if (action === "delete-me") {
+          const ok = await showConfirm(
+            "শুধু আপনার কাছ থেকে এই বার্তাটি মুছে যাবে। অন্য কারো কাছে থাকবে।",
+            { title: "শুধু আমার জন্য মুছুন", okText: "মুছে ফেলুন", cancelText: "বাতিল" }
+          );
           if (!ok) return;
-          try { await deleteMessage(activeChatId, msg.id); showToast("মুছে ফেলা হয়েছে", "ok"); }
-          catch (e) { showToast("❌ " + e.message, "err"); }
+          try {
+            await deleteForMe(activeChatId, msg.id);
+            showToast("✅ আপনার কাছ থেকে মুছে ফেলা হয়েছে", "ok");
+            // Real-time listener e auto-filter hoye jabe
+          } catch (e) {
+            showToast("❌ " + e.message, "err", 4000);
+          }
+        } else if (action === "unsend") {
+          const ok = await showConfirm(
+            "সবার কাছ থেকে এই বার্তাটি মুছে যাবে। এই কাজ ফিরিয়ে আনা যাবে না।",
+            { title: "সবার থেকে মুছুন", okText: "Unsend করুন", cancelText: "বাতিল" }
+          );
+          if (!ok) return;
+          try {
+            await unsendMessage(activeChatId, msg.id);
+            showToast("✅ সবাই থেকে মুছে ফেলা হয়েছে", "ok");
+          } catch (e) {
+            showToast("❌ " + e.message, "err", 4000);
+          }
         }
       };
     });
   }
 
-  document.addEventListener("click", (e) => { if (!msgMenu.contains(e.target)) msgMenu.classList.remove("show"); });
-  messages.addEventListener("scroll", () => msgMenu.classList.remove("show"));
+  function closeMsgMenu() {
+    msgMenu.classList.remove("show");
+    msgMenuBackdrop.classList.remove("show");
+  }
+
+  msgMenuBackdrop.addEventListener("click", closeMsgMenu);
+  document.addEventListener("click", (e) => {
+    if (!msgMenu.contains(e.target) && !msgMenuBackdrop.contains(e.target)) closeMsgMenu();
+  });
+  messages.addEventListener("scroll", closeMsgMenu);
 
   function setReplyTarget(msg) {
     replyTarget = {
@@ -1020,8 +1013,12 @@
     const reply = replyTarget;
     replyTarget = null;
     replyPreview.classList.remove("show");
-    try { await sendMessage(activeChatId, text, reply); }
-    catch (e) { msgInput.value = text; showToast("পাঠানো যায়নি: " + e.message, "err"); }
+    try {
+      await sendMessage(activeChatId, text, reply);
+    } catch (e) {
+      msgInput.value = text;
+      showToast("পাঠানো যায়নি: " + e.message, "err");
+    }
     sendBtn.disabled = false;
     msgInput.focus();
   }
@@ -1038,7 +1035,6 @@
     chatList.style.display = "block";
   });
 
-  // Call modal
   document.getElementById("voiceCallBtn").addEventListener("click", () => {
     if (!currentOtherUser) return;
     const initial = (currentOtherUser.name || "?")[0].toUpperCase();
@@ -1051,7 +1047,6 @@
   document.getElementById("callVoice").addEventListener("click", () => { callModal.style.display = "none"; showToast("🎤 ভয়েস কল শীঘ্রই আসছে", "info"); });
   document.getElementById("callVideo").addEventListener("click", () => { callModal.style.display = "none"; showToast("📹 ভিডিও কল শীঘ্রই আসছে", "info"); });
 
-  // Voice recording
   let mediaRecorder = null;
   let audioChunks = [];
   let isRecording = false;
@@ -1064,7 +1059,6 @@
     if (isRecording) return;
     await startRecording();
   });
-
   document.getElementById("voiceSendBtn").addEventListener("click", () => { if (isRecording && mediaRecorder) mediaRecorder.stop(); });
   document.getElementById("recordingCancel").addEventListener("click", () => {
     if (isRecording && mediaRecorder) {
@@ -1094,10 +1088,9 @@
         if (audioChunks.length === 0) return;
         const blob = new Blob(audioChunks, { type: "audio/webm" });
         if (blob.size < 1000) return;
-
         const tempDiv = document.createElement("div");
         tempDiv.className = "msg-row me";
-        tempDiv.innerHTML = `<div class="msg me">
+        tempDiv.innerHTML = `<div class="msg-bubble-wrap"><div class="msg me">
           <div class="msg-voice">
             <button class="voice-play"><svg viewBox="0 0 24 24"><polygon points="6 4 20 12 6 20"/></svg></button>
             <div class="voice-bars">${Array.from({length: 24}).map((_, i) =>
@@ -1105,7 +1098,7 @@
             ).join("")}</div>
             <div class="voice-duration">আপলোড...</div>
           </div>
-        </div>`;
+        </div></div>`;
         messages.appendChild(tempDiv);
         messages.scrollTop = messages.scrollHeight;
         try {
