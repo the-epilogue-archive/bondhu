@@ -24,7 +24,6 @@
     overflow:hidden;background:var(--paper);
   }
 
-  /* ============ TOPBAR ============ */
   .chat-topbar{
     display:flex;align-items:center;justify-content:space-between;
     padding:14px 4px;border-bottom:1px solid var(--rule);
@@ -73,7 +72,6 @@
   .home-btn:hover{transform:translateY(-2px);box-shadow:0 6px 16px var(--accent-glow)}
   .home-btn svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 
-  /* ============ CHAT LIST ============ */
   .chat-list{
     flex:1;overflow-y:auto;
     padding:8px 0 20px;scrollbar-width:thin;
@@ -127,7 +125,6 @@
     font-family:'Playfair Display',serif;flex-shrink:0;
   }
 
-  /* ============ CONVERSATION ============ */
   .conversation{
     display:none;flex-direction:column;
     flex:1;overflow:hidden;min-height:0;
@@ -190,7 +187,6 @@
   .icon-action:hover{background:var(--accent-soft);color:var(--accent);transform:translateY(-2px)}
   .icon-action svg{width:19px;height:19px;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
 
-  /* ============ MESSAGES ============ */
   .messages{
     flex:1;overflow-y:auto;
     padding:16px 4px;display:flex;flex-direction:column;
@@ -241,12 +237,6 @@
     border:1px solid var(--rule);border-bottom-left-radius:5px;
   }
 
-  .msg-meta{
-    font-size:10px;color:var(--ink-mute);
-    font-style:italic;font-family:'Playfair Display',serif;
-    padding:0 6px;
-  }
-
   .msg-reply-quote{
     padding:6px 10px;margin-bottom:6px;
     border-left:3px solid rgba(255,255,255,.5);
@@ -290,7 +280,6 @@
     opacity:.85;min-width:32px;text-align:right;
   }
 
-  /* ============ MESSAGE MENU ============ */
   .msg-menu-backdrop{
     position:fixed;inset:0;background:transparent;
     z-index:99;display:none;
@@ -347,7 +336,6 @@
   .reply-preview-close:hover{background:rgba(198,40,40,.1);color:#c62828}
   .reply-preview-close svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round}
 
-  /* ============ INPUT ============ */
   .input-wrap{
     flex-shrink:0;padding:10px 0 12px;
     border-top:1px solid var(--rule);background:var(--paper);
@@ -444,22 +432,16 @@
     .emoji-grid{grid-template-columns:repeat(7,1fr)}
   }
 
-  /* ============================================
-     CALL UI
-     ============================================ */
+  /* CALL UI */
   .call-overlay{
     position:fixed;inset:0;z-index:500;
     background:linear-gradient(180deg,#0a1628 0%,#0f1e30 100%);
-    display:none;
-    flex-direction:column;
-    color:#fff;
+    display:none;flex-direction:column;color:#fff;
     font-family:'Hind Siliguri',sans-serif;
-    opacity:0;
-    transition:opacity .3s;
+    opacity:0;transition:opacity .3s;
   }
   .call-overlay.show{display:flex;opacity:1}
 
-  /* Incoming */
   .call-incoming{
     flex:1;display:flex;flex-direction:column;
     align-items:center;justify-content:center;
@@ -471,11 +453,9 @@
     display:flex;align-items:center;justify-content:center;
     font-family:'Playfair Display',serif;
     font-size:48px;font-weight:700;
-    margin-bottom:24px;
-    overflow:hidden;
+    margin-bottom:24px;overflow:hidden;
     box-shadow:0 20px 60px rgba(124,179,66,.4);
-    animation:callPulse 1.8s infinite;
-    position:relative;
+    animation:callPulse 1.8s infinite;position:relative;
   }
   @keyframes callPulse{
     0%,100%{box-shadow:0 20px 60px rgba(124,179,66,.4),0 0 0 0 rgba(124,179,66,.6)}
@@ -487,8 +467,7 @@
     font-size:26px;font-weight:700;margin-bottom:8px;
   }
   .call-incoming-type{
-    font-size:14px;opacity:.7;margin-bottom:40px;
-    letter-spacing:.5px;
+    font-size:14px;opacity:.7;margin-bottom:40px;letter-spacing:.5px;
   }
   .call-incoming-actions{display:flex;gap:40px}
   .call-btn-circle{
@@ -503,27 +482,22 @@
   .call-btn-reject{background:#dc2626;color:#fff}
   .call-btn-accept{background:#22c55e;color:#fff;animation:callPulse 1.8s infinite}
 
-  /* Active call */
   .call-active{
     flex:1;position:relative;display:flex;flex-direction:column;
     background:#000;overflow:hidden;
   }
   .call-video-container{
     flex:1;position:relative;background:#000;
-    display:flex;align-items:center;justify-content:center;
-    overflow:hidden;
+    display:flex;align-items:center;justify-content:center;overflow:hidden;
   }
   .call-remote-video{
-    width:100%;height:100%;object-fit:cover;
-    background:#000;
+    width:100%;height:100%;object-fit:cover;background:#000;
   }
   .call-local-video{
     position:absolute;top:80px;right:16px;
-    width:110px;height:150px;
-    border-radius:14px;object-fit:cover;
+    width:110px;height:150px;border-radius:14px;object-fit:cover;
     background:#111;border:2px solid rgba(255,255,255,.2);
-    z-index:5;
-    box-shadow:0 8px 24px rgba(0,0,0,.5);
+    z-index:5;box-shadow:0 8px 24px rgba(0,0,0,.5);
     transform:scaleX(-1);
   }
   .call-audio-only{
@@ -537,10 +511,8 @@
     background:linear-gradient(135deg,var(--accent),var(--accent-2));
     display:flex;align-items:center;justify-content:center;
     font-family:'Playfair Display',serif;
-    font-size:56px;font-weight:700;
-    overflow:hidden;
-    margin-bottom:24px;
-    box-shadow:0 20px 60px rgba(124,179,66,.3);
+    font-size:56px;font-weight:700;overflow:hidden;
+    margin-bottom:24px;box-shadow:0 20px 60px rgba(124,179,66,.3);
   }
   .call-audio-avatar img{width:100%;height:100%;object-fit:cover}
   .call-audio-name{
@@ -550,10 +522,7 @@
   .call-status{
     font-size:14px;opacity:.75;letter-spacing:.3px;
   }
-  .call-status .dot{
-    display:inline-block;
-    animation:dotBlink 1.4s infinite;
-  }
+  .call-status .dot{display:inline-block;animation:dotBlink 1.4s infinite}
   .call-status .dot:nth-child(2){animation-delay:.2s}
   .call-status .dot:nth-child(3){animation-delay:.4s}
   @keyframes dotBlink{0%,60%,100%{opacity:.3}30%{opacity:1}}
@@ -567,8 +536,7 @@
     position:absolute;top:0;left:0;right:0;
     padding:20px 20px 40px;
     background:linear-gradient(180deg,rgba(0,0,0,.7),transparent);
-    z-index:4;
-    display:flex;justify-content:space-between;align-items:flex-start;
+    z-index:4;display:flex;justify-content:space-between;align-items:flex-start;
   }
   .call-top-info{color:#fff}
   .call-top-name{
@@ -581,8 +549,7 @@
     position:absolute;bottom:0;left:0;right:0;
     padding:30px 20px 50px;
     background:linear-gradient(0deg,rgba(0,0,0,.85),transparent);
-    z-index:4;
-    display:flex;justify-content:center;gap:20px;
+    z-index:4;display:flex;justify-content:center;gap:20px;
   }
   .call-ctrl{
     width:60px;height:60px;border-radius:50%;
@@ -601,7 +568,6 @@
   .call-ctrl.end:hover{background:#b91c1c}
   .call-ctrl svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 
-  /* Desktop 2-col */
   @media (min-width: 900px) {
     body { padding-bottom: 0; overflow: hidden; }
     .bottom-nav { display: none; }
@@ -751,25 +717,21 @@
 <div class="msg-menu-backdrop" id="msgMenuBackdrop"></div>
 <div class="msg-menu" id="msgMenu"></div>
 
-<!-- ============ CALL OVERLAY ============ -->
 <div class="call-overlay" id="callOverlay">
-
-  <!-- INCOMING -->
   <div class="call-incoming" id="callIncoming" style="display:none">
     <div class="call-incoming-avatar" id="incomingAvatar">?</div>
     <div class="call-incoming-name" id="incomingName">—</div>
     <div class="call-incoming-type" id="incomingType">ইনকামিং কল...</div>
     <div class="call-incoming-actions">
-      <button class="call-btn-circle call-btn-reject" id="rejectBtn" title="প্রত্যাখ্যান">
+      <button class="call-btn-circle call-btn-reject" id="rejectBtn">
         <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
-      <button class="call-btn-circle call-btn-accept" id="acceptBtn" title="গ্রহণ">
+      <button class="call-btn-circle call-btn-accept" id="acceptBtn">
         <svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
       </button>
     </div>
   </div>
 
-  <!-- ACTIVE -->
   <div class="call-active" id="callActive" style="display:none">
     <div class="call-video-container" id="callVideoContainer">
       <video class="call-remote-video" id="remoteVideo" autoplay playsinline></video>
@@ -793,18 +755,17 @@
     </div>
 
     <div class="call-controls">
-      <button class="call-ctrl" id="muteBtn" title="মিউট">
+      <button class="call-ctrl" id="muteBtn">
         <svg viewBox="0 0 24 24"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
       </button>
-      <button class="call-ctrl" id="videoToggleBtn" title="ভিডিও">
+      <button class="call-ctrl" id="videoToggleBtn">
         <svg viewBox="0 0 24 24"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
       </button>
-      <button class="call-ctrl end" id="endCallBtn" title="কল শেষ">
+      <button class="call-ctrl end" id="endCallBtn">
         <svg viewBox="0 0 24 24" style="transform:rotate(135deg)"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
       </button>
     </div>
   </div>
-
 </div>
 
 <nav class="bottom-nav">
@@ -828,6 +789,9 @@
     toggleMute, toggleVideo, cleanupCall, getLocalStream
   } from "./js/call.js";
   import { showToast, showConfirm } from "./js/toast.js";
+  import {
+    startNotifications, enableAudioOnFirstInteraction, playMessageSound
+  } from "./js/notify.js";
 
   let currentUser = null;
   let activeChatId = null;
@@ -844,6 +808,10 @@
   let isVideoOff = false;
   let callTimerInterval = null;
   let callStartTime = 0;
+
+  // For message sound
+  let lastSeenChatTimes = {};
+  let chatListenerStarted = false;
 
   const $ = (id) => document.getElementById(id);
 
@@ -894,20 +862,53 @@
     }
   });
 
+  enableAudioOnFirstInteraction();
+
   requireAuth(async (user) => {
     currentUser = user;
     const params = new URLSearchParams(window.location.search);
     const toUsername = params.get("to");
     const groupId = params.get("g");
 
+    // Notifications (likes/comments/follows)
+    startNotifications(user, { suppressSound: false });
+
     listenMyChats(user.uid, (chats) => {
       currentChats = chats;
+
+      // 🔊 New message sound detection
+      if (chatListenerStarted) {
+        chats.forEach(chat => {
+          const t = chat.updatedAt?.seconds || 0;
+          const prev = lastSeenChatTimes[chat.id] || 0;
+
+          if (t > prev && prev > 0) {
+            if (chat.lastSenderId && chat.lastSenderId !== user.uid) {
+              if (chat.id !== activeChatId) {
+                playMessageSound();
+                const preview = chat.lastMessage || "নতুন বার্তা";
+                const name = chat.isGroup
+                  ? (chat.name || "গ্রুপ")
+                  : (chat.memberData?.[chat.lastSenderId]?.name || "কেউ");
+                showToast(`💬 ${name}: ${preview.slice(0, 40)}`, "info", 3500);
+              }
+            }
+          }
+          lastSeenChatTimes[chat.id] = t;
+        });
+      } else {
+        chats.forEach(chat => {
+          lastSeenChatTimes[chat.id] = chat.updatedAt?.seconds || 0;
+        });
+        chatListenerStarted = true;
+      }
+
       renderChatList(chats);
     });
 
-    // Listen for incoming calls
+    // Incoming calls
     unsubIncoming = listenIncomingCalls(user.uid, (callId, call) => {
-      if (document.getElementById("callOverlay").classList.contains("show")) return;
+      if ($("callOverlay").classList.contains("show")) return;
       showIncomingCall(callId, call);
     });
 
@@ -994,7 +995,6 @@
     $("conversation").dataset.chatId = chat.id;
     $("conversation").dataset.isGroup = display.isGroup ? "1" : "0";
 
-    // Hide call buttons for group
     if (display.isGroup) {
       $("voiceCallBtn").style.display = "none";
       $("videoCallBtn").style.display = "none";
@@ -1227,9 +1227,6 @@
     }
   });
 
-  // ==========================================
-  // GROUP INFO
-  // ==========================================
   function showGroupInfo() {
     if (!currentChat) return;
     const isAdmin = (currentChat.admins || []).includes(currentUser.uid);
@@ -1310,12 +1307,8 @@
     });
   }
 
-  // ==========================================
   // CALL SYSTEM
-  // ==========================================
-  function showCallOverlay() {
-    $("callOverlay").classList.add("show");
-  }
+  function showCallOverlay() { $("callOverlay").classList.add("show"); }
   function hideCallOverlay() {
     $("callOverlay").classList.remove("show");
     $("callIncoming").style.display = "none";
@@ -1324,7 +1317,6 @@
     callTimerInterval = null;
   }
 
-  // Start call (from chat header buttons)
   async function initiateCall(type) {
     if (!currentDisplay || currentDisplay.isGroup) {
       showToast("গ্রুপ কল শীঘ্রই আসছে", "info");
@@ -1343,39 +1335,23 @@
     try {
       await startCall(currentDisplay.uid, type, {
         onRemoteStream: (stream) => {
-          const remoteVideo = $("remoteVideo");
-          remoteVideo.srcObject = stream;
-          remoteVideo.play().catch(() => {});
-          if (type === "voice") {
-            $("callStatus").innerHTML = "সংযুক্ত";
-            if (!callTimerInterval) startCallTimer();
-          } else {
-            if (!callTimerInterval) startCallTimer();
-          }
+          $("remoteVideo").srcObject = stream;
+          $("remoteVideo").play().catch(() => {});
+          $("callStatus").innerHTML = "সংযুক্ত";
+          if (!callTimerInterval) startCallTimer();
         },
         onICEConnectionChange: (state) => {
-          if (state === "connected") {
-            $("callStatus").innerHTML = "সংযুক্ত";
-          }
+          if (state === "connected") $("callStatus").innerHTML = "সংযুক্ত";
         },
-        onEnded: () => {
-          showToast("কল শেষ হয়েছে", "info");
-          hideCallOverlay();
-        },
-        onError: (e) => {
-          showToast("কল ব্যর্থ: " + e.message, "err");
-          hideCallOverlay();
-        }
+        onEnded: () => { showToast("কল শেষ হয়েছে", "info"); hideCallOverlay(); },
+        onError: (e) => { showToast("কল ব্যর্থ: " + e.message, "err"); hideCallOverlay(); }
       });
 
-      // Local video
       const localStream = getLocalStream();
       if (localStream) {
         $("localVideo").srcObject = localStream;
         $("localVideo").play().catch(() => {});
-        if (type === "voice") {
-          $("localVideo").style.display = "none";
-        }
+        if (type === "voice") $("localVideo").style.display = "none";
       }
     } catch (e) {
       showToast("কল শুরু করা যায়নি: " + e.message, "err");
@@ -1387,7 +1363,6 @@
     const initial = (display.name || "?")[0].toUpperCase();
     $("activeCallName").textContent = display.name;
     $("activeCallType").textContent = type === "video" ? "ভিডিও কল" : "ভয়েস কল";
-
     $("activeAudioAvatar").innerHTML = display.photoURL ? `<img src="${display.photoURL}">` : initial;
     $("activeAudioName").textContent = display.name;
     $("callStatus").innerHTML = statusText === "সংযুক্ত" ? "সংযুক্ত" : `<span class="dot">●</span> <span class="dot">●</span> <span class="dot">●</span>`;
@@ -1414,7 +1389,6 @@
     }, 1000);
   }
 
-  // Listen for incoming
   function showIncomingCall(callId, call) {
     showCallOverlay();
     $("callIncoming").style.display = "flex";
@@ -1425,12 +1399,10 @@
     $("incomingName").textContent = call.callerName || "Unknown";
     $("incomingType").textContent = call.type === "video" ? "ভিডিও কল আসছে..." : "ভয়েস কল আসছে...";
 
-    // Accept
     $("acceptBtn").onclick = async () => {
       try {
         $("callIncoming").style.display = "none";
         $("callActive").style.display = "flex";
-
         const display = { name: call.callerName || "Unknown", photoURL: "", uid: call.callerId };
         showActiveCallUI(display, call.type, "সংযুক্ত হচ্ছে...");
 
@@ -1444,14 +1416,8 @@
           onICEConnectionChange: (state) => {
             if (state === "connected") $("callStatus").innerHTML = "সংযুক্ত";
           },
-          onEnded: () => {
-            showToast("কল শেষ হয়েছে", "info");
-            hideCallOverlay();
-          },
-          onError: (e) => {
-            showToast("কল ব্যর্থ: " + e.message, "err");
-            hideCallOverlay();
-          }
+          onEnded: () => { showToast("কল শেষ হয়েছে", "info"); hideCallOverlay(); },
+          onError: (e) => { showToast("কল ব্যর্থ: " + e.message, "err"); hideCallOverlay(); }
         });
 
         const localStream = getLocalStream();
@@ -1466,14 +1432,12 @@
       }
     };
 
-    // Reject
     $("rejectBtn").onclick = async () => {
       await rejectCall(callId);
       hideCallOverlay();
     };
   }
 
-  // Control buttons
   $("muteBtn").addEventListener("click", () => {
     isMuted = toggleMute();
     $("muteBtn").classList.toggle("off", isMuted);
@@ -1495,7 +1459,6 @@
   $("voiceCallBtn").addEventListener("click", () => initiateCall("voice"));
   $("videoCallBtn").addEventListener("click", () => initiateCall("video"));
 
-  // Cleanup on page leave
   window.addEventListener("beforeunload", () => {
     cleanupCall();
     if (unsubIncoming) unsubIncoming();
