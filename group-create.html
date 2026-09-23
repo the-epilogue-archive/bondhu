@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="bn" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#f5f0e2">
+<title>বন্ধু — নতুন গ্রুপ</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" href="assets/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,500;0,600;0,700;0,800;1,500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/app.css">
+<script src="js/theme.js"></script>
+<style>
+  .group-photo-pick{
+    display:flex;flex-direction:column;align-items:center;
+    margin-bottom:22px;
+  }
+  .group-photo{
+    width:100px;height:100px;border-radius:50%;
+    background:var(--accent-soft);
+    border:2px dashed var(--accent-border);
+    display:flex;align-items:center;justify-content:center;
+    cursor:pointer;
+    transition:all .3s cubic-bezier(.34,1.56,.64,1);
+    overflow:hidden;
+    position:relative;
+  }
+  .group-photo:hover{
+    transform:translateY(-3px);
+    background:var(--accent-soft-hover);
+    border-color:var(--accent);
+  }
+  .group-photo img{width:100%;height:100%;object-fit:cover}
+  .group-photo svg{
+    width:36px;height:36px;
+    stroke:var(--accent);fill:none;stroke-width:1.6;
+    stroke-linecap:round;stroke-linejoin:round;
+  }
+  .group-photo-hint{
+    font-size:11.5px;color:var(--ink-mute);
+    font-style:italic;font-family:'Playfair Display',serif;
+    margin-top:8px;
+  }
+
+  .selected-chips{
+    display:flex;flex-wrap:wrap;gap:8px;
+    margin-bottom:14px;
+  }
+  .chip{
+    display:inline-flex;align-items:center;gap:6px;
+    padding:5px 6px 5px 4px;
+    background:var(--accent-soft);
+    color:var(--accent);
+    border-radius:20px;
+    font-size:12px;
+    font-weight:600;
+    font-family:'Hind Siliguri',sans-serif;
+  }
+  .chip-av{
+    width:22px;height:22px;border-radius:50%;
+    background:var(--accent);color:var(--accent-text);
+    display:flex;align-items:center;justify-content:center;
+    font-size:10px;font-weight:700;
+    overflow:hidden;flex-shrink:0;
+  }
+  .chip-av img{width:100%;height:100%;object-fit:cover}
+  .chip-x{
+    width:18px;height:18px;border-radius:50%;
+    background:rgba(45,90,61,.2);
+    display:flex;align-items:center;justify-content:center;
+    cursor:pointer;border:none;padding:0;
+    color:var(--accent);
+    transition:background .2s;
+  }
+  .chip-x:hover{background:rgba(198,40,40,.3);color:#c62828}
+  .chip-x svg{width:11px;height:11px;stroke:currentColor;fill:none;stroke-width:2.5;stroke-linecap:round}
+
+  .user-pick-list{
+    display:flex;flex-direction:column;
+    max-height:360px;overflow-y:auto;
+    border-radius:12px;
+    border:1px solid var(--rule);
+    background:var(--paper-elev);
+  }
+  .user-pick{
+    display:flex;align-items:center;gap:12px;
+    padding:12px 14px;
+    cursor:pointer;
+    border-bottom:1px solid var(--rule);
+    transition:background .2s;
+  }
+  .user-pick:last-child{border-bottom:none}
+  .user-pick:hover{background:var(--accent-soft)}
+  .user-pick.selected{background:var(--accent-soft)}
+  .user-pick input{
+    accent-color:var(--accent);cursor:pointer;
+    width:18px;height:18px;
+  }
+  .pick-av{
+    width:40px;height:40px;border-radius:50%;
+    background:var(--accent);color:var(--accent-text);
+    display:flex;align-items:center;justify-content:center;
+    font-weight:600;font-size:15px;
+    overflow:hidden;flex-shrink:0;
+  }
+  .pick-av img{width:100%;height:100%;object-fit:cover}
+  .pick-info{flex:1;min-width:0}
+  .pick-name{
+    font-family:'Playfair Display',serif;
+    font-size:14.5px;font-weight:700;color:var(--ink);
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+    margin-bottom:2px;
+  }
+  .pick-username{
+    font-size:12px;color:var(--ink-mute);
+    font-style:italic;font-family:'Playfair Display',serif;
+  }
+
+  .search-mini{
+    position:relative;margin-bottom:12px;
+  }
+  .search-mini input{
+    width:100%;padding:11px 14px 11px 40px;
+    border:1px solid var(--rule);
+    border-radius:22px;
+    background:var(--paper-elev);
+    color:var(--ink);font-family:inherit;font-size:14px;
+    outline:none;
+    box-sizing:border-box;
+    transition:border-color .25s,box-shadow .25s;
+  }
+  .search-mini input:focus{
+    border-color:var(--accent);
+    box-shadow:0 0 0 3px var(--accent-soft);
+  }
+  .search-mini svg{
+    position:absolute;left:14px;top:50%;
+    transform:translateY(-50%);
+    width:18px;height:18px;
+    stroke:var(--ink-mute);fill:none;stroke-width:1.8;
+    pointer-events:none;
+  }
+</style>
+</head>
+<body>
+
+<div class="page">
+
+  <nav class="topbar">
+    <div class="topbar-brand" style="font-size:18px;display:flex;align-items:center;gap:10px">
+      <button class="icon-btn" onclick="history.back()" style="width:32px;height:32px">
+        <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+      নতুন গ্রুপ
+    </div>
+    <div class="topbar-actions">
+      <button class="theme-toggle" onclick="toggleBondhuTheme()" aria-label="Theme">
+        <svg class="icon-moon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        <svg class="icon-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+      </button>
+    </div>
+  </nav>
+
+  <div style="padding:20px 0 18px">
+
+    <div class="group-photo-pick">
+      <div class="group-photo" id="photoPick">
+        <img id="photoPreview" style="display:none">
+        <svg id="photoIcon" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      </div>
+      <div class="group-photo-hint">গ্রুপের ছবি (ঐচ্ছিক)</div>
+      <input type="file" id="photoInput" accept="image/*" style="display:none">
+    </div>
+
+    <div class="field">
+      <label class="field-label">গ্রুপের নাম</label>
+      <input class="input" type="text" id="nameInput" placeholder="যেমন: ক্লাস ফ্রেন্ডস" maxlength="40" autocomplete="off">
+    </div>
+
+    <div class="field">
+      <label class="field-label">সদস্য নির্বাচন <span id="memberCount" style="color:var(--accent)">(০)</span></label>
+
+      <div class="selected-chips" id="chips"></div>
+
+      <div class="search-mini">
+        <input type="text" id="searchInput" placeholder="ব্যবহারকারী খুঁজুন..." autocomplete="off">
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.35-4.35"/></svg>
+      </div>
+
+      <div class="user-pick-list" id="userList">
+        <div class="loading-wrap" style="padding:30px">
+          <div class="spinner"></div>
+        </div>
+      </div>
+    </div>
+
+    <button class="btn" id="createBtn" disabled style="width:100%;margin-top:8px">
+      <svg viewBox="0 0 24 24" width="18" height="18" style="stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      গ্রুপ তৈরি করুন
+    </button>
+
+    <div class="alert" id="status" style="margin-top:14px"></div>
+  </div>
+
+</div>
+
+<script type="module">
+  import { requireAuth, getAllUsersList } from "./js/auth.js";
+  import { createGroupChat } from "./js/chat.js";
+  import { uploadToGitHub, hasToken } from "./js/upload.js";
+  import { showToast } from "./js/toast.js";
+
+  let currentUser = null;
+  let allUsers = [];
+  let selectedUids = new Set();
+  let groupPhotoFile = null;
+
+  const $ = (id) => document.getElementById(id);
+
+  requireAuth(async (user) => {
+    currentUser = user;
+    await loadUsers();
+  });
+
+  async function loadUsers() {
+    try {
+      allUsers = await getAllUsersList();
+      // Exclude self
+      allUsers = allUsers.filter(u => u.uid !== currentUser.uid);
+      renderUsers();
+    } catch (e) {
+      $("userList").innerHTML = `<div style="padding:20px;text-align:center;color:#c62828;font-size:13px">লোড ব্যর্থ: ${e.message}</div>`;
+    }
+  }
+
+  function renderUsers(filter = "") {
+    const t = filter.toLowerCase().trim();
+    const filtered = !t ? allUsers : allUsers.filter(u =>
+      (u.name || "").toLowerCase().includes(t) ||
+      (u.username || "").toLowerCase().includes(t)
+    );
+
+    if (filtered.length === 0) {
+      $("userList").innerHTML = `<div style="padding:30px;text-align:center;color:var(--ink-mute);font-size:13px">কোনো ব্যবহারকারী নেই</div>`;
+      return;
+    }
+
+    $("userList").innerHTML = filtered.map(u => {
+      const initial = (u.name || "?")[0].toUpperCase();
+      const selected = selectedUids.has(u.uid);
+      return `
+        <div class="user-pick ${selected ? "selected" : ""}" data-uid="${u.uid}">
+          <input type="checkbox" ${selected ? "checked" : ""} onclick="event.stopPropagation()">
+          <div class="pick-av">${u.photoURL ? `<img src="${u.photoURL}">` : initial}</div>
+          <div class="pick-info">
+            <div class="pick-name">${escapeHtml(u.name || "?")}</div>
+            <div class="pick-username">@${escapeHtml(u.username || "?")}</div>
+          </div>
+        </div>
+      `;
+    }).join("");
+
+    $("userList").querySelectorAll(".user-pick").forEach(el => {
+      el.addEventListener("click", () => {
+        const uid = el.dataset.uid;
+        if (selectedUids.has(uid)) selectedUids.delete(uid);
+        else selectedUids.add(uid);
+        renderUsers($("searchInput").value);
+        renderChips();
+        updateCreateBtn();
+      });
+    });
+  }
+
+  function renderChips() {
+    const chips = $("chips");
+    if (selectedUids.size === 0) {
+      chips.innerHTML = "";
+      return;
+    }
+    chips.innerHTML = [...selectedUids].map(uid => {
+      const u = allUsers.find(x => x.uid === uid);
+      if (!u) return "";
+      const initial = (u.name || "?")[0].toUpperCase();
+      return `
+        <span class="chip">
+          <span class="chip-av">${u.photoURL ? `<img src="${u.photoURL}">` : initial}</span>
+          ${escapeHtml(u.name)}
+          <button class="chip-x" data-uid="${uid}">
+            <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </span>
+      `;
+    }).join("");
+
+    chips.querySelectorAll(".chip-x").forEach(b => {
+      b.addEventListener("click", (e) => {
+        e.stopPropagation();
+        selectedUids.delete(b.dataset.uid);
+        renderUsers($("searchInput").value);
+        renderChips();
+        updateCreateBtn();
+      });
+    });
+  }
+
+  function updateCreateBtn() {
+    const hasName = $("nameInput").value.trim().length > 0;
+    const hasMembers = selectedUids.size >= 2;
+    $("createBtn").disabled = !(hasName && hasMembers);
+    $("memberCount").textContent = `(${bnNum(selectedUids.size)})`;
+  }
+
+  $("nameInput").addEventListener("input", updateCreateBtn);
+  $("searchInput").addEventListener("input", (e) => renderUsers(e.target.value));
+
+  // Photo pick
+  $("photoPick").addEventListener("click", () => $("photoInput").click());
+  $("photoInput").addEventListener("change", (e) => {
+    const f = e.target.files[0];
+    if (!f) return;
+    groupPhotoFile = f;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      $("photoPreview").src = ev.target.result;
+      $("photoPreview").style.display = "block";
+      $("photoIcon").style.display = "none";
+    };
+    reader.readAsDataURL(f);
+  });
+
+  // Create
+  $("createBtn").addEventListener("click", async () => {
+    const name = $("nameInput").value.trim();
+    if (!name) { showToast("গ্রুপের নাম দিন", "err"); return; }
+    if (selectedUids.size < 2) { showToast("অন্তত ২ জন সদস্য নির্বাচন করুন", "err"); return; }
+
+    const btn = $("createBtn");
+    btn.disabled = true;
+    btn.innerHTML = `<span style="width:16px;height:16px;border:2px solid currentColor;border-top-color:transparent;border-radius:50%;animation:spin .8s linear infinite;display:inline-block"></span> তৈরি হচ্ছে...`;
+
+    try {
+      let photoURL = "";
+      if (groupPhotoFile) {
+        if (!hasToken()) {
+          showToast("ছবি আপলোডের জন্য GitHub টোকেন দরকার", "err");
+          btn.disabled = false;
+          btn.innerHTML = "গ্রুপ তৈরি করুন";
+          return;
+        }
+        photoURL = await uploadToGitHub(groupPhotoFile, "profiles");
+      }
+
+      const chatId = await createGroupChat(name, [...selectedUids], photoURL);
+      showToast("✅ গ্রুপ তৈরি হয়েছে", "ok");
+      setTimeout(() => {
+        window.location.href = `chat.html?g=${chatId}`;
+      }, 800);
+    } catch (e) {
+      showToast("❌ " + e.message, "err");
+      btn.disabled = false;
+      btn.innerHTML = "গ্রুপ তৈরি করুন";
+    }
+  });
+
+  function bnNum(n) {
+    const en = "0123456789", bn = "০১২৩৪৫৬৭৮৯";
+    return String(n).replace(/[0-9]/g, d => bn[en.indexOf(d)]);
+  }
+  function escapeHtml(str) {
+    return String(str || "").replace(/[&<>"']/g, m => ({
+      "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+    }[m]));
+  }
+</script>
+
+<style>
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+
+</body>
+</html>
